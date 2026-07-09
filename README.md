@@ -23,7 +23,7 @@ noctalia msg plugins enable pulser/clock-hover
 - **sysmon-ram** — Compact gauge bar or plain percentage; hover shows percent and used/total GB (auto-detected).
 - **sysmon-temp** — CPU package temperature always shown; hover can also show GPU, hottest NVMe, RAM (DIMM), and hottest CPU core, each toggleable.
 - **sysmon-net-down** / **sysmon-net-up** — Auto-detects the busiest network interface. Hides entirely below a configurable idle threshold; hovering always shows it.
-- **media-mini** — Now-playing via playerctl/MPRIS. Expands from 20 to 40 characters on hover only if needed, scrolls as a marquee if still too long. Left-click opens the media panel, right-click toggles play/pause.
+- **media-mini** — Now-playing via playerctl/MPRIS, with cover art (downloaded/cached for remote art, used directly for local files) and an inline block-character playback-progress bar. Expands from 20 to 40 characters on hover only if needed, scrolls as a marquee if still too long. Left-click opens the media panel, right-click toggles play/pause.
 
 All widgets share the same open/close animation timing (60fps ease) and use UTF-8-safe character reveal so multi-byte glyphs never get cut mid-character during the animation.
 

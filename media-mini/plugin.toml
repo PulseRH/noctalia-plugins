@@ -1,13 +1,13 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.1.0"
+version = "0.2.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["media"]
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS. Expands from 20 to 40 characters on hover only if the text is actually longer than that; scrolls as a marquee on hover if it's still too long even expanded. Left-click opens the media panel, right-click toggles play/pause."
+description = "Compact now-playing (artist - title) via playerctl/MPRIS, with cover art and an inline playback-progress bar. Expands from 20 to 40 characters on hover only if the text is actually longer than that; scrolls as a marquee on hover if it's still too long even expanded. Left-click opens the media panel, right-click toggles play/pause."
 
 [[widget]]
 id = "media"
