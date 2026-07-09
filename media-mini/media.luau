@@ -264,18 +264,16 @@ local function render()
     return
   end
   barWidget.setVisible(true)
-  -- Block-bar and title text share one label, so the whole run has to be one
-  -- font -- monospace (unlike Adwaita Sans) has the bar characters, so it
-  -- overrides any custom font setting while the bar is on. Otherwise use the
-  -- user's chosen font, falling back to Adwaita Sans if left blank.
+  -- Noctalia already has a generic per-widget font override (every widget,
+  -- plugins included, inherits Widget::labelFontFamily() -- confirmed in
+  -- widget.h/plugin_widget.cpp) exposed in the bar's own widget settings, so
+  -- this plugin has no business managing font choice itself. The one
+  -- exception: the progress bar's block characters need monospace, so force
+  -- that specifically while the bar is on; otherwise don't touch the font at
+  -- all and let the host-level picker (or its default) apply untouched.
   local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
-  local customFont = barWidget.getConfig("font")
   if barEnabled then
     barWidget.setFont("monospace")
-  elseif customFont and customFont ~= "" then
-    barWidget.setFont(customFont)
-  else
-    barWidget.setFont("Adwaita Sans")
   end
 
   local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
