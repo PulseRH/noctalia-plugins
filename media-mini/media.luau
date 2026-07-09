@@ -1,13 +1,12 @@
 --!nonstrict
--- Now-playing via playerctl/MPRIS. Compact width is 20 chars; hovering
--- animates open to 40 chars, but only actually grows if the text is longer
--- than 20 -- a short title just stays put. If the text is still too long even
--- at 40 chars while hovering, it scrolls as a marquee instead of truncating.
--- Left-click opens the media panel, right-click toggles play/pause (matches
--- the native Media widget's own click/right-click split).
+-- Now-playing via playerctl/MPRIS. Compact/expand width (in characters) are
+-- settings below; hovering animates from one to the other, but only actually
+-- grows if the text is longer than the compact width -- a short title just
+-- stays put. If it's still too long even at the expanded width while
+-- hovering, it scrolls as a marquee instead of truncating. Left-click opens
+-- the media panel, right-click toggles play/pause (matches the native Media
+-- widget's own click/right-click split).
 
-local COMPACT_LEN = 20
-local EXPAND_LEN = 40
 local COVER_SIZE_DEFAULT = 20 -- px, square cover-art icon in place of the play/pause glyph
 local ROUND_SIZE = 128 -- px, fixed processing canvas the mask is rendered at before downscale
 local BAR_LEN = 8 -- characters in the inline playback-progress bar
@@ -17,11 +16,17 @@ local EASE = 0.16
 local ANIM_INTERVAL = 16
 local SCROLL_INTERVAL = 150 -- ms per marquee character step
 local IDLE_INTERVAL = 1000 -- ms poll cadence when settled and not scrolling
+-- Re-poll every this many scroll ticks too, so a track change is still
+-- noticed while continuously hovering/scrolling (previously only polled in
+-- the idle branch, so a long-hovered widget could get stuck on a stale
+-- track indefinitely).
+local SCROLL_POLL_EVERY = math.max(1, math.floor(IDLE_INTERVAL / SCROLL_INTERVAL + 0.5))
 
 local hovering = false
 local progress = 0.0 -- 0 = compact (20), 1 = expanded (40)
 local target = 0.0
 local scrollOffset = 0
+local ticksSincePoll = 0
 
 local hasMedia = false
 local playing = false
@@ -90,24 +95,56 @@ local function utf8Window(s: string, startChar: number, length: number): string
   return s:sub(startByte)
 end
 
+-- Returns compact/expand width in characters, expand clamped to be no
+-- smaller than compact (a user could otherwise set expand < compact, which
+-- would make hovering shrink the text instead of growing it).
+local function widthRange(): (number, number)
+  local compactLen = barWidget.getConfig("compact_width") or 20
+  local expandLen = barWidget.getConfig("expand_width") or 40
+  return compactLen, math.max(compactLen, expandLen)
+end
+
+-- Browser MPRIS (Firefox et al) doesn't populate mpris:artUrl for web video,
+-- but does expose the page URL -- for YouTube specifically that's enough to
+-- build a thumbnail URL via its stable, unauthenticated thumbnail CDN.
+local function youtubeThumbFromPageUrl(pageUrl: string): string?
+  local id = string.match(pageUrl, "[?&]v=([%w_%-]+)")
+  if not id then
+    id = string.match(pageUrl, "youtu%.be/([%w_%-]+)")
+  end
+  if not id then
+    return nil
+  end
+  return `https://i.ytimg.com/vi/{id}/hqdefault.jpg`
+end
+
 local function pollMedia()
   noctalia.runAsync(
-    "playerctl metadata --format '{{status}}|{{artist}}|{{mpris:artUrl}}|{{position}}|{{mpris:length}}|{{title}}' 2>/dev/null",
+    "playerctl metadata --format '{{status}}|{{artist}}|{{mpris:artUrl}}|{{position}}|{{mpris:length}}|{{xesam:url}}|{{title}}' 2>/dev/null",
     function(result)
       local out = result.stdout or ""
       -- title is last/greedy since it's the only field likely to contain
       -- stray characters; the others are safe to split on "|".
-      local status, a, url, pos, len, t =
-        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
+      local status, a, url, pos, len, pageUrl, t =
+        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
       if not status or status == "" then
         hasMedia = false
         return
+      end
+      local resolvedArtUrl = url or ""
+      if resolvedArtUrl == "" and pageUrl and pageUrl ~= "" then
+        resolvedArtUrl = youtubeThumbFromPageUrl(pageUrl) or ""
+      end
+      -- Reset the marquee position on a real track change so it doesn't
+      -- keep scrolling from the middle of the previous title.
+      if hasMedia and (a ~= artist or t ~= title) then
+        scrollOffset = 0
       end
       hasMedia = true
       playing = status == "Playing"
       artist = a or ""
       title = t or ""
-      artUrl = url or ""
+      artUrl = resolvedArtUrl
       position = tonumber(pos) or 0
       length = tonumber(len) or 0
     end,
@@ -241,8 +278,9 @@ local function render()
 
   local bar = progressBar()
   local full = fullText()
+  local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(full) or #full
-  local width = math.floor(COMPACT_LEN + (EXPAND_LEN - COMPACT_LEN) * progress + 0.5)
+  local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
 
   if fullLen <= width then
     barWidget.setText(bar .. full)
@@ -267,15 +305,22 @@ local function step()
   progress = target
 
   local full = fullText()
+  local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(full) or #full
-  local width = math.floor(COMPACT_LEN + (EXPAND_LEN - COMPACT_LEN) * progress + 0.5)
+  local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
   local needsScroll = hovering and hasMedia and fullLen > width
 
   if needsScroll then
     scrollOffset += 1
+    ticksSincePoll += 1
+    if ticksSincePoll >= SCROLL_POLL_EVERY then
+      ticksSincePoll = 0
+      pollMedia()
+    end
     noctalia.setUpdateInterval(SCROLL_INTERVAL)
     render()
   else
+    ticksSincePoll = 0
     noctalia.setUpdateInterval(IDLE_INTERVAL)
     pollMedia()
     render()
