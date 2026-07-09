@@ -14,7 +14,7 @@ desktop_dirs="$HOME/.local/share/applications /usr/share/applications /usr/local
 desktop=""
 for dir in $desktop_dirs; do
     [ -d "$dir" ] || continue
-    match=$(find "$dir" -maxdepth 1 -iname "*${app_id}*.desktop" 2>/dev/null | head -1)
+    match=$(find -L "$dir" -maxdepth 1 -iname "*${app_id}*.desktop" 2>/dev/null | head -1)
     if [ -n "$match" ]; then
         desktop="$match"
         break
@@ -32,20 +32,42 @@ case "$icon" in
     *)
         icon_dirs="$HOME/.local/share/icons /usr/share/icons /usr/share/pixmaps /var/lib/flatpak/exports/share/icons $HOME/.local/share/flatpak/exports/share/icons"
         src=""
-        for sizedir in 128x128 96x96 64x64 48x48 32x32 scalable; do
-            for dir in $icon_dirs; do
-                [ -d "$dir" ] || continue
-                match=$(find "$dir" -path "*/${sizedir}/apps/${icon}.png" -o -path "*/${sizedir}/apps/${icon}.svg" 2>/dev/null | head -1)
-                if [ -n "$match" ]; then
-                    src="$match"
-                    break 2
-                fi
+
+        # Prefer the user's actually-configured icon theme first (e.g. a
+        # Papirus/Adwaita variant) over whichever theme `find` happens to
+        # traverse into first -- different themes often draw the same app
+        # differently (confirmed: hicolor's ghostty icon is not what the
+        # user's Papirus-Dark theme -- and thus every native widget -- shows).
+        current_theme=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'\"")
+        if [ -n "${current_theme:-}" ]; then
+            for sizedir in 128x128 96x96 64x64 48x48 32x32 scalable; do
+                for dir in "$HOME/.local/share/icons/$current_theme" "/usr/share/icons/$current_theme"; do
+                    [ -d "$dir" ] || continue
+                    match=$(find -L "$dir" -path "*/${sizedir}/apps/${icon}.png" -o -path "*/${sizedir}/apps/${icon}.svg" 2>/dev/null | head -1)
+                    if [ -n "$match" ]; then
+                        src="$match"
+                        break 2
+                    fi
+                done
             done
-        done
+        fi
+
+        if [ -z "$src" ]; then
+            for sizedir in 128x128 96x96 64x64 48x48 32x32 scalable; do
+                for dir in $icon_dirs; do
+                    [ -d "$dir" ] || continue
+                    match=$(find -L "$dir" -path "*/${sizedir}/apps/${icon}.png" -o -path "*/${sizedir}/apps/${icon}.svg" 2>/dev/null | head -1)
+                    if [ -n "$match" ]; then
+                        src="$match"
+                        break 2
+                    fi
+                done
+            done
+        fi
         if [ -z "$src" ]; then
             for dir in $icon_dirs; do
                 [ -d "$dir" ] || continue
-                match=$(find "$dir" \( -iname "${icon}.png" -o -iname "${icon}.svg" -o -iname "${icon}.xpm" \) 2>/dev/null | head -1)
+                match=$(find -L "$dir" \( -iname "${icon}.png" -o -iname "${icon}.svg" -o -iname "${icon}.xpm" \) 2>/dev/null | head -1)
                 if [ -n "$match" ]; then
                     src="$match"
                     break
