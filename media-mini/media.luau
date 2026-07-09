@@ -268,11 +268,16 @@ local function render()
     return
   end
   barWidget.setVisible(true)
-  -- Block-bar and title text share one label, so the whole run has to be one
-  -- font -- monospace (unlike Adwaita Sans) has the bar characters. Only pay
-  -- for the monospace look when the bar is actually enabled.
+  -- Noctalia already gives every widget (native or plugin) a per-widget Font
+  -- setting in its own settings panel (Widget::labelFontFamily), applied at
+  -- build time. Calling setFont() here overrides that every time it's
+  -- called, so only do it when the block-character bar actually needs a
+  -- monospace font to line up -- never touch font at all otherwise, so the
+  -- user's own Font choice is left alone.
   local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
-  barWidget.setFont(barEnabled and "monospace" or "Adwaita Sans")
+  if barEnabled then
+    barWidget.setFont("monospace")
+  end
 
   local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
   local roundPct = barWidget.getConfig("corner_rounding") or 100

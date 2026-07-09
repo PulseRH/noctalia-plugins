@@ -91,7 +91,7 @@ tags = ["system"]
 [[plugin]]
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.6.0"
+version = "0.6.1"
 author = "pulser"
 license = "MIT"
 icon = "player-play-filled"

@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.6.0"
+version = "0.6.1"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
@@ -24,7 +24,7 @@ default = true
 key = "show_progress_bar"
 type = "bool"
 label = "Show progress bar"
-description = "Prefix an inline block-character bar showing playback position."
+description = "Prefix an inline block-character bar showing playback position. The bar characters need a monospace font to line up, so enabling this overrides the widget's own Font setting below to monospace; turn it off to use your chosen font."
 default = true
 
 [[widget.setting]]
