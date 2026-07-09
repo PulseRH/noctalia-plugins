@@ -1,17 +1,37 @@
 id = "pulser/active-window-hover"
 name = "Active Window (hover expand)"
-version = "0.3.0"
+version = "0.4.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["window"]
 icon = "app-window-filled"
-description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), with the real per-app icon (via its .desktop entry + icon theme, rasterized/cached with ImageMagick) when one can be found -- icon size is configurable separately for compact and hover, animating between them. Compact by default, expands on hover with an animated open/close, scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
+description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), with the real per-app icon (via its .desktop entry + icon theme, rasterized/cached with ImageMagick) when one can be found. Compact/expand text width and icon size are both configurable separately, animating between them on hover. Scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
 
 [[widget]]
 id = "active-window"
 entry = "active_window.luau"
+
+[[widget.setting]]
+key = "compact_width"
+type = "number"
+label = "Compact width (characters)"
+description = "Text width when not hovering. The title only actually shrinks to this if it's longer -- a short title just stays put."
+default = 20
+min = 8
+max = 60
+step = 1
+
+[[widget.setting]]
+key = "expand_width"
+type = "number"
+label = "Expanded width (characters)"
+description = "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
+default = 40
+min = 8
+max = 100
+step = 1
 
 [[widget.setting]]
 key = "icon_size"

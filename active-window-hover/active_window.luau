@@ -1,13 +1,11 @@
 --!nonstrict
 -- Focused window's title via wlrctl (wlr-foreign-toplevel-management protocol --
--- compositor-agnostic, confirmed working under driftwm). Compact width is 20
--- chars; hovering animates open to 40, but only actually grows if the title is
--- longer than 20. If it's still too long even at 40 while hovering, it
--- scrolls as a marquee instead of truncating. Hidden entirely when there's no
--- focused window (e.g. an empty workspace).
-
-local COMPACT_LEN = 20
-local EXPAND_LEN = 40
+-- compositor-agnostic, confirmed working under driftwm). Compact/expand width
+-- (in characters) are settings below; hovering animates from one to the
+-- other, but only actually grows if the title is longer than the compact
+-- width. If it's still too long even at the expanded width while hovering,
+-- it scrolls as a marquee instead of truncating. Hidden entirely when
+-- there's no focused window (e.g. an empty workspace).
 
 -- Icons are rasterized once per app_id at a fixed, generously large size
 -- (independent of the icon_size/icon_size_hover settings below) so changing
@@ -117,6 +115,15 @@ local function utf8Sub(s: string, charCount: number): string
   return s:sub(1, offset - 1)
 end
 
+-- Returns compact/expand width in characters, expand clamped to be no
+-- smaller than compact (a user could otherwise set expand < compact, which
+-- would make hovering shrink the text instead of growing it).
+local function widthRange(): (number, number)
+  local compactLen = barWidget.getConfig("compact_width") or 20
+  local expandLen = barWidget.getConfig("expand_width") or 40
+  return compactLen, math.max(compactLen, expandLen)
+end
+
 local function pollActiveWindow()
   noctalia.runAsync("wlrctl toplevel list state:active 2>/dev/null", function(result)
     local out = result.stdout or ""
@@ -154,8 +161,9 @@ local function render()
     barWidget.setGlyph("app-window-filled")
   end
 
+  local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(title) or #title
-  local width = math.floor(COMPACT_LEN + (EXPAND_LEN - COMPACT_LEN) * progress + 0.5)
+  local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
 
   if fullLen <= width then
     barWidget.setText(title)
@@ -179,8 +187,9 @@ local function step()
   end
   progress = target
 
+  local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(title) or #title
-  local width = math.floor(COMPACT_LEN + (EXPAND_LEN - COMPACT_LEN) * progress + 0.5)
+  local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
   local needsScroll = hovering and hasWindow and fullLen > width
 
   if needsScroll then
