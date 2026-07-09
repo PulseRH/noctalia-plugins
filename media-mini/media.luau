@@ -9,6 +9,7 @@
 local COMPACT_LEN = 20
 local EXPAND_LEN = 40
 local COVER_SIZE = 20 -- px, square cover-art icon in place of the play/pause glyph
+local ROUND_SIZE = 128 -- px, resolution the circular mask is rendered at before downscale
 local BAR_LEN = 8 -- characters in the inline playback-progress bar
 
 -- Same open/close tuning as the clock/volume/sysmon widgets: 0.16 @ 16ms.
@@ -34,11 +35,25 @@ local length = 0
 -- fetcher), so http(s) art (Spotify etc.) gets downloaded once per track into
 -- a cache file and reused; file:// art (most local players) is used directly.
 local CACHE_DIR = `{noctalia.pluginDir()}/cache`
-local COVER_PATH = `{CACHE_DIR}/cover.jpg`
+local DOWNLOAD_PATH = `{CACHE_DIR}/cover-src.jpg`
+local ROUND_PATH = `{CACHE_DIR}/cover-round.png`
 noctalia.mkdirAll(CACHE_DIR)
+
+-- barWidget.setImage has no radius/rounding option (that's a native-widget-only
+-- C++ feature -- confirmed no such field exists on the plugin image binding),
+-- so rounding is done by shelling out to ImageMagick to bake a circular alpha
+-- mask into a cached copy, and pointing setImage at that instead.
+local MAGICK_AVAILABLE = noctalia.commandExists("magick") or noctalia.commandExists("convert")
+local MAGICK_CMD = noctalia.commandExists("magick") and "magick" or "convert"
 
 local lastRequestedArtUrl = nil
 local downloadedArtUrl = nil
+local roundingSource = nil -- raw path currently being/last processed
+local roundedFor = nil -- raw path the current ROUND_PATH content matches
+
+local function shQuote(s: string): string
+  return "'" .. string.gsub(s, "'", "'\\''") .. "'"
+end
 
 -- utf8.len/offset find character boundaries so truncation/windowing never
 -- cuts a multi-byte character in half.
@@ -110,7 +125,7 @@ end
 -- Returns a local file path for the current cover art, or nil if there isn't
 -- one (yet). Downloads remote art once per track and caches it; only ever
 -- returns a path once the file backing it is actually ready to read.
-local function resolveCoverPath(): string?
+local function resolveRawCoverPath(): string?
   if artUrl == "" then
     return nil
   end
@@ -123,15 +138,61 @@ local function resolveCoverPath(): string?
   if string.match(artUrl, "^https?://") then
     if artUrl ~= lastRequestedArtUrl then
       lastRequestedArtUrl = artUrl
-      noctalia.download(artUrl, COVER_PATH, function(ok)
+      noctalia.download(artUrl, DOWNLOAD_PATH, function(ok)
         if ok then
           downloadedArtUrl = artUrl
         end
       end)
     end
     if downloadedArtUrl == artUrl then
-      return COVER_PATH
+      return DOWNLOAD_PATH
     end
+  end
+
+  return nil
+end
+
+-- Wraps resolveRawCoverPath with a circular-mask pass (async, once per raw
+-- source) so the widget only ever displays the rounded copy. Falls back to
+-- the unrounded raw art if ImageMagick isn't installed.
+local function resolveCoverPath(): string?
+  local raw = resolveRawCoverPath()
+  if not raw then
+    return nil
+  end
+  if not MAGICK_AVAILABLE then
+    return raw
+  end
+
+  if roundedFor == raw then
+    return ROUND_PATH
+  end
+
+  if roundingSource ~= raw then
+    roundingSource = raw
+    local half = math.floor(ROUND_SIZE / 2)
+    local cmd = string.format(
+      "%s %s -resize %dx%d^ -gravity center -extent %dx%d "
+        .. "\\( -size %dx%d xc:black -fill white -draw \"circle %d,%d %d,0\" \\) "
+        .. "-alpha off -compose CopyOpacity -composite %s",
+      MAGICK_CMD,
+      shQuote(raw),
+      ROUND_SIZE,
+      ROUND_SIZE,
+      ROUND_SIZE,
+      ROUND_SIZE,
+      ROUND_SIZE,
+      ROUND_SIZE,
+      half,
+      half,
+      half,
+      shQuote(ROUND_PATH)
+    )
+    noctalia.runAsync(cmd, function(result)
+      if result.exitCode == 0 then
+        roundedFor = raw
+      end
+    end)
   end
 
   return nil
@@ -145,6 +206,9 @@ local function progressBar(): string
   if not hasMedia or length <= 0 then
     return ""
   end
+  if barWidget.getConfig("show_progress_bar") == false then
+    return ""
+  end
   local frac = math.max(0, math.min(1, position / length))
   local filled = math.floor(frac * BAR_LEN + 0.5)
   return string.rep("█", filled) .. string.rep("░", BAR_LEN - filled) .. " "
@@ -156,12 +220,13 @@ local function render()
     return
   end
   barWidget.setVisible(true)
-  -- Block-bar and glyph/cover-art text share one label, so the whole run
-  -- has to be one font -- monospace (unlike Adwaita Sans) has the bar
-  -- characters, and covers artist/title fine too.
-  barWidget.setFont("monospace")
+  -- Block-bar and title text share one label, so the whole run has to be one
+  -- font -- monospace (unlike Adwaita Sans) has the bar characters. Only pay
+  -- for the monospace look when the bar is actually enabled.
+  local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
+  barWidget.setFont(barEnabled and "monospace" or "Adwaita Sans")
 
-  local coverPath = resolveCoverPath()
+  local coverPath = barWidget.getConfig("show_cover_art") ~= false and resolveCoverPath() or nil
   if coverPath then
     barWidget.setImage(coverPath, true, COVER_SIZE)
   else
