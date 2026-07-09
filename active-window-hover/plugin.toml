@@ -1,0 +1,14 @@
+id = "pulser/active-window-hover"
+name = "Active Window (hover expand)"
+version = "0.1.0"
+min_noctalia = "5.0.0"
+author = "pulser"
+license = "MIT"
+dependencies = []
+tags = ["window"]
+icon = "app-window-filled"
+description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), compact by default and expanding on hover with an animated open/close; scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
+
+[[widget]]
+id = "active-window"
+entry = "active_window.luau"

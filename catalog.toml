@@ -1,6 +1,17 @@
 # This file is auto-generated from */plugin.toml. Do not edit manually.
 
 [[plugin]]
+id = "pulser/active-window-hover"
+name = "Active Window (hover expand)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "app-window-filled"
+description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), compact by default and expanding on hover with an animated open/close; scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
+min_noctalia = "5.0.0"
+tags = ["window"]
+
+[[plugin]]
 id = "pulser/clock-hover"
 name = "Clock (hover expand)"
 version = "0.1.0"
