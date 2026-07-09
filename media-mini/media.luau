@@ -15,7 +15,7 @@ local BAR_LEN = 8 -- characters in the inline playback-progress bar
 -- Same open/close tuning as the clock/volume/sysmon widgets: 0.16 @ 16ms.
 local EASE = 0.16
 local ANIM_INTERVAL = 16
-local SCROLL_INTERVAL = 400 -- ms per marquee character step
+local SCROLL_INTERVAL = 150 -- ms per marquee character step
 local IDLE_INTERVAL = 1000 -- ms poll cadence when settled and not scrolling
 
 local hovering = false
