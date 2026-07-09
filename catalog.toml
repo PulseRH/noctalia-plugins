@@ -91,10 +91,10 @@ tags = ["system"]
 [[plugin]]
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.5.0"
+version = "0.6.0"
 author = "pulser"
 license = "MIT"
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an inline playback-progress bar (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
+description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an inline playback-progress bar (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
 min_noctalia = "5.0.0"
 tags = ["media"]

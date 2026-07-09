@@ -44,6 +44,13 @@ local DOWNLOAD_PATH = `{CACHE_DIR}/cover-src.jpg`
 local ROUND_PATH = `{CACHE_DIR}/cover-round.png`
 noctalia.mkdirAll(CACHE_DIR)
 
+-- playerctl with no -p picks a player by its own internal ordering, not by
+-- who's actually playing -- confirmed it can land on a paused/stale player
+-- (e.g. a YouTube tab that navigated away, leaving stale MPRIS metadata)
+-- over a genuinely Playing one. pick-player.sh checks all players' status
+-- first and prefers one that's actually Playing.
+local PICK_PLAYER_SCRIPT = `{noctalia.pluginDir()}/pick-player.sh`
+
 -- barWidget.setImage has no radius/rounding option (that's a native-widget-only
 -- C++ feature -- confirmed no such field exists on the plugin image binding),
 -- so rounding is done by shelling out to ImageMagick to bake a circular alpha
@@ -120,7 +127,7 @@ end
 
 local function pollMedia()
   noctalia.runAsync(
-    "playerctl metadata --format '{{status}}|{{artist}}|{{mpris:artUrl}}|{{position}}|{{mpris:length}}|{{xesam:url}}|{{title}}' 2>/dev/null",
+    `sh {shQuote(PICK_PLAYER_SCRIPT)}`,
     function(result)
       local out = result.stdout or ""
       -- title is last/greedy since it's the only field likely to contain
