@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.3.0"
+version = "0.4.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
@@ -26,3 +26,23 @@ type = "bool"
 label = "Show progress bar"
 description = "Prefix an inline block-character bar showing playback position."
 default = true
+
+[[widget.setting]]
+key = "cover_size"
+type = "number"
+label = "Cover art size (px)"
+description = "Size of the cover art icon in place of the play/pause glyph."
+default = 20
+min = 12
+max = 40
+step = 1
+
+[[widget.setting]]
+key = "corner_rounding"
+type = "number"
+label = "Cover art rounding (%)"
+description = "0 = square corners, 100 = fully circular."
+default = 100
+min = 0
+max = 100
+step = 5

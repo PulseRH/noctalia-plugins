@@ -8,8 +8,8 @@
 
 local COMPACT_LEN = 20
 local EXPAND_LEN = 40
-local COVER_SIZE = 20 -- px, square cover-art icon in place of the play/pause glyph
-local ROUND_SIZE = 128 -- px, resolution the circular mask is rendered at before downscale
+local COVER_SIZE_DEFAULT = 20 -- px, square cover-art icon in place of the play/pause glyph
+local ROUND_SIZE = 128 -- px, fixed processing canvas the mask is rendered at before downscale
 local BAR_LEN = 8 -- characters in the inline playback-progress bar
 
 -- Same open/close tuning as the clock/volume/sysmon widgets: 0.16 @ 16ms.
@@ -48,8 +48,8 @@ local MAGICK_CMD = noctalia.commandExists("magick") and "magick" or "convert"
 
 local lastRequestedArtUrl = nil
 local downloadedArtUrl = nil
-local roundingSource = nil -- raw path currently being/last processed
-local roundedFor = nil -- raw path the current ROUND_PATH content matches
+local roundingKey = nil -- "path|pct" currently being/last processed
+local roundedFor = nil -- "path|pct" the current ROUND_PATH content matches
 
 local function shQuote(s: string): string
   return "'" .. string.gsub(s, "'", "'\\''") .. "'"
@@ -152,28 +152,31 @@ local function resolveRawCoverPath(): string?
   return nil
 end
 
--- Wraps resolveRawCoverPath with a circular-mask pass (async, once per raw
--- source) so the widget only ever displays the rounded copy. Falls back to
--- the unrounded raw art if ImageMagick isn't installed.
-local function resolveCoverPath(): string?
+-- Wraps resolveRawCoverPath with a rounded-rectangle mask pass (async, once
+-- per raw source + rounding amount) so the widget only ever displays the
+-- rounded copy. Falls back to the unrounded raw art if ImageMagick isn't
+-- installed. pct is 0 (square) to 100 (fully circular, radius = half size --
+-- roundRectangle degrades to a circle once the corner radius reaches that).
+local function resolveCoverPath(pct: number): string?
   local raw = resolveRawCoverPath()
   if not raw then
     return nil
   end
-  if not MAGICK_AVAILABLE then
+  if not MAGICK_AVAILABLE or pct <= 0 then
     return raw
   end
 
-  if roundedFor == raw then
+  local key = `{raw}|{pct}`
+  if roundedFor == key then
     return ROUND_PATH
   end
 
-  if roundingSource ~= raw then
-    roundingSource = raw
-    local half = math.floor(ROUND_SIZE / 2)
+  if roundingKey ~= key then
+    roundingKey = key
+    local radius = math.floor((pct / 100) * (ROUND_SIZE / 2) + 0.5)
     local cmd = string.format(
       "%s %s -resize %dx%d^ -gravity center -extent %dx%d "
-        .. "\\( -size %dx%d xc:black -fill white -draw \"circle %d,%d %d,0\" \\) "
+        .. "\\( -size %dx%d xc:black -fill white -draw \"roundRectangle 0,0,%d,%d,%d,%d\" \\) "
         .. "-alpha off -compose CopyOpacity -composite %s",
       MAGICK_CMD,
       shQuote(raw),
@@ -183,14 +186,15 @@ local function resolveCoverPath(): string?
       ROUND_SIZE,
       ROUND_SIZE,
       ROUND_SIZE,
-      half,
-      half,
-      half,
+      ROUND_SIZE - 1,
+      ROUND_SIZE - 1,
+      radius,
+      radius,
       shQuote(ROUND_PATH)
     )
     noctalia.runAsync(cmd, function(result)
       if result.exitCode == 0 then
-        roundedFor = raw
+        roundedFor = key
       end
     end)
   end
@@ -226,9 +230,11 @@ local function render()
   local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
   barWidget.setFont(barEnabled and "monospace" or "Adwaita Sans")
 
-  local coverPath = barWidget.getConfig("show_cover_art") ~= false and resolveCoverPath() or nil
+  local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
+  local roundPct = barWidget.getConfig("corner_rounding") or 100
+  local coverPath = barWidget.getConfig("show_cover_art") ~= false and resolveCoverPath(roundPct) or nil
   if coverPath then
-    barWidget.setImage(coverPath, true, COVER_SIZE)
+    barWidget.setImage(coverPath, true, coverSize)
   else
     barWidget.setGlyph(playing and "player-play-filled" or "player-pause-filled")
   end
