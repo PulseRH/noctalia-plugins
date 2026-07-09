@@ -252,7 +252,10 @@ local function progressBar(): string
   end
   local frac = math.max(0, math.min(1, position / length))
   local filled = math.floor(frac * BAR_LEN + 0.5)
-  return string.rep("█", filled) .. string.rep("░", BAR_LEN - filled) .. " "
+  -- "░" (light shade) reads as a grid of tiny dots at text size, not a flat
+  -- fill -- "▮" (black vertical rectangle) is a solid full-height shape, so
+  -- the unfilled track looks like a flat bar instead of a stippled texture.
+  return string.rep("█", filled) .. string.rep("▮", BAR_LEN - filled) .. " "
 end
 
 local function render()
@@ -262,10 +265,18 @@ local function render()
   end
   barWidget.setVisible(true)
   -- Block-bar and title text share one label, so the whole run has to be one
-  -- font -- monospace (unlike Adwaita Sans) has the bar characters. Only pay
-  -- for the monospace look when the bar is actually enabled.
+  -- font -- monospace (unlike Adwaita Sans) has the bar characters, so it
+  -- overrides any custom font setting while the bar is on. Otherwise use the
+  -- user's chosen font, falling back to Adwaita Sans if left blank.
   local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
-  barWidget.setFont(barEnabled and "monospace" or "Adwaita Sans")
+  local customFont = barWidget.getConfig("font")
+  if barEnabled then
+    barWidget.setFont("monospace")
+  elseif customFont and customFont ~= "" then
+    barWidget.setFont(customFont)
+  else
+    barWidget.setFont("Adwaita Sans")
+  end
 
   local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
   local roundPct = barWidget.getConfig("corner_rounding") or 100

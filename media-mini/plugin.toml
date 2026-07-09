@@ -1,13 +1,13 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.5.0"
+version = "0.6.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["media"]
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an inline playback-progress bar (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
+description = "Compact now-playing (artist - title) via playerctl/MPRIS, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an inline playback-progress bar (both toggleable below, with a configurable font when the bar is off). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
 
 [[widget]]
 id = "media"
@@ -66,3 +66,10 @@ default = 100
 min = 0
 max = 100
 step = 5
+
+[[widget.setting]]
+key = "font"
+type = "string"
+label = "Font"
+description = "Font family for the text. Leave blank for the default (Adwaita Sans). Ignored while the progress bar is shown -- that needs monospace for its block characters, and switching the font mid-run would break it (font fallback swaps the whole run, not just the missing glyphs)."
+default = ""
