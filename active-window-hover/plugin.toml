@@ -1,13 +1,13 @@
 id = "pulser/active-window-hover"
 name = "Active Window (hover expand)"
-version = "0.1.0"
+version = "0.2.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["window"]
 icon = "app-window-filled"
-description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), compact by default and expanding on hover with an animated open/close; scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
+description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), with the real per-app icon (via its .desktop entry + icon theme, rasterized/cached with ImageMagick) when one can be found. Compact by default, expands on hover with an animated open/close, scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
 
 [[widget]]
 id = "active-window"

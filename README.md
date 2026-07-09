@@ -24,7 +24,7 @@ noctalia msg plugins enable pulser/clock-hover
 - **sysmon-temp** — CPU package temperature always shown; hover can also show GPU, hottest NVMe, RAM (DIMM), and hottest CPU core, each toggleable.
 - **sysmon-net-down** / **sysmon-net-up** — Auto-detects the busiest network interface. Hides entirely below a configurable idle threshold; hovering always shows it.
 - **media-mini** — Now-playing via playerctl/MPRIS, with rounded cover art (downloaded/cached for remote art, used directly for local files; rounding needs ImageMagick) and an inline block-character playback-progress bar. Both are on by default and can be turned off in the widget's settings, which also expose the cover art size (12-40px) and rounding amount (0% square to 100% fully circular). Expands from 20 to 40 characters on hover only if needed, scrolls as a marquee if still too long. Left-click opens the media panel, right-click toggles play/pause.
-- **active-window-hover** — Focused window's title via `wlrctl` (wlr-foreign-toplevel-management, compositor-agnostic). Expands from 20 to 40 characters on hover only if needed, scrolls as a marquee if still too long, animated open/close. Hidden entirely when nothing is focused.
+- **active-window-hover** — Focused window's title via `wlrctl` (wlr-foreign-toplevel-management, compositor-agnostic), with the real per-app icon (resolved from its `.desktop` entry + icon theme, rasterized/cached via ImageMagick) in place of a generic glyph when one can be found. Expands from 20 to 40 characters on hover only if needed, scrolls as a marquee if still too long, animated open/close. Hidden entirely when nothing is focused.
 
 All widgets share the same open/close animation timing (60fps ease) and use UTF-8-safe character reveal so multi-byte glyphs never get cut mid-character during the animation.
 
@@ -34,7 +34,7 @@ All widgets share the same open/close animation timing (60fps ease) and use UTF-
 - `sysmon-cpu`'s wattage reading requires Intel RAPL (`/sys/class/powercap/intel-rapl:0`); no AMD equivalent is wired up.
 - `sysmon-temp`'s optional GPU reading shells out to `nvidia-smi`; no AMD/Intel GPU temp source is wired up.
 - `media-mini`'s progress bar is text (block characters), not an actual background fill — bar widgets have no rect/opacity primitive exposed to plugins, only `setText`/`setGlyph`/`setImage`/`setColor`/etc. Rounded cover art shells out to `magick`/`convert` (ImageMagick) to bake a circular alpha mask; if neither is installed, art is shown unrounded instead.
-- `active-window-hover` requires `wlrctl` (e.g. `dnf install wlrctl`/AUR `wlrctl`) and a compositor that implements `wlr-foreign-toplevel-management-v1` (confirmed working under driftwm; should work under sway, Hyprland, river, etc. too since it's the standard protocol, not compositor-specific code).
+- `active-window-hover` requires `wlrctl` (e.g. `dnf install wlrctl`/AUR `wlrctl`) and a compositor that implements `wlr-foreign-toplevel-management-v1` (confirmed working under driftwm; should work under sway, Hyprland, river, etc. too since it's the standard protocol, not compositor-specific code). Per-app icon lookup also needs `magick`/`convert`; falls back to a generic window glyph for apps with no matching `.desktop` entry/icon (e.g. internal windows with no installed launcher) or if ImageMagick is missing.
 
 ## License
 

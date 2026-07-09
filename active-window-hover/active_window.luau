@@ -8,6 +8,7 @@
 
 local COMPACT_LEN = 20
 local EXPAND_LEN = 40
+local ICON_SIZE = 20 -- px, square per-app icon in place of the generic glyph
 
 -- Same open/close tuning as the clock/volume/sysmon/media widgets: 0.16 @ 16ms.
 local EASE = 0.16
@@ -22,6 +23,59 @@ local scrollOffset = 0
 
 local hasWindow = false
 local title = ""
+local appId = ""
+
+-- Per-app icon lookup (.desktop entry -> icon theme file, rasterized to a
+-- cached PNG) shells out to resolve-icon.sh, since that's a lot of find/case
+-- logic that's much more readable as a real shell script than built up as a
+-- giant Lua string. Resolved once per app_id for the life of the widget --
+-- app icons don't change at runtime.
+local CACHE_DIR = `{noctalia.pluginDir()}/cache`
+local RESOLVE_SCRIPT = `{noctalia.pluginDir()}/resolve-icon.sh`
+noctalia.mkdirAll(CACHE_DIR)
+
+local iconCache = {} -- app_id -> resolved PNG path, or false if not found
+local resolving = {} -- app_id -> true while a lookup is in flight
+
+local function shQuote(s: string): string
+  return "'" .. string.gsub(s, "'", "'\\''") .. "'"
+end
+
+local function sanitizeForFilename(s: string): string
+  local out = string.gsub(s, "[^%w%.%-]", "_")
+  if out == "" then
+    return "unknown"
+  end
+  return out
+end
+
+local function resolveIcon(id: string): string?
+  local cached = iconCache[id]
+  if cached ~= nil then
+    if cached == false then
+      return nil
+    end
+    return cached
+  end
+
+  if not resolving[id] then
+    resolving[id] = true
+    local dest = `{CACHE_DIR}/icon-{sanitizeForFilename(id)}.png`
+    local cmd = string.format(
+      "sh %s %s %s %d",
+      shQuote(RESOLVE_SCRIPT),
+      shQuote(id),
+      shQuote(dest),
+      ICON_SIZE
+    )
+    noctalia.runAsync(cmd, function(result)
+      resolving[id] = nil
+      iconCache[id] = (result.exitCode == 0) and dest or false
+    end)
+  end
+
+  return nil
+end
 
 -- `length` characters starting at 0-indexed `startChar`.
 local function utf8Window(s: string, startChar: number, length: number): string
@@ -63,13 +117,14 @@ local function pollActiveWindow()
     local out = result.stdout or ""
     -- "app_id: title" -- app_id never contains ": ", so splitting on the
     -- first occurrence is reliable even if the title itself has a colon.
-    local _, t = string.match(out, "^(.-): (.-)%s*$")
+    local id, t = string.match(out, "^(.-): (.-)%s*$")
     if not t or t == "" then
       hasWindow = false
       return
     end
     hasWindow = true
     title = t
+    appId = id or ""
   end)
 end
 
@@ -80,7 +135,13 @@ local function render()
   end
   barWidget.setVisible(true)
   barWidget.setFont("Adwaita Sans")
-  barWidget.setGlyph("app-window-filled")
+
+  local iconPath = appId ~= "" and resolveIcon(appId) or nil
+  if iconPath then
+    barWidget.setImage(iconPath, false, ICON_SIZE)
+  else
+    barWidget.setGlyph("app-window-filled")
+  end
 
   local fullLen = utf8.len(title) or #title
   local width = math.floor(COMPACT_LEN + (EXPAND_LEN - COMPACT_LEN) * progress + 0.5)
