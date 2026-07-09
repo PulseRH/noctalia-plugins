@@ -8,7 +8,12 @@
 
 local COMPACT_LEN = 20
 local EXPAND_LEN = 40
-local ICON_SIZE = 20 -- px, square per-app icon in place of the generic glyph
+
+-- Icons are rasterized once per app_id at a fixed, generously large size
+-- (independent of the icon_size/icon_size_hover settings below) so changing
+-- those settings later never needs a re-rasterize -- setImage just downscales
+-- the cached file to whatever size is requested each frame.
+local ICON_RASTER_SIZE = 64
 
 -- Same open/close tuning as the clock/volume/sysmon/media widgets: 0.16 @ 16ms.
 local EASE = 0.16
@@ -66,7 +71,7 @@ local function resolveIcon(id: string): string?
       shQuote(RESOLVE_SCRIPT),
       shQuote(id),
       shQuote(dest),
-      ICON_SIZE
+      ICON_RASTER_SIZE
     )
     noctalia.runAsync(cmd, function(result)
       resolving[id] = nil
@@ -138,8 +143,14 @@ local function render()
 
   local iconPath = appId ~= "" and resolveIcon(appId) or nil
   if iconPath then
-    barWidget.setImage(iconPath, false, ICON_SIZE)
+    local compactSize = barWidget.getConfig("icon_size") or 20
+    local hoverSize = barWidget.getConfig("icon_size_hover") or 28
+    local displaySize = math.floor(compactSize + (hoverSize - compactSize) * progress + 0.5)
+    barWidget.setImage(iconPath, false, displaySize)
   else
+    -- No size control here: the plugin API doesn't expose a glyph-size
+    -- setter, only setImage's width/height -- so the generic fallback glyph
+    -- stays whatever fixed size the bar's theme uses for every plugin icon.
     barWidget.setGlyph("app-window-filled")
   end
 

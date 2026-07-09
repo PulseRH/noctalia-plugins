@@ -1,14 +1,34 @@
 id = "pulser/active-window-hover"
 name = "Active Window (hover expand)"
-version = "0.2.0"
+version = "0.3.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["window"]
 icon = "app-window-filled"
-description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), with the real per-app icon (via its .desktop entry + icon theme, rasterized/cached with ImageMagick) when one can be found. Compact by default, expands on hover with an animated open/close, scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
+description = "Shows the focused window's title via wlrctl (wlr-foreign-toplevel-management), with the real per-app icon (via its .desktop entry + icon theme, rasterized/cached with ImageMagick) when one can be found -- icon size is configurable separately for compact and hover, animating between them. Compact by default, expands on hover with an animated open/close, scrolls as a marquee if still too long even expanded. Requires the `wlrctl` CLI tool."
 
 [[widget]]
 id = "active-window"
 entry = "active_window.luau"
+
+[[widget.setting]]
+key = "icon_size"
+type = "number"
+label = "Icon size (px)"
+description = "Per-app icon size when compact (not hovering). Only affects the real app icon -- the generic fallback glyph (shown when no icon can be resolved) is a fixed size, since the plugin API doesn't expose glyph sizing."
+default = 20
+min = 12
+max = 40
+step = 1
+
+[[widget.setting]]
+key = "icon_size_hover"
+type = "number"
+label = "Icon size on hover (px)"
+description = "Per-app icon size while hovering; animates between this and the compact size along with the text width."
+default = 28
+min = 12
+max = 48
+step = 1
