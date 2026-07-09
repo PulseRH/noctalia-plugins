@@ -1,13 +1,13 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.6.1"
+version = "0.7.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["media"]
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an inline playback-progress bar (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
+description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
 
 [[widget]]
 id = "media"
@@ -18,13 +18,6 @@ key = "show_cover_art"
 type = "bool"
 label = "Show cover art"
 description = "Replace the play/pause icon with the track's (rounded) cover art when available."
-default = true
-
-[[widget.setting]]
-key = "show_progress_bar"
-type = "bool"
-label = "Show progress bar"
-description = "Prefix an inline block-character bar showing playback position. The bar characters need a monospace font to line up, so enabling this overrides the widget's own Font setting below to monospace; turn it off to use your chosen font."
 default = true
 
 [[widget.setting]]

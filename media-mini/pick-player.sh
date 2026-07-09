@@ -6,7 +6,7 @@
 # pipe-delimited format.
 set -eu
 
-fmt='{{status}}|{{artist}}|{{mpris:artUrl}}|{{position}}|{{mpris:length}}|{{xesam:url}}|{{title}}'
+fmt='{{status}}|{{artist}}|{{mpris:artUrl}}|{{xesam:url}}|{{title}}'
 
 best=""
 for p in $(playerctl -l 2>/dev/null); do

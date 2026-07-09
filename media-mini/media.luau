@@ -9,7 +9,6 @@
 
 local COVER_SIZE_DEFAULT = 20 -- px, square cover-art icon in place of the play/pause glyph
 local ROUND_SIZE = 128 -- px, fixed processing canvas the mask is rendered at before downscale
-local BAR_LEN = 8 -- characters in the inline playback-progress bar
 
 -- Same open/close tuning as the clock/volume/sysmon widgets: 0.16 @ 16ms.
 local EASE = 0.16
@@ -33,8 +32,6 @@ local playing = false
 local artist = ""
 local title = ""
 local artUrl = ""
-local position = 0
-local length = 0
 
 -- Cover art is only ever a local file (barWidget.setImage has no network
 -- fetcher), so http(s) art (Spotify etc.) gets downloaded once per track into
@@ -132,8 +129,8 @@ local function pollMedia()
       local out = result.stdout or ""
       -- title is last/greedy since it's the only field likely to contain
       -- stray characters; the others are safe to split on "|".
-      local status, a, url, pos, len, pageUrl, t =
-        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
+      local status, a, url, pageUrl, t =
+        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
       if not status or status == "" then
         hasMedia = false
         return
@@ -152,8 +149,6 @@ local function pollMedia()
       artist = a or ""
       title = t or ""
       artUrl = resolvedArtUrl
-      position = tonumber(pos) or 0
-      length = tonumber(len) or 0
     end,
     1500
   )
@@ -246,38 +241,16 @@ local function resolveCoverPath(pct: number): string?
   return nil
 end
 
--- A short block-character bar (needs the monospace font to line up/render;
--- see setFont below) reflecting playback position -- the closest available
--- stand-in for a background progress fill, since bar widgets have no
--- rect/opacity primitive to paint one behind the text.
-local function progressBar(): string
-  if not hasMedia or length <= 0 then
-    return ""
-  end
-  if barWidget.getConfig("show_progress_bar") == false then
-    return ""
-  end
-  local frac = math.max(0, math.min(1, position / length))
-  local filled = math.floor(frac * BAR_LEN + 0.5)
-  return string.rep("█", filled) .. string.rep("░", BAR_LEN - filled) .. " "
-end
-
 local function render()
   if not hasMedia then
     barWidget.setVisible(false)
     return
   end
   barWidget.setVisible(true)
-  -- Noctalia already gives every widget (native or plugin) a per-widget Font
-  -- setting in its own settings panel (Widget::labelFontFamily), applied at
-  -- build time. Calling setFont() here overrides that every time it's
-  -- called, so only do it when the block-character bar actually needs a
-  -- monospace font to line up -- never touch font at all otherwise, so the
-  -- user's own Font choice is left alone.
-  local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
-  if barEnabled then
-    barWidget.setFont("monospace")
-  end
+  -- Never call setFont here -- Noctalia already gives every widget (native or
+  -- plugin) a per-widget Font setting in its own settings panel
+  -- (Widget::labelFontFamily), applied at build time. Touching font at all
+  -- would override that on every render.
 
   local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
   local roundPct = barWidget.getConfig("corner_rounding") or 100
@@ -288,22 +261,21 @@ local function render()
     barWidget.setGlyph(playing and "player-play-filled" or "player-pause-filled")
   end
 
-  local bar = progressBar()
   local full = fullText()
   local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(full) or #full
   local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
 
   if fullLen <= width then
-    barWidget.setText(bar .. full)
+    barWidget.setText(full)
   elseif hovering then
     local loop = full .. "   "
     local loopLen = utf8.len(loop) or #loop
     local start = scrollOffset % loopLen
     local window = utf8Window(loop .. full, start, width)
-    barWidget.setText(bar .. window)
+    barWidget.setText(window)
   else
-    barWidget.setText(`{bar}{utf8Sub(full, math.max(width - 3, 1))}...`)
+    barWidget.setText(`{utf8Sub(full, math.max(width - 3, 1))}...`)
   end
 end
 
