@@ -252,10 +252,7 @@ local function progressBar(): string
   end
   local frac = math.max(0, math.min(1, position / length))
   local filled = math.floor(frac * BAR_LEN + 0.5)
-  -- "░" (light shade) reads as a grid of tiny dots at text size, not a flat
-  -- fill -- "▮" (black vertical rectangle) is a solid full-height shape, so
-  -- the unfilled track looks like a flat bar instead of a stippled texture.
-  return string.rep("█", filled) .. string.rep("▮", BAR_LEN - filled) .. " "
+  return string.rep("█", filled) .. string.rep("░", BAR_LEN - filled) .. " "
 end
 
 local function render()
@@ -264,17 +261,11 @@ local function render()
     return
   end
   barWidget.setVisible(true)
-  -- Noctalia already has a generic per-widget font override (every widget,
-  -- plugins included, inherits Widget::labelFontFamily() -- confirmed in
-  -- widget.h/plugin_widget.cpp) exposed in the bar's own widget settings, so
-  -- this plugin has no business managing font choice itself. The one
-  -- exception: the progress bar's block characters need monospace, so force
-  -- that specifically while the bar is on; otherwise don't touch the font at
-  -- all and let the host-level picker (or its default) apply untouched.
+  -- Block-bar and title text share one label, so the whole run has to be one
+  -- font -- monospace (unlike Adwaita Sans) has the bar characters. Only pay
+  -- for the monospace look when the bar is actually enabled.
   local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
-  if barEnabled then
-    barWidget.setFont("monospace")
-  end
+  barWidget.setFont(barEnabled and "monospace" or "Adwaita Sans")
 
   local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
   local roundPct = barWidget.getConfig("corner_rounding") or 100

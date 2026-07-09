@@ -1,13 +1,13 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.7.0"
+version = "0.5.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["media"]
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an inline playback-progress bar (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings; font follows the bar's own per-widget font picker (forced to monospace only while the progress bar is on, since that needs its block characters). Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
+description = "Compact now-playing (artist - title) via playerctl/MPRIS, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an inline playback-progress bar (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
 
 [[widget]]
 id = "media"
