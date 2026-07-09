@@ -1,0 +1,89 @@
+# This file is auto-generated from */plugin.toml. Do not edit manually.
+
+[[plugin]]
+id = "pulser/clock-hover"
+name = "Clock (hover expand)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "clock"
+description = "Compact clock that expands to a full weekday/date/time on hover."
+min_noctalia = "5.0.0"
+tags = ["clock"]
+
+[[plugin]]
+id = "pulser/volume-hover"
+name = "Volume (click slider)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "volume-high"
+description = "Volume icon + text slider (bar/knob) + percentage. Left/right-click steps volume, middle-click toggles mute -- the plugin bridge doesn't forward drag or scroll events, so it can't be dragged."
+min_noctalia = "5.0.0"
+tags = ["audio"]
+
+[[plugin]]
+id = "pulser/sysmon-cpu"
+name = "CPU (mini)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "cpu-usage"
+description = "Compact gauge bar or plain percentage (toggle below); hover shows percent, clock speed, and package wattage."
+min_noctalia = "5.0.0"
+tags = ["system"]
+
+[[plugin]]
+id = "pulser/sysmon-ram"
+name = "RAM (mini)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "memory"
+description = "Compact gauge bar or plain percentage (toggle below); hover shows percent and used/total GB (total auto-detected)."
+min_noctalia = "5.0.0"
+tags = ["system"]
+
+[[plugin]]
+id = "pulser/sysmon-temp"
+name = "CPU Temp (mini)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "cpu-temperature"
+description = "CPU package temperature always shown; hover can also show GPU, hottest NVMe, RAM (DIMM), and hottest CPU core, each toggleable below."
+min_noctalia = "5.0.0"
+tags = ["system"]
+
+[[plugin]]
+id = "pulser/sysmon-net-down"
+name = "Download speed (mini)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "download-speed"
+description = "Auto-detects the busiest interface. Hides entirely below an idle threshold (KB/s -- 1024 = 1 meg); hovering always shows it. Compact units (K/M) can be toggled off for full KB/s-MB/s."
+min_noctalia = "5.0.0"
+tags = ["system"]
+
+[[plugin]]
+id = "pulser/sysmon-net-up"
+name = "Upload speed (mini)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "upload-speed"
+description = "Auto-detects the busiest interface. Hides entirely below an idle threshold (KB/s -- 1024 = 1 meg); hovering always shows it. Compact units (K/M) can be toggled off for full KB/s-MB/s."
+min_noctalia = "5.0.0"
+tags = ["system"]
+
+[[plugin]]
+id = "pulser/media-mini"
+name = "Media (mini)"
+version = "0.1.0"
+author = "pulser"
+license = "MIT"
+icon = "player-play-filled"
+description = "Compact now-playing (artist - title) via playerctl/MPRIS. Expands from 20 to 40 characters on hover only if the text is actually longer than that; scrolls as a marquee on hover if it's still too long even expanded. Left-click opens the media panel, right-click toggles play/pause."
+min_noctalia = "5.0.0"
+tags = ["media"]

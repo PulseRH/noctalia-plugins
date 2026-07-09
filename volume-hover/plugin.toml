@@ -1,0 +1,14 @@
+id = "pulser/volume-hover"
+name = "Volume (click slider)"
+version = "0.1.0"
+min_noctalia = "5.0.0"
+author = "pulser"
+license = "MIT"
+dependencies = []
+tags = ["audio"]
+icon = "volume-high"
+description = "Volume icon + text slider (bar/knob) + percentage. Left/right-click steps volume, middle-click toggles mute -- the plugin bridge doesn't forward drag or scroll events, so it can't be dragged."
+
+[[widget]]
+id = "volume"
+entry = "volume.luau"

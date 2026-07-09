@@ -1,0 +1,14 @@
+id = "pulser/clock-hover"
+name = "Clock (hover expand)"
+version = "0.1.0"
+min_noctalia = "5.0.0"
+author = "pulser"
+license = "MIT"
+dependencies = []
+tags = ["clock"]
+icon = "clock"
+description = "Compact clock that expands to a full weekday/date/time on hover."
+
+[[widget]]
+id = "clock"
+entry = "clock.luau"

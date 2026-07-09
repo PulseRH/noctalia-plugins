@@ -1,0 +1,21 @@
+id = "pulser/sysmon-cpu"
+name = "CPU (mini)"
+version = "0.1.0"
+min_noctalia = "5.0.0"
+author = "pulser"
+license = "MIT"
+dependencies = []
+tags = ["system"]
+icon = "cpu-usage"
+description = "Compact gauge bar or plain percentage (toggle below); hover shows percent, clock speed, and package wattage."
+
+[[widget]]
+id = "cpu"
+entry = "cpu.luau"
+
+  [[widget.setting]]
+  key = "gauge"
+  type = "bool"
+  label = "Show gauge bar"
+  description = "Compact display: gauge bar (on) or plain percentage (off)"
+  default = true

@@ -1,0 +1,38 @@
+id = "pulser/sysmon-temp"
+name = "CPU Temp (mini)"
+version = "0.1.0"
+min_noctalia = "5.0.0"
+author = "pulser"
+license = "MIT"
+dependencies = []
+tags = ["system"]
+icon = "cpu-temperature"
+description = "CPU package temperature always shown; hover can also show GPU, hottest NVMe, RAM (DIMM), and hottest CPU core, each toggleable below."
+
+[[widget]]
+id = "temp"
+entry = "temp.luau"
+
+  [[widget.setting]]
+  key = "show_gpu"
+  type = "bool"
+  label = "Show GPU temp on hover"
+  default = true
+
+  [[widget.setting]]
+  key = "show_nvme"
+  type = "bool"
+  label = "Show hottest NVMe temp on hover"
+  default = false
+
+  [[widget.setting]]
+  key = "show_ram"
+  type = "bool"
+  label = "Show RAM (DIMM) temp on hover"
+  default = false
+
+  [[widget.setting]]
+  key = "show_hottest_core"
+  type = "bool"
+  label = "Show hottest CPU core on hover"
+  default = false

@@ -1,0 +1,38 @@
+id = "pulser/sysmon-net-up"
+name = "Upload speed (mini)"
+version = "0.1.0"
+min_noctalia = "5.0.0"
+author = "pulser"
+license = "MIT"
+dependencies = []
+tags = ["system"]
+icon = "upload-speed"
+description = "Auto-detects the busiest interface. Hides entirely below an idle threshold (KB/s -- 1024 = 1 meg); hovering always shows it. Compact units (K/M) can be toggled off for full KB/s-MB/s."
+
+[[widget]]
+id = "net-up"
+entry = "net_up.luau"
+
+  [[widget.setting]]
+  key = "threshold_kbps"
+  type = "number"
+  label = "Idle threshold (KB/s)"
+  description = "Hide entirely below this; hovering always shows it. 1024 = 1 MB/s"
+  default = 1024
+  min = 0
+  max = 20480
+  step = 32
+
+  [[widget.setting]]
+  key = "compact_units"
+  type = "bool"
+  label = "Compact units when not hovering"
+  description = "34K/1.2M instead of 34KB/s/1.2MB/s while not hovering"
+  default = true
+
+  [[widget.setting]]
+  key = "hide_completely"
+  type = "bool"
+  label = "Hide widget entirely when idle"
+  description = "On: vanishes below the idle threshold. Off: icon stays, only the number hides"
+  default = true
