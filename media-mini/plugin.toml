@@ -1,13 +1,13 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.7.0"
+version = "0.8.0"
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["media"]
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
+description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an image-rendered playback-progress bar beside it (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
 
 [[widget]]
 id = "media"
@@ -18,6 +18,13 @@ key = "show_cover_art"
 type = "bool"
 label = "Show cover art"
 description = "Replace the play/pause icon with the track's (rounded) cover art when available."
+default = true
+
+[[widget.setting]]
+key = "show_progress_bar"
+type = "bool"
+label = "Show progress bar"
+description = "Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph."
 default = true
 
 [[widget.setting]]

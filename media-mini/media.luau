@@ -10,6 +10,26 @@
 local COVER_SIZE_DEFAULT = 20 -- px, square cover-art icon in place of the play/pause glyph
 local ROUND_SIZE = 128 -- px, fixed processing canvas the mask is rendered at before downscale
 
+-- The progress bar is rendered as an actual image (not text) so it's always
+-- a flat solid fill and never has to share a font with the title label --
+-- no installed font renders block/shade characters as a true flat fill
+-- (they're dither patterns by design), and forcing a font for them fights
+-- the widget's own per-widget Font setting. Position is discretized into
+-- FILL_STEPS buckets so there are only ever a handful of distinct bar
+-- images to render/cache, not one per frame.
+local FILL_STEPS = 24
+-- When cover art is on, the bar sits *beside* the art (not over it): the art
+-- and a progress pill are composited side by side into one image (the widget
+-- only has a single image slot). Sizes are in the ROUND_SIZE processing space.
+local COMBO_GAP = 16 -- px, transparent gap between art and bar
+local COMBO_BAR_W = 220 -- px, bar width (kept wide vs. tall so it reads as a bar, not a blob)
+local COMBO_BAR_H = 52 -- px, bar height
+local COMBO_CANVAS_W = ROUND_SIZE + COMBO_GAP + COMBO_BAR_W -- total composited width
+-- Standalone bar (cover art off), shown in place of the play/pause glyph.
+local STANDALONE_BAR_W = 200 -- px canvas
+local STANDALONE_BAR_H = 64
+local STANDALONE_DISP_SCALE = 2.4 -- display width = cover_size * this (bar has no art to size against)
+
 -- Same open/close tuning as the clock/volume/sysmon widgets: 0.16 @ 16ms.
 local EASE = 0.16
 local ANIM_INTERVAL = 16
@@ -32,6 +52,8 @@ local playing = false
 local artist = ""
 local title = ""
 local artUrl = ""
+local position = 0
+local length = 0
 
 -- Cover art is only ever a local file (barWidget.setImage has no network
 -- fetcher), so http(s) art (Spotify etc.) gets downloaded once per track into
@@ -39,6 +61,7 @@ local artUrl = ""
 local CACHE_DIR = `{noctalia.pluginDir()}/cache`
 local DOWNLOAD_PATH = `{CACHE_DIR}/cover-src.jpg`
 local ROUND_PATH = `{CACHE_DIR}/cover-round.png`
+local COVER_BAR_PATH = `{CACHE_DIR}/cover-bar.png`
 noctalia.mkdirAll(CACHE_DIR)
 
 -- playerctl with no -p picks a player by its own internal ordering, not by
@@ -57,8 +80,18 @@ local MAGICK_CMD = noctalia.commandExists("magick") and "magick" or "convert"
 
 local lastRequestedArtUrl = nil
 local downloadedArtUrl = nil
-local roundingKey = nil -- "path|pct" currently being/last processed
-local roundedFor = nil -- "path|pct" the current ROUND_PATH content matches
+-- Cache keys are keyed on artUrl (the art's identity), NOT the file path:
+-- downloaded art always lands at the same cover-src.jpg path, so a path-based
+-- key made every song look identical and the rounded/composited art never
+-- refreshed on a track change. artUrl changes per track, so it does.
+local roundingKey = nil -- "artUrl|pct" currently being/last processed
+local roundedFor = nil -- "artUrl|pct" the current ROUND_PATH content matches
+
+local coverBarPending = nil -- "artUrl|pct|bucket" currently baking
+local coverBarLastKey = nil -- "artUrl|pct|bucket" the current COVER_BAR_PATH content matches
+local coverBarArtReady = nil -- "artUrl|pct" for which at least one composite has been baked
+local standaloneReady = {} -- [bucket] = true once cache/bar-standalone-{bucket}.png exists
+local standalonePending = {} -- [bucket] = true while generating
 
 local function shQuote(s: string): string
   return "'" .. string.gsub(s, "'", "'\\''") .. "'"
@@ -129,8 +162,8 @@ local function pollMedia()
       local out = result.stdout or ""
       -- title is last/greedy since it's the only field likely to contain
       -- stray characters; the others are safe to split on "|".
-      local status, a, url, pageUrl, t =
-        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
+      local status, a, url, pos, len, pageUrl, t =
+        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
       if not status or status == "" then
         hasMedia = false
         return
@@ -149,6 +182,8 @@ local function pollMedia()
       artist = a or ""
       title = t or ""
       artUrl = resolvedArtUrl
+      position = tonumber(pos) or 0
+      length = tonumber(len) or 0
     end,
     1500
   )
@@ -205,7 +240,7 @@ local function resolveCoverPath(pct: number): string?
     return raw
   end
 
-  local key = `{raw}|{pct}`
+  local key = `{artUrl}|{pct}`
   if roundedFor == key then
     return ROUND_PATH
   end
@@ -241,22 +276,142 @@ local function resolveCoverPath(pct: number): string?
   return nil
 end
 
+-- 0..FILL_STEPS bucket for the current playback position, or 0 if unknown.
+local function fillBucket(): number
+  if not hasMedia or length <= 0 then
+    return 0
+  end
+  local frac = math.max(0, math.min(1, position / length))
+  return math.floor(frac * FILL_STEPS + 0.5)
+end
+
+-- roundRectangle with a radius bigger than half the rect just renders as a
+-- fully rounded pill, so no clamping needed for the small-fill edge cases.
+local function barDrawCmd(fillColor: string, x1: number, y1: number, x2: number, y2: number, r: number): string
+  return string.format(" -fill %s -draw \"roundRectangle %d,%d,%d,%d,%d,%d\"", fillColor, x1, y1, x2, y2, r, r)
+end
+
+-- Composites the (already rounded) cover art and a progress pill side by side
+-- into one image, so both can share the widget's single image slot without
+-- the bar sitting on top of the art. Returns COVER_BAR_PATH once at least one
+-- composite exists for the current art (subsequent bucket changes overwrite
+-- that same file in place -- setImage watch=true reloads it, so the widget's
+-- width never jitters), or the plain art path until the first bake lands.
+local function resolveCoverWithBar(pct: number, bucket: number): string?
+  local base = resolveCoverPath(pct)
+  if not base then
+    return nil
+  end
+  if not MAGICK_AVAILABLE then
+    return base
+  end
+
+  local artKey = `{artUrl}|{pct}`
+  local fullKey = `{artKey}|{bucket}`
+
+  -- (Re)bake whenever the displayed bucket/art isn't the one on disk.
+  if coverBarLastKey ~= fullKey and coverBarPending ~= fullKey then
+    coverBarPending = fullKey
+    local barX = ROUND_SIZE + COMBO_GAP
+    local filledW = math.floor((bucket / FILL_STEPS) * COMBO_BAR_W + 0.5)
+    local top = math.floor((ROUND_SIZE - COMBO_BAR_H) / 2)
+    local bottom = top + COMBO_BAR_H - 1
+    local r = math.floor(COMBO_BAR_H / 2)
+
+    local cmd = string.format("%s %s -background none -gravity West -extent %dx%d", MAGICK_CMD, shQuote(base), COMBO_CANVAS_W, ROUND_SIZE)
+      .. barDrawCmd("\"rgba(255,255,255,0.30)\"", barX, top, barX + COMBO_BAR_W - 1, bottom, r)
+      .. (filledW > 0 and barDrawCmd("white", barX, top, barX + filledW - 1, bottom, r) or "")
+      .. " "
+      .. shQuote(COVER_BAR_PATH)
+
+    noctalia.runAsync(cmd, function(result)
+      coverBarPending = nil
+      if result.exitCode == 0 then
+        coverBarLastKey = fullKey
+        coverBarArtReady = artKey
+      end
+    end)
+  end
+
+  if coverBarArtReady == artKey then
+    return COVER_BAR_PATH
+  end
+  return base
+end
+
+-- Standalone flat pill bar for when cover art is off, shown in place of the
+-- play/pause glyph. Purely a function of the fill bucket (not the track), so
+-- each of the FILL_STEPS possible images only ever needs generating once.
+local function resolveStandaloneBar(bucket: number): string?
+  local path = `{CACHE_DIR}/bar-standalone-{bucket}.png`
+  if standaloneReady[bucket] then
+    return path
+  end
+  if not MAGICK_AVAILABLE then
+    return nil
+  end
+
+  if not standalonePending[bucket] then
+    standalonePending[bucket] = true
+    local filledW = math.floor((bucket / FILL_STEPS) * STANDALONE_BAR_W + 0.5)
+    local r = math.floor(STANDALONE_BAR_H / 2)
+
+    local cmd = string.format("%s -size %dx%d xc:none", MAGICK_CMD, STANDALONE_BAR_W, STANDALONE_BAR_H)
+      .. barDrawCmd("\"rgba(255,255,255,0.28)\"", 0, 0, STANDALONE_BAR_W - 1, STANDALONE_BAR_H - 1, r)
+      .. (filledW > 0 and barDrawCmd("white", 0, 0, filledW - 1, STANDALONE_BAR_H - 1, r) or "")
+      .. " "
+      .. shQuote(path)
+
+    noctalia.runAsync(cmd, function(result)
+      standalonePending[bucket] = false
+      if result.exitCode == 0 then
+        standaloneReady[bucket] = true
+      end
+    end)
+  end
+
+  return nil
+end
+
 local function render()
   if not hasMedia then
     barWidget.setVisible(false)
     return
   end
   barWidget.setVisible(true)
-  -- Never call setFont here -- Noctalia already gives every widget (native or
+  -- Never touch font here -- Noctalia already gives every widget (native or
   -- plugin) a per-widget Font setting in its own settings panel
-  -- (Widget::labelFontFamily), applied at build time. Touching font at all
-  -- would override that on every render.
+  -- (Widget::labelFontFamily), applied at build time. The progress bar is an
+  -- image now, not text, so it never needs (or fights over) a font.
 
+  local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
+  local coverEnabled = barWidget.getConfig("show_cover_art") ~= false
   local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
   local roundPct = barWidget.getConfig("corner_rounding") or 100
-  local coverPath = barWidget.getConfig("show_cover_art") ~= false and resolveCoverPath(roundPct) or nil
-  if coverPath then
-    barWidget.setImage(coverPath, true, coverSize)
+  local barActive = barEnabled and hasMedia and length > 0
+  local bucket = fillBucket()
+
+  local imagePath = nil
+  if coverEnabled then
+    imagePath = barActive and resolveCoverWithBar(roundPct, bucket) or resolveCoverPath(roundPct)
+  end
+
+  if imagePath == COVER_BAR_PATH then
+    -- art + bar side by side: the composite is COMBO_CANVAS_W wide at
+    -- ROUND_SIZE tall, displayed at cover_size tall and proportionally wide.
+    local dispW = math.floor(coverSize * (COMBO_CANVAS_W / ROUND_SIZE) + 0.5)
+    barWidget.setImage(imagePath, true, dispW, coverSize)
+  elseif imagePath then
+    barWidget.setImage(imagePath, true, coverSize) -- plain square art
+  elseif barActive then
+    local barPath = resolveStandaloneBar(bucket)
+    if barPath then
+      local dispW = math.floor(coverSize * STANDALONE_DISP_SCALE + 0.5)
+      local dispH = math.floor(dispW * (STANDALONE_BAR_H / STANDALONE_BAR_W) + 0.5)
+      barWidget.setImage(barPath, true, dispW, dispH)
+    else
+      barWidget.setGlyph(playing and "player-play-filled" or "player-pause-filled")
+    end
   else
     barWidget.setGlyph(playing and "player-play-filled" or "player-pause-filled")
   end
