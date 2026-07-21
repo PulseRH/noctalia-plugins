@@ -119,8 +119,8 @@ end
 -- smaller than compact (a user could otherwise set expand < compact, which
 -- would make hovering shrink the text instead of growing it).
 local function widthRange(): (number, number)
-  local compactLen = barWidget.getConfig("compact_width") or 20
-  local expandLen = barWidget.getConfig("expand_width") or 40
+  local compactLen = noctalia.getConfig("compact_width") or 20
+  local expandLen = noctalia.getConfig("expand_width") or 40
   return compactLen, math.max(compactLen, expandLen)
 end
 
@@ -150,8 +150,8 @@ local function render()
 
   local iconPath = appId ~= "" and resolveIcon(appId) or nil
   if iconPath then
-    local compactSize = barWidget.getConfig("icon_size") or 20
-    local hoverSize = barWidget.getConfig("icon_size_hover") or 28
+    local compactSize = noctalia.getConfig("icon_size") or 20
+    local hoverSize = noctalia.getConfig("icon_size_hover") or 28
     local displaySize = math.floor(compactSize + (hoverSize - compactSize) * progress + 0.5)
     barWidget.setImage(iconPath, false, displaySize)
   else

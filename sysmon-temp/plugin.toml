@@ -1,6 +1,7 @@
 id = "pulser/sysmon-temp"
 name = "CPU Temp (mini)"
 version = "0.1.0"
+plugin_api = 5
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
@@ -16,23 +17,23 @@ entry = "temp.luau"
   [[widget.setting]]
   key = "show_gpu"
   type = "bool"
-  label = "Show GPU temp on hover"
+  label_key = "settings.show_gpu.label"
   default = true
 
   [[widget.setting]]
   key = "show_nvme"
   type = "bool"
-  label = "Show hottest NVMe temp on hover"
+  label_key = "settings.show_nvme.label"
   default = false
 
   [[widget.setting]]
   key = "show_ram"
   type = "bool"
-  label = "Show RAM (DIMM) temp on hover"
+  label_key = "settings.show_ram.label"
   default = false
 
   [[widget.setting]]
   key = "show_hottest_core"
   type = "bool"
-  label = "Show hottest CPU core on hover"
+  label_key = "settings.show_hottest_core.label"
   default = false

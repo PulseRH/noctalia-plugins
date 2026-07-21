@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "threshold_kbps": {
+      "label": "Idle threshold (KB/s)",
+      "description": "Hide entirely below this; hovering always shows it. 1024 = 1 MB/s"
+    },
+    "compact_units": {
+      "label": "Compact units when not hovering",
+      "description": "34K/1.2M instead of 34KB/s/1.2MB/s while not hovering"
+    },
+    "hide_completely": {
+      "label": "Hide widget entirely when idle",
+      "description": "On: vanishes below the idle threshold. Off: icon stays, only the number hides"
+    }
+  }
+}

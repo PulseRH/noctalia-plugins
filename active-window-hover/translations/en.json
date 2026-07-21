@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "compact_width": {
+      "label": "Compact width (characters)",
+      "description": "Text width when not hovering. The title only actually shrinks to this if it's longer -- a short title just stays put."
+    },
+    "expand_width": {
+      "label": "Expanded width (characters)",
+      "description": "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
+    },
+    "icon_size": {
+      "label": "Icon size (px)",
+      "description": "Per-app icon size when compact (not hovering). Only affects the real app icon -- the generic fallback glyph (shown when no icon can be resolved) is a fixed size, since the plugin API doesn't expose glyph sizing."
+    },
+    "icon_size_hover": {
+      "label": "Icon size on hover (px)",
+      "description": "Per-app icon size while hovering; animates between this and the compact size along with the text width."
+    }
+  }
+}

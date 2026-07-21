@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "show_gpu": {
+      "label": "Show GPU temp on hover"
+    },
+    "show_nvme": {
+      "label": "Show hottest NVMe temp on hover"
+    },
+    "show_ram": {
+      "label": "Show RAM (DIMM) temp on hover"
+    },
+    "show_hottest_core": {
+      "label": "Show hottest CPU core on hover"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "gauge": {
+      "label": "Show gauge bar",
+      "description": "Compact display: gauge bar (on) or plain percentage (off)"
+    }
+  }
+}

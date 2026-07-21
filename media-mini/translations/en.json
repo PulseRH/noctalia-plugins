@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "show_cover_art": {
+      "label": "Show cover art",
+      "description": "Replace the play/pause icon with the track's (rounded) cover art when available."
+    },
+    "show_progress_bar": {
+      "label": "Show progress bar",
+      "description": "Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph."
+    },
+    "compact_width": {
+      "label": "Compact width (characters)",
+      "description": "Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put."
+    },
+    "expand_width": {
+      "label": "Expanded width (characters)",
+      "description": "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
+    },
+    "cover_size": {
+      "label": "Cover art size (px)",
+      "description": "Size of the cover art icon in place of the play/pause glyph."
+    },
+    "corner_rounding": {
+      "label": "Cover art rounding (%)",
+      "description": "0 = square corners, 100 = fully circular."
+    }
+  }
+}

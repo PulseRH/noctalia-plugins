@@ -65,7 +65,7 @@ end
 local function render()
   barWidget.setGlyph("memory")
   local pctText = `{math.floor(pct + 0.5)}%`
-  local useGauge = barWidget.getConfig("gauge")
+  local useGauge = noctalia.getConfig("gauge")
 
   if useGauge ~= false then
     barWidget.setFont("monospace")

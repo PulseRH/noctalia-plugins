@@ -136,8 +136,8 @@ end
 -- smaller than compact (a user could otherwise set expand < compact, which
 -- would make hovering shrink the text instead of growing it).
 local function widthRange(): (number, number)
-  local compactLen = barWidget.getConfig("compact_width") or 20
-  local expandLen = barWidget.getConfig("expand_width") or 40
+  local compactLen = noctalia.getConfig("compact_width") or 20
+  local expandLen = noctalia.getConfig("expand_width") or 40
   return compactLen, math.max(compactLen, expandLen)
 end
 
@@ -384,10 +384,10 @@ local function render()
   -- (Widget::labelFontFamily), applied at build time. The progress bar is an
   -- image now, not text, so it never needs (or fights over) a font.
 
-  local barEnabled = barWidget.getConfig("show_progress_bar") ~= false
-  local coverEnabled = barWidget.getConfig("show_cover_art") ~= false
-  local coverSize = barWidget.getConfig("cover_size") or COVER_SIZE_DEFAULT
-  local roundPct = barWidget.getConfig("corner_rounding") or 100
+  local barEnabled = noctalia.getConfig("show_progress_bar") ~= false
+  local coverEnabled = noctalia.getConfig("show_cover_art") ~= false
+  local coverSize = noctalia.getConfig("cover_size") or COVER_SIZE_DEFAULT
+  local roundPct = noctalia.getConfig("corner_rounding") or 100
   local barActive = barEnabled and hasMedia and length > 0
   local bucket = fillBucket()
 
@@ -480,9 +480,23 @@ function onHover(isHovering: boolean)
 end
 
 function onClick()
-  noctalia.runAsync("noctalia msg panel-toggle control-center media")
+  noctalia.runAsync("playerctl play-pause")
 end
 
 function onRightClick()
-  noctalia.runAsync("playerctl play-pause")
+  noctalia.runAsync("noctalia msg panel-toggle control-center media")
+end
+
+-- Scroll to skip tracks. Host calls onScroll(axis, steps): axis "vertical"/
+-- "horizontal", steps signed whole detents (negative = scroll up on Wayland).
+function onScroll(axis, steps)
+  local n = tonumber(steps) or 0
+  if axis ~= "vertical" or n == 0 then
+    return
+  end
+  if n < 0 then
+    noctalia.runAsync("playerctl previous")
+  else
+    noctalia.runAsync("playerctl next")
+  end
 end

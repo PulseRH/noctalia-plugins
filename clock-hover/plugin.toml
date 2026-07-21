@@ -1,6 +1,7 @@
 id = "pulser/clock-hover"
 name = "Clock (hover expand)"
 version = "0.1.0"
+plugin_api = 5
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"

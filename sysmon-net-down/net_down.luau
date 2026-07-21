@@ -80,7 +80,7 @@ local function speedText(v: number, compact: boolean): string
 end
 
 local function computeTarget(): number
-  local threshold = barWidget.getConfig("threshold_kbps") or 1024
+  local threshold = noctalia.getConfig("threshold_kbps") or 1024
   return (hovering or kbps >= threshold) and 1.0 or 0.0
 end
 
@@ -88,7 +88,7 @@ local function render()
   barWidget.setFont("Adwaita Sans")
 
   if progress <= 0.001 then
-    if barWidget.getConfig("hide_completely") ~= false then
+    if noctalia.getConfig("hide_completely") ~= false then
       barWidget.setVisible(false)
     else
       barWidget.setVisible(true)
@@ -100,7 +100,7 @@ local function render()
 
   barWidget.setVisible(true)
   barWidget.setGlyph("download-speed")
-  local compact = not hovering and barWidget.getConfig("compact_units") ~= false
+  local compact = not hovering and noctalia.getConfig("compact_units") ~= false
   local full = speedText(kbps, compact)
   local revealLen = math.floor(utf8.len(full) * progress + 0.5)
   barWidget.setText(utf8Sub(full, revealLen))

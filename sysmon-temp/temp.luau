@@ -139,22 +139,22 @@ local function render()
   local base = `CPU {math.floor(tempC + 0.5)}°C`
 
   local extraParts = {}
-  if barWidget.getConfig("show_gpu") ~= false and gpuC then
+  if noctalia.getConfig("show_gpu") ~= false and gpuC then
     extraParts[#extraParts + 1] = `GPU {math.floor(gpuC + 0.5)}°C`
   end
-  if barWidget.getConfig("show_nvme") == true then
+  if noctalia.getConfig("show_nvme") == true then
     local v = maxOf(nvmePaths)
     if v then
       extraParts[#extraParts + 1] = `NVMe {math.floor(v + 0.5)}°C`
     end
   end
-  if barWidget.getConfig("show_ram") == true then
+  if noctalia.getConfig("show_ram") == true then
     local v = maxOf(ramPaths)
     if v then
       extraParts[#extraParts + 1] = `RAM {math.floor(v + 0.5)}°C`
     end
   end
-  if barWidget.getConfig("show_hottest_core") == true then
+  if noctalia.getConfig("show_hottest_core") == true then
     local v = maxOf(corePaths)
     if v then
       extraParts[#extraParts + 1] = `Core {math.floor(v + 0.5)}°C`
@@ -194,7 +194,7 @@ end
 function onHover(isHovering: boolean)
   hovering = isHovering
   target = isHovering and 1.0 or 0.0
-  if hovering and barWidget.getConfig("show_gpu") ~= false then
+  if hovering and noctalia.getConfig("show_gpu") ~= false then
     updateGpu()
   end
   step()

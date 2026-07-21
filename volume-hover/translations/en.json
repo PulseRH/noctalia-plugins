@@ -1,0 +1,32 @@
+{
+  "settings": {
+    "bar_color": {
+      "label": "Bar colour",
+      "description": "Theme colour role used for the filled bar and knob.",
+      "options": {
+        "primary": "Primary (accent)",
+        "onsurface": "On-surface (text)",
+        "secondary": "Secondary",
+        "tertiary": "Tertiary",
+        "hover": "Hover",
+        "error": "Error"
+      }
+    },
+    "slider_width": {
+      "label": "Slider width (px)",
+      "description": "On-screen width of the slider image. Height scales with it."
+    },
+    "scroll_step": {
+      "label": "Scroll step (%)",
+      "description": "How much one scroll notch changes the volume."
+    },
+    "invert_scroll": {
+      "label": "Invert scroll direction",
+      "description": "By default scroll up raises the volume. Turn this on if it feels backwards."
+    },
+    "show_percent": {
+      "label": "Show percentage",
+      "description": "Show the numeric volume (or \"muted\") as text beside the slider."
+    }
+  }
+}

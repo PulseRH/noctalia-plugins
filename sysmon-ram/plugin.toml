@@ -1,6 +1,7 @@
 id = "pulser/sysmon-ram"
 name = "RAM (mini)"
 version = "0.1.0"
+plugin_api = 5
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
@@ -16,6 +17,6 @@ entry = "ram.luau"
   [[widget.setting]]
   key = "gauge"
   type = "bool"
-  label = "Show gauge bar"
-  description = "Compact display: gauge bar (on) or plain percentage (off)"
+  label_key = "settings.gauge.label"
+  description_key = "settings.gauge.description"
   default = true

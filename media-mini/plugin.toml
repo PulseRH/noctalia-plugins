@@ -1,13 +1,14 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.8.0"
+version = "0.9.0"
+plugin_api = 5
 min_noctalia = "5.0.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
 tags = ["media"]
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an image-rendered playback-progress bar beside it (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click opens the media panel, right-click toggles play/pause."
+description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an image-rendered playback-progress bar beside it (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click toggles play/pause, right-click opens the media panel, and scrolling over the widget skips tracks (scroll up = previous, scroll down = next)."
 
 [[widget]]
 id = "media"
@@ -16,22 +17,22 @@ entry = "media.luau"
 [[widget.setting]]
 key = "show_cover_art"
 type = "bool"
-label = "Show cover art"
-description = "Replace the play/pause icon with the track's (rounded) cover art when available."
+label_key = "settings.show_cover_art.label"
+description_key = "settings.show_cover_art.description"
 default = true
 
 [[widget.setting]]
 key = "show_progress_bar"
 type = "bool"
-label = "Show progress bar"
-description = "Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph."
+label_key = "settings.show_progress_bar.label"
+description_key = "settings.show_progress_bar.description"
 default = true
 
 [[widget.setting]]
 key = "compact_width"
 type = "number"
-label = "Compact width (characters)"
-description = "Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put."
+label_key = "settings.compact_width.label"
+description_key = "settings.compact_width.description"
 default = 20
 min = 8
 max = 60
@@ -40,8 +41,8 @@ step = 1
 [[widget.setting]]
 key = "expand_width"
 type = "number"
-label = "Expanded width (characters)"
-description = "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
+label_key = "settings.expand_width.label"
+description_key = "settings.expand_width.description"
 default = 40
 min = 8
 max = 100
@@ -50,8 +51,8 @@ step = 1
 [[widget.setting]]
 key = "cover_size"
 type = "number"
-label = "Cover art size (px)"
-description = "Size of the cover art icon in place of the play/pause glyph."
+label_key = "settings.cover_size.label"
+description_key = "settings.cover_size.description"
 default = 20
 min = 12
 max = 40
@@ -60,8 +61,8 @@ step = 1
 [[widget.setting]]
 key = "corner_rounding"
 type = "number"
-label = "Cover art rounding (%)"
-description = "0 = square corners, 100 = fully circular."
+label_key = "settings.corner_rounding.label"
+description_key = "settings.corner_rounding.description"
 default = 100
 min = 0
 max = 100
