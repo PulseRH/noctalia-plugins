@@ -373,6 +373,9 @@ render = function()
   local bgExpanded = math.max(bgCompact, math.min(1000, noctalia.getConfig("background_expand_width") or 420))
   local bgWidth = bgCompact + (bgExpanded - bgCompact) * progress
   local bgHeight = math.max(16, math.min(40, noctalia.getConfig("background_height") or 22))
+  local backgroundColor = tostring(noctalia.getConfig("background_progress_color") or "primary")
+  local backgroundDarkening = math.max(0, math.min(60, noctalia.getConfig("background_darkening") or 0)) / 100
+  local backgroundTrack = string.format("#000000%02x", math.floor(backgroundDarkening * 255 + 0.5))
   local children = {}
   local cover = nil
   if noctalia.getConfig("show_cover_art") ~= false then cover = resolveRawCoverPath() end
@@ -447,7 +450,7 @@ render = function()
     -- The title/progress area seeks. Artwork and control targets stay above
     -- the background and keep their own playback actions.
     backgroundWidth = bgWidth
-    backgroundSeekOffset = 8 + (cover and coverSize or coverSize + 4) + 6 + (controls and (60 * controlsReveal + 6) or 0)
+    backgroundSeekOffset = 0 + (cover and coverSize or coverSize + 4) + 6 + (controls and (60 * controlsReveal + 6) or 0)
     backgroundSeekWidth = math.max(1, bgWidth - backgroundSeekOffset - 8)
     if hovering and fullLen * 7 > backgroundSeekWidth then
       local loop = full .. "   "
@@ -464,12 +467,12 @@ render = function()
     }))
     local backgroundLayers = {
       ui.row({key = "background-track-layer", width = bgWidth, height = inputHeight, align = "center"}, {
-        ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = "#00000000"}),
+        ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = backgroundTrack}),
       }),
       ui.row({key = "background-fill-layer", width = bgWidth, height = inputHeight, gap = 0, align = "center"}, flat and {
-        ui.progress({width = bgWidth, height = bgHeight, radius = bgHeight / 2, progress = fraction, fill = "primary", track = "#00000000"}),
+        ui.progress({width = bgWidth, height = bgHeight, radius = bgHeight / 2, progress = fraction, fill = backgroundColor, track = "#00000000"}),
       } or {
-        ui.box({width = bgWidth * fraction, height = bgHeight, radius = flat and 0 or math.min(bgHeight, bgWidth * fraction) / 2, fill = "primary"}),
+        ui.box({width = bgWidth * fraction, height = bgHeight, radius = flat and 0 or math.min(bgHeight, bgWidth * fraction) / 2, fill = backgroundColor}),
         ui.box({width = bgWidth * (1 - fraction), height = 1, fill = "#00000000"}),
       }),
       ui.graph({key = "background-wide-pointer", width = bgWidth, height = inputHeight, values = {0, 0},
@@ -478,7 +481,7 @@ render = function()
     }
     local foregroundHeight = math.max(cover and coverSize or coverSize + 4, 20)
     table.insert(backgroundLayers, ui.row({key = "media-foreground", width = bgWidth, height = foregroundHeight,
-      gap = 6, paddingH = 8, align = "center"}, children))
+      gap = 6, paddingH = 0, align = "center"}, children))
     barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth,
       align = "center", onHover = "onMediaInlineHover", onClick = "onBackgroundSeekClick"}, backgroundLayers))
   else

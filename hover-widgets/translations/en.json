@@ -253,6 +253,21 @@
       "background_seek_strip": {
         "label": "Right-click controls to seek",
         "description": "Right-click a playback button to seek at its position on the background progress. Left-click operates the button; right-click elsewhere opens Media controls."
+      },
+      "background_progress_color": {
+        "label": "Background progress colour",
+        "description": "Theme colour for the played part of background progress.",
+        "options": {
+          "on_surface": "Text colour",
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "tertiary": "Tertiary",
+          "error": "Error"
+        }
+      },
+      "background_darkening": {
+        "label": "Background darkening (%)",
+        "description": "Darken the unplayed background around the progress. Zero matches the widget background; the progress colour stays at full strength."
       }
     }
   },
