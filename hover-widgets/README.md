@@ -284,3 +284,7 @@ Serializes metadata polling and preserves the last valid media through five tran
 ## Version 1.9.0
 
 Reduces play/pause glyphs slightly (18px in the 20px controls). Adds a full-width 4px click target at the lower edge of background progress without an extra visible line, so seeking remains possible underneath artwork and playback controls. Its Seek beneath controls setting defaults on. Button centres retain playback actions. Scroll action optionally seeks playback by a configurable number of seconds (up forward/down back); track skipping remains the default. Seek writes are serialized/coalesced, and stale metadata cannot undo a new target. Unplayed volume/media tracks use a subtle dark translucent background. Settings place controllers before their conditional dependants. The CPU widget now shows GPU usage alongside CPU, with a Show GPU usage toggle.
+
+## Version 1.9.1
+
+Fixes playback buttons being covered by transparent seek-layout nodes. The foreground remains on its original vertical centre and above the seek anchor in hit-test order. The lower-edge seek footer is outside button targets. Background media leaves the unplayed area transparent so the host capsule matches other widgets; progress uses the full theme primary colour.

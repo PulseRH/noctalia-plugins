@@ -427,44 +427,47 @@ render = function()
       local loop = full .. "   "
       text = utf8Window(loop .. full, scrollOffset % (utf8.len(loop) or #loop), fullLen)
     end
-    table.insert(children, ui.row({key = "background-seek-hit", width = backgroundSeekWidth, height = inputHeight,
+    table.insert(children, ui.row({key = "background-seek-hit", width = backgroundSeekWidth, height = math.max(coverSize, 20),
       gap = -backgroundSeekWidth, align = "center", onClick = "onBackgroundSeekClick", tooltip = "Click progress to seek"}, {
-      ui.row({key = "background-title-layer", width = backgroundSeekWidth, height = inputHeight, align = "center"}, {
+      ui.row({key = "background-title-layer", width = backgroundSeekWidth, height = math.max(coverSize, 20), align = "center"}, {
         ui.label({key = "title", text = text, maxLines = 1, maxWidth = backgroundSeekWidth}),
       }),
-      ui.graph({key = "background-seek-pointer", width = backgroundSeekWidth, height = inputHeight, values = {0, 0},
+      ui.graph({key = "background-seek-pointer", width = backgroundSeekWidth, height = math.max(coverSize, 20), values = {0, 0},
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onBackgroundSeekMove", onPointerLeave = "onBackgroundSeekLeave"}),
     }))
     local backgroundLayers = {
       ui.row({key = "background-track-layer", width = bgWidth, height = inputHeight, align = "center"}, {
-        ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = "#00000022"}),
+        ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = "#00000000"}),
       }),
       ui.row({key = "background-fill-layer", width = bgWidth, height = inputHeight, gap = 0, align = "center"}, flat and {
-        ui.progress({width = bgWidth, height = bgHeight, radius = bgHeight / 2, progress = fraction, fill = "primary/0.3", track = "#00000000"}),
+        ui.progress({width = bgWidth, height = bgHeight, radius = bgHeight / 2, progress = fraction, fill = "primary", track = "#00000000"}),
       } or {
-        ui.box({width = bgWidth * fraction, height = bgHeight, radius = flat and 0 or math.min(bgHeight, bgWidth * fraction) / 2, fill = "primary/0.3"}),
+        ui.box({width = bgWidth * fraction, height = bgHeight, radius = flat and 0 or math.min(bgHeight, bgWidth * fraction) / 2, fill = "primary"}),
         ui.box({width = bgWidth * (1 - fraction), height = 1, fill = "#00000000"}),
       }),
       ui.graph({key = "background-wide-pointer", width = bgWidth, height = inputHeight, values = {0, 0},
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onBackgroundBarMove", onPointerLeave = "onBackgroundSeekLeave"}),
-      ui.row({key = "media-foreground", width = bgWidth, height = inputHeight, gap = 6, paddingH = 8, align = "center"}, children),
     }
+    local foregroundHeight = math.max(cover and coverSize or coverSize + 4, 20)
     if noctalia.getConfig("background_seek_strip") ~= false then
       local stripWidth = bgWidth - 8
-      local top = (inputHeight + bgHeight) / 2 - 4
-      table.insert(backgroundLayers, ui.column({key = "seek-strip-layer", width = bgWidth, height = inputHeight, gap = 0, align = "center"}, {
-        ui.box({width = 1, height = top, fill = "#00000000"}),
-        ui.row({key = "seek-strip-hit", width = stripWidth, height = 4, gap = -stripWidth, align = "center",
+      -- Positive subpixel height is required: Flex treats maxHeight=0 as unset.
+      -- Put this layout anchor below the foreground in hit-test order, so its
+      -- tiny frame cannot cover buttons. Only its overflowing footer is exposed.
+      table.insert(backgroundLayers, ui.column({key = "seek-strip-layer", width = bgWidth, height = 0.01,
+        paddingV = foregroundHeight / 2 + 1, gap = 0, align = "center"}, {
+        ui.row({key = "seek-strip-hit", width = stripWidth, height = 4, gap = 0, align = "center",
           onClick = "onBackgroundSeekClick", tooltip = "Seek below the playback buttons"}, {
-          ui.box({key = "seek-strip-space", width = stripWidth, height = 4, fill = "#00000000"}),
           ui.graph({key = "seek-strip-pointer", width = stripWidth, height = 4, values = {0, 0}, color = "#00000000", lineWidth = 0, fillOpacity = 0,
             onPointerMove = "onBackgroundStripMove", onPointerLeave = "onBackgroundSeekLeave"}),
         }),
-        ui.box({width = 1, height = inputHeight - top - 4, fill = "#00000000"}),
       }))
     end
+    -- Foreground wins hits over the seek anchor and stays on the original centre.
+    table.insert(backgroundLayers, ui.row({key = "media-foreground", width = bgWidth, height = foregroundHeight,
+      gap = 6, paddingH = 8, align = "center"}, children))
     barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth,
       align = "center", onHover = "onMediaInlineHover", onClick = "onBackgroundSeekClick"}, backgroundLayers))
   else

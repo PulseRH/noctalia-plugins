@@ -58,3 +58,5 @@ Version 1.8.0 fixes transient media disappearance, speeds artwork with persisten
 Version 1.9.0: smaller play/pause, full-width background seek strip, optional wheel seeking, darker unplayed backgrounds and reordered settings.
 
 CPU now shows optional GPU usage alongside CPU using Noctalia system statistics. Unplayed background darkening is subtle, and the lower-edge seek target adds no visible line.
+
+Version 1.9.1 restores media button click routing and centring with Seek beneath controls enabled. Unplayed background uses the normal host capsule; played progress uses the full theme primary colour.
