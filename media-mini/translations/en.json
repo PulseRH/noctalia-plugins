@@ -251,8 +251,8 @@
         "description": "Seconds per wheel step. Scroll up goes forward; down goes back."
       },
       "background_seek_strip": {
-        "label": "Seek beneath controls",
-        "description": "Keep an invisible clickable seek area along the lower edge of the background, including underneath the playback controls."
+        "label": "Right-click controls to seek",
+        "description": "Right-click a playback button to seek at its position on the background progress. Left-click operates the button; right-click elsewhere opens Media controls."
       }
     }
   },

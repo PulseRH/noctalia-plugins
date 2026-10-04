@@ -166,7 +166,7 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 | `background_width` | `int` | `260` | Compact background pill width, in pixels; it grows to Expanded background width on hover. |
 | `background_expand_width` | `int` | `420` | Background pill width on hover, in pixels. Never smaller than Background width. |
 | `background_height` | `int` | `22` | Thickness of the background progress pill, in pixels. |
-| `background_seek_strip` | `bool` | `true` | Keep an invisible clickable seek area along the lower edge of the background, including underneath the playback controls. |
+| `background_seek_strip` | `bool` | `true` | Right-click playback controls to seek at their horizontal position on background progress. Left-click operates playback; right-click elsewhere opens Media controls. |
 | `progress_style` | `select` | `classic` | Classic supports clicks. Classic with dragging keeps the same pill, uses expanded width, previews while dragging and seeks on release. Interactive uses the native slider appearance. |
 | `progress_width` | `int` | `35` | Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length. |
 | `progress_expand_width` | `int` | `35` | Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length. |
@@ -288,3 +288,7 @@ Reduces play/pause glyphs slightly (18px in the 20px controls). Adds a full-widt
 ## Version 1.9.1
 
 Fixes playback buttons being covered by transparent seek-layout nodes. The foreground remains on its original vertical centre and above the seek anchor in hit-test order. The lower-edge seek footer is outside button targets. Background media leaves the unplayed area transparent so the host capsule matches other widgets; progress uses the full theme primary colour.
+
+## Version 1.9.2
+
+Replaces the seek footer with right-click seeking over playback controls, usable in thin bars. The existing `background_seek_strip` key controls this option for compatibility. Hover icons keep their contrasting theme colour. The media right-click gesture binding must be `none` to let the plugin route right-clicks; the plugin opens Media controls outside the playback buttons.

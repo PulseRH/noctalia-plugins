@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.8.1"
+version = "1.8.2"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -14,7 +14,7 @@ id = "media"
 entry = "media.luau"
 
 [widget.actions]
-right = "panel-toggle control-center media"
+right = "none"
 
 [[widget.setting]]
 key = "show_cover_art"

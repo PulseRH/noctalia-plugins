@@ -221,14 +221,46 @@ function onMediaControlHover(state, key)
   elseif hoveredControl == key then hoveredControl = nil end
   onHover(state == "true")
 end
+local function controlPointerMove(key, x, y)
+  if noctalia.getConfig("progress_layout") == "background" then
+    local index = key == "previous" and 0 or key == "pause" and 1 or 2
+    local reveal = noctalia.getConfig("controls_on_hover") == true and progress or 1
+    local controlsWidth = 60 * reveal
+    local start = backgroundSeekOffset - controlsWidth - 6 + index * 20 * reveal
+    backgroundSeekX = (start + (tonumber(x) or 0) * 20 * reveal) / math.max(1, backgroundWidth)
+  end
+  onMediaControlHover("true", key)
+end
+local function controlPointerLeave(key)
+  onMediaControlHover("false", key)
+end
+function onPreviousPointer(x, y) controlPointerMove("previous", x, y) end
+function onPausePointer(x, y) controlPointerMove("pause", x, y) end
+function onNextPointer(x, y) controlPointerMove("next", x, y) end
+function onPreviousLeave() controlPointerLeave("previous") end
+function onPauseLeave() controlPointerLeave("pause") end
+function onNextLeave() controlPointerLeave("next") end
 local function playbackButton(key, glyph, action, tooltip, size, reveal)
   reveal = reveal or 1
   local highlighted = hoveredControl == key
+  local background = noctalia.getConfig("progress_layout") == "background"
   local glyphSize = (key == "pause" or key == "playback") and math.min(18, size - 2) or math.min(16, size - 4)
-  return ui.row({key = key, width = size * reveal, height = size, align = "center", justify = "center", radius = 5,
-    fill = highlighted and "primary/0.2" or "#00000000", onClick = action, onHover = "onMediaControlHover", tooltip = tooltip}, {
-    ui.glyph({name = glyph, size = glyphSize * reveal, color = highlighted and "primary" or "on_surface"}),
-  })
+  local content = {ui.glyph({name = glyph, size = glyphSize * reveal,
+    color = highlighted and not background and "primary" or "on_surface"})}
+  if background and key ~= "playback" then
+    local name = key == "previous" and "Previous" or key == "pause" and "Pause" or "Next"
+    content = {
+      ui.row({width = size * reveal, height = size, align = "center", justify = "center"}, content),
+      ui.graph({key = key .. "-pointer", width = size * reveal, height = size, values = {0, 0},
+        color = "#00000000", lineWidth = 0, fillOpacity = 0,
+        onPointerMove = "on" .. name .. "Pointer", onPointerLeave = "on" .. name .. "Leave"}),
+    }
+  end
+  return ui.row({key = key, width = size * reveal, height = size, gap = -size * reveal,
+    align = "center", justify = "center", radius = 5,
+    fill = highlighted and (background and "on_surface/0.12" or "primary/0.2") or "#00000000",
+    onClick = action, onHover = "onMediaControlHover", tooltip = tooltip}, content)
+
 end
 function onMediaInlineHover(state)
   onHover(state == "true")
@@ -306,12 +338,6 @@ function onBackgroundSeekMove(x)
 end
 function onBackgroundBarMove(x)
   backgroundSeekX = tonumber(x)
-  onHover(true)
-end
-function onBackgroundStripMove(x)
-  local n = tonumber(x)
-  if n == nil then return end
-  backgroundSeekX = n <= 0 and 0 or n >= 1 and 1 or (4 + n * (backgroundWidth - 8)) / math.max(1, backgroundWidth)
   onHover(true)
 end
 function onBackgroundSeekLeave()
@@ -451,21 +477,6 @@ render = function()
         onPointerMove = "onBackgroundBarMove", onPointerLeave = "onBackgroundSeekLeave"}),
     }
     local foregroundHeight = math.max(cover and coverSize or coverSize + 4, 20)
-    if noctalia.getConfig("background_seek_strip") ~= false then
-      local stripWidth = bgWidth - 8
-      -- Positive subpixel height is required: Flex treats maxHeight=0 as unset.
-      -- Put this layout anchor below the foreground in hit-test order, so its
-      -- tiny frame cannot cover buttons. Only its overflowing footer is exposed.
-      table.insert(backgroundLayers, ui.column({key = "seek-strip-layer", width = bgWidth, height = 0.01,
-        paddingV = foregroundHeight / 2 + 1, gap = 0, align = "center"}, {
-        ui.row({key = "seek-strip-hit", width = stripWidth, height = 4, gap = 0, align = "center",
-          onClick = "onBackgroundSeekClick", tooltip = "Seek below the playback buttons"}, {
-          ui.graph({key = "seek-strip-pointer", width = stripWidth, height = 4, values = {0, 0}, color = "#00000000", lineWidth = 0, fillOpacity = 0,
-            onPointerMove = "onBackgroundStripMove", onPointerLeave = "onBackgroundSeekLeave"}),
-        }),
-      }))
-    end
-    -- Foreground wins hits over the seek anchor and stays on the original centre.
     table.insert(backgroundLayers, ui.row({key = "media-foreground", width = bgWidth, height = foregroundHeight,
       gap = 6, paddingH = 8, align = "center"}, children))
     barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth,
@@ -540,6 +551,12 @@ function onClick()
 end
 
 function onRightClick()
+  if noctalia.getConfig("progress_layout") == "background"
+    and noctalia.getConfig("background_seek_strip") ~= false
+    and hoveredControl ~= nil and hoveredControl ~= "playback" then
+    onBackgroundSeekClick()
+    return
+  end
   noctalia.runAsync("noctalia msg panel-toggle control-center media")
 end
 

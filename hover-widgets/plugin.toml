@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.9.1"
+version = "1.9.2"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -275,7 +275,7 @@ id = "media"
 entry = "media.luau"
 
 [widget.actions]
-right = "panel-toggle control-center media"
+right = "none"
 
 [[widget.setting]]
 key = "show_cover_art"
