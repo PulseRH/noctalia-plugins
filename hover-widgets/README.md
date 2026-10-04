@@ -15,7 +15,7 @@ One Noctalia plugin containing nine compact bar widgets. Each widget can be adde
 
 Noctalia 5.2.0 or later (plugin API 32), on Linux. Commands declared by this bundle: `noctalia`, `wpctl`, `playerctl`, `sh`, and `wlrctl`. The clock and basic system monitors don't invoke the specialised commands; volume uses `wpctl`, media uses `playerctl` and `sh`, and active-window uses `wlrctl`. Because dependencies are declared at plugin scope, missing tools can be reported even if you only use another widget.
 
-Optional `magick` or `convert` (ImageMagick) rounds media artwork. Volume and progress graphics are drawn directly and do not need ImageMagick. Optional `nvidia-smi` provides NVIDIA temperature. `wlrctl` requires wlr-foreign-toplevel-management-v1 support from the compositor. CPU temperature currently targets Intel coretemp; power needs readable Intel RAPL. See Notes for other hardware limits.
+Artwork uses native ui.image corner rounding; ImageMagick is no longer needed. Volume and progress graphics are drawn directly. Optional `nvidia-smi` provides NVIDIA temperature. `wlrctl` requires wlr-foreign-toplevel-management-v1 support from the compositor. CPU temperature currently targets Intel coretemp; power needs readable Intel RAPL. See Notes for other hardware limits.
 
 ## Usage
 
@@ -193,7 +193,7 @@ Reads the clock through Noctalia. No network calls or filesystem writes. No subp
 
 ### Hover Volume
 
-Runs wpctl to query and adjust the default PipeWire sink, and noctalia for panel and mute actions. Optional magick or convert renders local images into the plugin data directory. No network access. The packaged Noctalia Tabler font is used when found; otherwise a native glyph is shown.
+Runs wpctl to query and adjust the default PipeWire sink, and noctalia for panel and mute actions. Volume shapes use native rendering. No network access. The packaged Noctalia Tabler font is used when found; otherwise a native glyph is shown.
 
 
 ### Hover CPU Monitor
@@ -223,7 +223,7 @@ Reads interface counters from /proc/net/dev. No network requests or filesystem w
 
 ### Mini Media
 
-Runs the shipped pick-player.sh through sh; it uses playerctl to prefer a Playing MPRIS player. Playback controls target the same selected player that supplies the displayed metadata. Optional magick or convert rounds/composites cover art and progress images. Remote HTTP(S) artwork is downloaded using Noctalia; missing YouTube artwork may request i.ytimg.com thumbnails. Requests disclose your IP and the requested artwork/video id to that host. Local file:// artwork is read directly. Cache images are written only under the plugin data directory. No remote code is executed.
+Runs the shipped pick-player.sh through sh; it uses playerctl to prefer a Playing MPRIS player. Playback controls target the same selected player that supplies the displayed metadata. Artwork corners and progress images use native rendering. Remote HTTP(S) artwork is downloaded using Noctalia; missing YouTube artwork may request i.ytimg.com thumbnails. Requests disclose your IP and the requested artwork/video id to that host. Local file:// artwork is read directly. Cache images are written only under the plugin data directory. No remote code is executed.
 
 
 ### Hover Active Window
@@ -272,3 +272,7 @@ Restores folding in volume drag mode and keeps input width fixed during an activ
 ## Version 1.7.0
 
 Hover-only controls fade and expand into place. A 120ms leave grace period prevents child-to-child hover transitions collapsing the widget or restarting the marquee. Background progress is seekable from the title area and unoccupied background; artwork and buttons keep playback actions. Related settings use Noctalia conditional visibility for controls, cover art, handle colour and progress placement.
+
+## Version 1.8.0
+
+Serializes metadata polling and preserves the last valid media through five transient failures; six consecutive misses hide the widget until a valid read returns. Metadata checks run every 500ms while idle. Artwork uses persistent URL-keyed downloads, renders immediately on completion, and uses native ui.image rounding instead of ImageMagick. Background titles use their remaining pixel width rather than inline character limits; inline text-width settings hide in background mode. Play/pause glyphs are larger while retaining the same button targets.

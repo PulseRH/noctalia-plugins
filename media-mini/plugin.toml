@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.6.0"
+version = "1.7.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -143,6 +143,7 @@ default = true
 
 [[widget.setting]]
 key = "compact_width"
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.compact_width.label"
 description_key = "media_mini.settings.compact_width.description"
@@ -153,6 +154,7 @@ step = 1
 
 [[widget.setting]]
 key = "expand_width"
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.expand_width.label"
 description_key = "media_mini.settings.expand_width.description"

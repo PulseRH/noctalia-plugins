@@ -52,3 +52,5 @@ Version 1.5.0: Rounded/Flat point style, optional media playback controls and ba
 Version 1.6.0 fixes volume folding and handle visibility, adds media controls only on hover and theme colours, and expands background progress without wrapping the title.
 
 Version 1.7.0 adds animated hover controls, stable hover transitions, clickable background seeking and conditional settings visibility.
+
+Version 1.8.0 fixes transient media disappearance, speeds artwork with persistent cache/native rounding, fixes background text width and enlarges play/pause icons.
