@@ -40,7 +40,7 @@ Hover to reveal the full weekday, ordinal date, month and seconds. Uses local ti
 
 ### Hover Volume (`volume`)
 
-Keeps the original baked speaker and hover slider. Click the speaker/slider image to toggle mute; click the percentage (or muted label) or right-click to open the anchored Audio Control Center. The Speaker click setting can make the image open Audio instead. Scroll adjusts volume. The classic slider is a visual indicator; use Audio for dragging.
+Keeps the original baked speaker and hover slider. Click the speaker to toggle mute; click anywhere on its expanded slider to set volume; click the percentage (or muted label) or right-click to open the anchored Audio Control Center. The Speaker click setting can make the image open Audio instead. Scroll adjusts volume. The classic slider accepts position clicks; use Audio for dragging.
 
 
 ### Hover CPU Monitor (`cpu`)
@@ -70,7 +70,7 @@ Shows transmit throughput. Hover expands the reading. Set Hide completely to fal
 
 ### Mini Media (`media`)
 
-Classic keeps the original cover art and solid progress pill. Compact and expanded progress widths are configurable independently; equal values keep a fixed length. Interactive style replaces the pill with a native slider: click or drag to seek when the player supports it. Cover/title clicks toggle playback; right-click opens Media. Scroll skips tracks. Hidden when no player is available.
+Classic keeps the original cover art and solid progress pill. Compact and expanded progress widths are configurable independently; equal values keep a fixed length. Click the classic progress pill to seek to that point. Interactive style adds a native draggable slider. Seeking requires player support. Cover/title clicks toggle playback; right-click opens Media. Scroll skips tracks. Hidden when no player is available.
 
 
 ### Hover Active Window (`active-window`)
@@ -225,4 +225,10 @@ Clock left-click opens the Control Center Calendar page, matching the native clo
 
 ## Version 1.1.0
 
-Original visual styles remain the defaults. Volume now has separate icon and label click targets. Media adds configurable compact/expanded progress widths and an opt-in Interactive seek-slider style. Seeking commits on release and targets the displayed player; pending seeks are discarded when its track changes.
+Original visual styles remain the defaults. Volume has separate speaker, track and label click targets. Media adds configurable compact/expanded progress widths and an opt-in Interactive seek-slider style. Seeking commits on release and targets the displayed player; pending seeks are discarded when its track changes.
+
+## Version 1.2.0
+
+Classic progress bars now accept position clicks without changing their artwork. Volume clicks map onto the original knob travel; media clicks seek the displayed player to the corresponding point in the track. Media refreshes visibility as soon as a metadata query completes.
+
+Version 1.2.1 gives volume immediate click feedback and refreshes the classic knob as soon as its raster frame completes.

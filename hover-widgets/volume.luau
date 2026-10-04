@@ -45,6 +45,7 @@ local DATA_DIR = noctalia.pluginDataDir() or noctalia.expandPath("~/.cache/nocta
 local CACHE_DIR = `{DATA_DIR}/cache/volume-hover`
 -- ── state ────────────────────────────────────────────────────────────────────
 local vol, muted = 0.5, false
+local render, poll
 local hovering = false
 local progress, target = 0.0, 0.0
 local pollAccum = POLL_MS
@@ -126,6 +127,7 @@ local function bake(path, cmd)
   pending[path] = true
   noctalia.runAsync(cmd, function(_r)
     pending[path] = nil; ready[path] = _r.exitCode == 0 and noctalia.fileExists(path)
+    if ready[path] and render then render() end
   end, 4000)
 end
 
@@ -141,17 +143,51 @@ end
 
 -- ── render ────────────────────────────────────────────────────────────────────
 function onSpeakerClick()
-  noctalia.runAsync({"wpctl", "set-mute", SINK, "toggle"}, nil, 1500)
+  muted = not muted
+  render()
+  noctalia.runAsync({"wpctl", "set-mute", SINK, "toggle"}, function() poll() end, 1500)
 end
 function onInlineHover(state)
   onHover(state == "true")
+end
+local classicPointerX = nil
+local classicBarWidth = 0
+function onVolumeBarMove(x)
+  classicPointerX = tonumber(x)
+  if not hovering then onHover(true) end
+end
+function onVolumeBarLeave()
+  classicPointerX = nil
+  onHover(false)
+end
+function onVolumeBarClick()
+  if classicPointerX == nil or classicBarWidth <= 0 then return end
+  -- Account for the original knob's half-width at each end of its travel.
+  local value = clamp((classicPointerX * classicBarWidth / scale() - KNOB_R) / (BAR_FULL - 2 * KNOB_R), 0, 1)
+  vol = value
+  render()
+  noctalia.runAsync({"wpctl", "set-volume", "-l", "1.0", SINK, tostring(value)}, function() poll() end, 1500)
 end
 local function drawClassic(path, width, height)
   local children = {}
   local click = if noctalia.getConfig("icon_click") == "panel" then nil else "onSpeakerClick"
   if path then
-    table.insert(children, ui.image({key = "speaker-bar", path = path, width = width, height = height,
-      onClick = click, onHover = "onInlineHover"}))
+    local speakerWidth = round(SPK_AREA * scale())
+    classicBarWidth = math.max(0, width - speakerWidth)
+    local layers = {ui.image({key = "speaker-bar", path = path, width = width, height = height,
+      onClick = click, onHover = "onInlineHover"})}
+    if classicBarWidth > 0 then
+      -- Transparent graph supplies normalized pointer coordinates; an overlap
+      -- row puts its hit area exactly over the existing raster bar, leaving the
+      -- speaker as its own click target. Neither control changes the artwork.
+      table.insert(layers, ui.row({key = "volume-hit", width = classicBarWidth, height = height,
+        onClick = "onVolumeBarClick"}, {
+        ui.graph({key = "volume-pointer", width = classicBarWidth, height = height, values = {0, 0},
+          color = "#00000000", lineWidth = 0, fillOpacity = 0,
+          onPointerMove = "onVolumeBarMove", onPointerLeave = "onVolumeBarLeave"}),
+      }))
+    end
+    table.insert(children, ui.row({key = "classic-volume", gap = -classicBarWidth, align = "center"}, layers))
   elseif click then
     table.insert(children, ui.button({key = "speaker", glyph = if muted then "volume-off" elseif vol < 0.4 then "volume-2" else "volume",
       glyphSize = 20, width = 24, height = 24, variant = "ghost", onClick = click, onHover = "onInlineHover"}))
@@ -165,7 +201,7 @@ local function drawClassic(path, width, height)
   barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center", onHover = "onInlineHover"}, children))
 end
 
-local function render()
+render = function()
   if not MAGICK then
     drawClassic(nil, 0, 0)
     return
@@ -209,7 +245,7 @@ local function applyResult(result)
     render()
   end
 end
-local function poll() noctalia.runAsync(`wpctl get-volume {SINK}`, applyResult, 1500) end
+poll = function() noctalia.runAsync(`wpctl get-volume {SINK}`, applyResult, 1500) end
 
 local function adjust(up)
   local step = round(clamp(cfgNumber("scroll_step", 5), 1, 25))

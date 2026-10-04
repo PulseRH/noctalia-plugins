@@ -32,7 +32,7 @@
       },
       "icon_click": {
         "label": "Speaker click",
-        "description": "Click the speaker to toggle mute, or open Audio. Percentage/padding and right-click open Audio.",
+        "description": "Click the speaker to toggle mute, or open Audio. Click the expanded track to set volume. Percentage/padding and right-click open Audio.",
         "options": {
           "mute": "Toggle mute",
           "panel": "Open Audio panel"
@@ -144,7 +144,7 @@
       },
       "progress_style": {
         "label": "Progress style",
-        "description": "Classic keeps the original solid pill and artwork. Interactive uses a native seek slider; click or drag it to seek.",
+        "description": "Classic keeps the original solid pill and accepts click-to-seek. Interactive uses a native slider with dragging.",
         "options": {
           "classic": "Classic (original look)",
           "interactive": "Interactive seek slider"

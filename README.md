@@ -18,7 +18,7 @@ noctalia msg plugins enable pulser/clock-hover
 ## Plugins
 
 - **clock-hover** — Compact clock that expands to a full weekday/date/time on hover, with an animated open/close reveal.
-- **volume-hover** — Original baked speaker and expanding slider. Click the speaker/slider image to toggle mute; click the percentage or right-click to open Audio. The Speaker click option can select Audio instead of mute. Scroll changes volume.
+- **volume-hover** — Original baked speaker and expanding slider. Click the speaker to toggle mute; click the expanded slider to set volume; click the percentage or right-click to open Audio. The Speaker click option can select Audio instead of mute. Scroll changes volume.
 - **sysmon-cpu** — Compact gauge bar or plain percentage; hover shows percent, clock speed, and package wattage (Intel RAPL).
 - **sysmon-ram** — Compact gauge bar or plain percentage; hover shows percent and used/total GB (auto-detected).
 - **sysmon-temp** — CPU package temperature always shown; hover can also show GPU, hottest NVMe, RAM (DIMM), and hottest CPU core, each toggleable.
@@ -41,4 +41,4 @@ All widgets share the same open/close animation timing (60fps ease) and use UTF-
 
 MIT
 
-**hover-widgets** bundles all nine entries into one install. Volume and media changes require plugin API 32 (Noctalia 5.2+). Classic media progress remains a visual indicator; choose Interactive for seeking.
+**hover-widgets** bundles all nine entries into one install. Volume and media changes require plugin API 32 (Noctalia 5.2+). Classic media progress supports click-to-seek; choose Interactive for dragging.

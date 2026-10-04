@@ -1,6 +1,6 @@
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "0.6.1"
+version = "0.7.1"
 plugin_api = 32
 author = "pulser"
 license = "MIT"

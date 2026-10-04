@@ -168,6 +168,7 @@ local function pollMedia()
       if not status or status == "" then
         hasMedia = false
         seekDraft, seekPlayer, seekTrack = nil, nil, nil
+        if render then render() end
         return
       end
       local resolvedArtUrl = url or ""
@@ -188,6 +189,7 @@ local function pollMedia()
       position = tonumber(pos) or 0
       length = tonumber(len) or 0
       if seekDraft ~= nil and seekTrack ~= trackKey() then seekDraft, seekPlayer, seekTrack = nil, nil, nil end
+      if render then render() end
     end,
     1500
   )
@@ -360,6 +362,20 @@ function onSeekRelease()
   end, 1500)
   render()
 end
+local classicSeekX = nil
+function onClassicSeekMove(x)
+  classicSeekX = tonumber(x)
+  if not hovering then onHover(true) end
+end
+function onClassicSeekLeave()
+  classicSeekX = nil
+  onHover(false)
+end
+function onClassicSeekClick()
+  if classicSeekX == nil or length <= 0 then return end
+  onSeekChange(tostring(math.max(0, math.min(1, classicSeekX)) * length / 1000000))
+  onSeekRelease()
+end
 render = function()
   barWidget.setVisible(hasMedia)
   if not hasMedia then return end
@@ -404,8 +420,13 @@ render = function()
       if bar then
         local barHeight = cover and coverSize * COMBO_BAR_H / ROUND_SIZE
           or coverSize * STANDALONE_DISP_SCALE * STANDALONE_BAR_H / STANDALONE_BAR_W
-        table.insert(parts, ui.image({key = "classic-progress", path = bar, width = barWidth,
-          height = barHeight, fit = "stretch", onClick = "onPlaybackClick", onHover = "onMediaInlineHover"}))
+        table.insert(parts, ui.row({key = "classic-progress-hit", gap = -barWidth, align = "center",
+          onClick = "onClassicSeekClick"}, {
+          ui.image({key = "classic-progress", path = bar, width = barWidth, height = barHeight, fit = "stretch"}),
+          ui.graph({key = "classic-seek-pointer", width = barWidth, height = barHeight, values = {0, 0},
+            color = "#00000000", lineWidth = 0, fillOpacity = 0,
+            onPointerMove = "onClassicSeekMove", onPointerLeave = "onClassicSeekLeave"}),
+        }))
       end
     end
     if #parts == 0 then
