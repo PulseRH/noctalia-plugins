@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.4.0"
+version = "1.5.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -23,6 +23,17 @@ entry = "volume.luau"
 [widget.actions]
 left = "panel-toggle control-center audio"
 right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "point_style"
+type = "select"
+label_key = "volume_hover.settings.point_style.label"
+description_key = "volume_hover.settings.point_style.description"
+default = "rounded"
+options = [
+  { value = "rounded", label_key = "volume_hover.settings.point_style.options.rounded" },
+  { value = "flat", label_key = "volume_hover.settings.point_style.options.flat" },
+]
 
 [[widget.setting]]
 key = "show_knob"
@@ -257,6 +268,55 @@ entry = "media.luau"
 
 [widget.actions]
 right = "panel-toggle control-center media"
+
+[[widget.setting]]
+key = "point_style"
+type = "select"
+label_key = "media_mini.settings.point_style.label"
+description_key = "media_mini.settings.point_style.description"
+default = "rounded"
+options = [
+  { value = "rounded", label_key = "media_mini.settings.point_style.options.rounded" },
+  { value = "flat", label_key = "media_mini.settings.point_style.options.flat" },
+]
+
+[[widget.setting]]
+key = "show_controls"
+type = "bool"
+label_key = "media_mini.settings.show_controls.label"
+description_key = "media_mini.settings.show_controls.description"
+default = false
+
+[[widget.setting]]
+key = "progress_layout"
+type = "select"
+label_key = "media_mini.settings.progress_layout.label"
+description_key = "media_mini.settings.progress_layout.description"
+default = "inline"
+options = [
+  { value = "inline", label_key = "media_mini.settings.progress_layout.options.inline" },
+  { value = "background", label_key = "media_mini.settings.progress_layout.options.background" },
+]
+
+[[widget.setting]]
+key = "background_width"
+type = "int"
+label_key = "media_mini.settings.background_width.label"
+description_key = "media_mini.settings.background_width.description"
+default = 260
+min = 120
+max = 700
+step = 2
+
+[[widget.setting]]
+key = "background_height"
+type = "int"
+label_key = "media_mini.settings.background_height.label"
+description_key = "media_mini.settings.background_height.description"
+default = 22
+min = 16
+max = 40
+step = 1
 
 [[widget.setting]]
 key = "progress_thickness"

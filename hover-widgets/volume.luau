@@ -5,6 +5,8 @@ local SINK = "@DEFAULT_AUDIO_SINK@"
 local vol, muted = 0.5, false
 local hovering, progress, target = false, 0, 0
 local pointerX, trackWidth = nil, 0
+local handleWidth = 0
+local renderedSliderValue = nil
 local generation = 0
 local wantedVolume, wantedMute = nil, nil
 local writePending, pollPending = false, false
@@ -69,7 +71,11 @@ local function requestVolume(value)
 end
 function onVolumeDrag(value)
   local requested = tonumber(value)
-  if requested then requestVolume(requested) end
+  if requested and renderedSliderValue ~= nil and math.abs(requested - renderedSliderValue) < 0.000001 then return end
+  if requested and trackWidth > 4 then
+    local x = 2 + requested * (trackWidth - 4)
+    requestVolume(requested <= 0 and 0 or requested >= 1 and 1 or (x - handleWidth / 2) / math.max(1, trackWidth - handleWidth))
+  end
 end
 function onVolumeDragEnd() flush() end
 function onSpeakerClick()
@@ -90,7 +96,7 @@ function onVolumeBarLeave()
 end
 function onVolumeBarClick()
   if pointerX == nil or trackWidth <= 0 then return end
-  local radius = boolean("show_knob", true) and thickness() * 0.75 or 0
+  local radius = handleWidth / 2
   requestVolume((pointerX * trackWidth - radius) / math.max(1, trackWidth - radius * 2))
 end
 render = function()
@@ -110,30 +116,41 @@ render = function()
     trackWidth = math.max(thickness() * 2, clamp(number("slider_width", 90), 40, 300) * (draggingEnabled and 1 or progress))
     local h = thickness()
     local showKnob = boolean("show_knob", true)
-    local diameter = h * 1.5
-    local knobStart = clamp(vol, 0, 1) * (trackWidth - diameter)
-    local filledWidth = showKnob and (knobStart + diameter / 2) or clamp(vol, 0, 1) * trackWidth
+    local flat = noctalia.getConfig("point_style") == "flat"
+    local diameter = math.floor(h * 1.5 + 0.5)
+    handleWidth = showKnob and (flat and 3 or diameter) or 0
+    local knobStart = clamp(vol, 0, 1) * (trackWidth - handleWidth)
+    local filledWidth = knobStart + handleWidth / 2
     local layers = {
       ui.row({key = "track-layer", width = trackWidth, height = inputHeight, align = "center"}, {
         ui.box({key = "track", width = trackWidth, height = h, radius = h / 2, fill = color .. "/0.23"}),
       }),
-      ui.row({key = "fill-layer", gap = 0, width = trackWidth, height = inputHeight, align = "center"}, {
-        ui.box({key = "fill", width = filledWidth, height = h, radius = math.min(h, filledWidth) / 2, fill = color}),
+      ui.row({key = "fill-layer", gap = 0, width = trackWidth, height = inputHeight, align = "center"}, flat and {
+        ui.progress({key = "flat-fill", width = trackWidth, height = h, radius = h / 2,
+          progress = filledWidth / trackWidth, fill = color, track = "#00000000"}),
+      } or {
+        ui.box({key = "fill", width = filledWidth, height = h, radius = flat and 0 or math.min(h, filledWidth) / 2, fill = color}),
         ui.box({width = trackWidth - filledWidth, height = 1, fill = "#00000000"}),
       }),
     }
     if showKnob then
       table.insert(layers, ui.row({key = "knob-layer", gap = 0, width = trackWidth, height = inputHeight, align = "center"}, {
         ui.box({width = knobStart, height = 1, fill = "#00000000"}),
-        ui.box({key = "knob", width = diameter, height = diameter, radius = diameter / 2,
+        ui.box({key = "knob", width = handleWidth, height = diameter, radius = flat and 0 or diameter / 2,
           fill = tostring(noctalia.getConfig("knob_color") or "on_primary")}),
-        ui.box({width = math.max(0, trackWidth - diameter - knobStart), height = 1, fill = "#00000000"}),
+        ui.box({width = math.max(0, trackWidth - handleWidth - knobStart), height = 1, fill = "#00000000"}),
       }))
     end
     if draggingEnabled then
-      table.insert(layers, ui.slider({key = "volume-drag", width = trackWidth, height = inputHeight,
-        min = 0, max = 1, step = 0.01, value = clamp(vol, 0, 1), opacity = 0,
-        onChange = "onVolumeDrag", onDragEnd = "onVolumeDragEnd"}))
+      -- API 32 sliders ignore width: flexGrow inside a fixed-width wrapper
+      -- supplies the actual input width. Undo its 2px inset to follow the handle.
+      local sliderValue = clamp((filledWidth - 2) / (trackWidth - 4), 0, 1)
+      renderedSliderValue = sliderValue
+      table.insert(layers, ui.row({key = "volume-drag-wrapper", width = trackWidth, height = inputHeight, align = "center"}, {
+        ui.slider({key = "volume-drag", flexGrow = 1, controlSize = "md",
+          min = 0, max = 1, step = 0, value = sliderValue, opacity = 0,
+          onChange = "onVolumeDrag", onDragEnd = "onVolumeDragEnd"}),
+      }))
     else
       table.insert(layers, ui.graph({key = "volume-pointer", width = trackWidth, height = inputHeight, values = {0, 0},
         color = "#00000000", lineWidth = 0, fillOpacity = 0,

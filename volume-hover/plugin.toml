@@ -1,6 +1,6 @@
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "0.9.0"
+version = "1.0.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -16,6 +16,17 @@ entry = "volume.luau"
 [widget.actions]
 left = "panel-toggle control-center audio"
 right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "point_style"
+type = "select"
+label_key = "volume_hover.settings.point_style.label"
+description_key = "volume_hover.settings.point_style.description"
+default = "rounded"
+options = [
+  { value = "rounded", label_key = "volume_hover.settings.point_style.options.rounded" },
+  { value = "flat", label_key = "volume_hover.settings.point_style.options.flat" },
+]
 
 [[widget.setting]]
 key = "show_knob"

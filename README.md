@@ -46,3 +46,5 @@ MIT
 Version 1.3.0 adds independent bar thickness and width controls, serialized volume updates, and optional dragging with the classic shapes. Enable dragging keeps volume expanded; Classic with dragging uses media’s expanded width and seeks on release.
 
 Version 1.4.0 adds Circle colour and Show circle knob settings, centres thin bars in drag mode, and rounds both track and fill ends.
+
+Version 1.5.0: Rounded/Flat point style, optional media playback controls and background progress, plus corrected drag input geometry. The background is visual; inline progress remains seekable.

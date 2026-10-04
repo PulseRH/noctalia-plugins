@@ -40,6 +40,8 @@ local position = 0
 local length = 0
 local seekDraft, seekPlayer, seekTrack = nil, nil, nil
 local render
+local classicBarWidth = 0
+local renderedSeekValue = nil
 local function trackKey() return `{activePlayer}|{artist}|{title}|{length}` end
 
 -- Cover art is only ever a local file (barWidget.setImage has no network
@@ -273,6 +275,24 @@ end
 function onPlaybackClick()
   if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "play-pause"}) end
 end
+function onPreviousClick()
+  if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "previous"}, function() pollMedia() end) end
+end
+function onNextClick()
+  if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "next"}, function() pollMedia() end) end
+end
+function onClassicDragChange(value)
+  if length <= 0 or classicBarWidth <= 4 then return end
+  local requested = tonumber(value) or 0
+  if renderedSeekValue ~= nil and math.abs(requested - renderedSeekValue) < 0.000001 then return end
+  local raw = requested
+  local fraction = raw <= 0 and 0 or raw >= 1 and 1 or (2 + raw * (classicBarWidth - 4)) / classicBarWidth
+  onSeekChange(tostring(fraction * length / 1000000))
+end
+function onNativeSeekChange(value)
+  if renderedSeekValue ~= nil and math.abs((tonumber(value) or 0) - renderedSeekValue) < 0.000001 then return end
+  onSeekChange(tostring((tonumber(value) or 0) * length / 1000000))
+end
 function onSeekChange(value)
   if length <= 0 or activePlayer == "" then return end
   if seekDraft == nil then seekPlayer, seekTrack = activePlayer, trackKey() end
@@ -309,68 +329,78 @@ render = function()
   barWidget.setVisible(hasMedia)
   if not hasMedia then return end
   local coverSize = noctalia.getConfig("cover_size") or COVER_SIZE_DEFAULT
+  local showBar = noctalia.getConfig("show_progress_bar") ~= false and length > 0
+  local background = noctalia.getConfig("progress_layout") == "background" and showBar and not barWidget.isVertical()
+  local controls = noctalia.getConfig("show_controls") == true
+  local flat = noctalia.getConfig("point_style") == "flat"
+  local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
+  local expanded = math.max(compact, math.min(500, noctalia.getConfig("progress_expand_width") or 35))
+  local classicDrag = noctalia.getConfig("progress_style") == "classic_drag"
+  local interactive = noctalia.getConfig("progress_style") == "interactive"
+  local barWidth = classicDrag and expanded or compact + (expanded - compact) * progress
+  local barHeight = math.max(4, math.min(24, noctalia.getConfig("progress_thickness") or 8))
+  local inputHeight = 38
+  local fraction = math.max(0, math.min(1, length > 0 and (seekDraft or position / 1000000) * 1000000 / length or 0))
+  local bgWidth = math.max(120, math.min(700, noctalia.getConfig("background_width") or 260))
+  local bgHeight = math.max(16, math.min(40, noctalia.getConfig("background_height") or 22))
   local children = {}
-  if noctalia.getConfig("progress_style") == "interactive" then
-  local imagePath = nil
-  if noctalia.getConfig("show_cover_art") ~= false then
-    imagePath = resolveCoverPath(noctalia.getConfig("corner_rounding") or 100)
-  end
-  if imagePath then
-    table.insert(children, ui.image({key = "cover", path = imagePath, width = coverSize, height = coverSize,
-      fit = "cover", onClick = "onPlaybackClick", onHover = "onMediaInlineHover", tooltip = "Play / pause"}))
+  local cover = nil
+  if noctalia.getConfig("show_cover_art") ~= false then cover = resolveCoverPath(noctalia.getConfig("corner_rounding") or 100) end
+  if cover then
+    table.insert(children, ui.image({key = "cover", path = cover, width = coverSize, height = coverSize,
+      onClick = "onPlaybackClick", onHover = "onMediaInlineHover"}))
   else
     table.insert(children, ui.button({key = "playback", glyph = playing and "player-pause-filled" or "player-play-filled",
       glyphSize = coverSize, width = coverSize + 4, height = coverSize + 4,
       variant = "ghost", onClick = "onPlaybackClick", onHover = "onMediaInlineHover", tooltip = "Play / pause"}))
   end
-  if noctalia.getConfig("show_progress_bar") ~= false and length > 0 then
-    local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
-    local expanded = math.max(compact, math.min(500, noctalia.getConfig("progress_expand_width") or 35))
-    table.insert(children, ui.slider({key = "song-progress", min = 0, max = length / 1000000, step = 1,
-      value = seekDraft or math.max(0, math.min(length, position)) / 1000000,
-      width = compact + (expanded - compact) * progress, height = math.max(4, math.min(24, noctalia.getConfig("progress_thickness") or 8)), controlSize = "sm",
-      onChange = "onSeekChange", onDragEnd = "onSeekRelease"}))
+  if controls then
+    table.insert(children, ui.row({key = "controls", gap = 0, align = "center"}, {
+      ui.button({key = "previous", glyph = "player-skip-back-filled", glyphSize = 14, width = 20, height = 20,
+        variant = "ghost", onClick = "onPreviousClick", onHover = "onMediaInlineHover", tooltip = "Previous"}),
+      ui.button({key = "pause", glyph = playing and "player-pause-filled" or "player-play-filled", glyphSize = 14, width = 20, height = 20,
+        variant = "ghost", onClick = "onPlaybackClick", onHover = "onMediaInlineHover", tooltip = "Play / pause"}),
+      ui.button({key = "next", glyph = "player-skip-forward-filled", glyphSize = 14, width = 20, height = 20,
+        variant = "ghost", onClick = "onNextClick", onHover = "onMediaInlineHover", tooltip = "Next"}),
+    }))
   end
-  else
-    local showBar = noctalia.getConfig("show_progress_bar") ~= false and length > 0
-    local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
-    local expanded = math.max(compact, math.min(500, noctalia.getConfig("progress_expand_width") or 35))
-    local classicDrag = noctalia.getConfig("progress_style") == "classic_drag"
-    local barWidth = classicDrag and expanded or compact + (expanded - compact) * progress
-    local roundPct = noctalia.getConfig("corner_rounding") or 100
-    local cover = nil
-    if noctalia.getConfig("show_cover_art") ~= false then cover = resolveCoverPath(roundPct) end
-    local parts = {}
-    if cover then
-      table.insert(parts, ui.image({key = "cover", path = cover, width = coverSize, height = coverSize,
-        onClick = "onPlaybackClick", onHover = "onMediaInlineHover"}))
-    end
-    if showBar then
-      local barHeight = math.max(4, math.min(24, noctalia.getConfig("progress_thickness") or 8))
-      local filledWidth = barWidth * math.max(0, math.min(1, (seekDraft or position / 1000000) * 1000000 / length))
-      local inputHeight = 38
-      table.insert(parts, ui.row({key = "classic-progress-hit", height = inputHeight, gap = -barWidth, align = "center",
-        onClick = "onClassicSeekClick"}, {
+  if showBar and not background then
+    classicBarWidth = barWidth
+    if interactive then
+      renderedSeekValue = fraction
+      table.insert(children, ui.row({key = "song-progress-wrapper", width = barWidth, height = inputHeight, align = "center"}, {
+        ui.slider({key = "song-progress", flexGrow = 1, controlSize = "md", min = 0, max = 1, step = 0,
+          value = renderedSeekValue, onChange = "onNativeSeekChange", onDragEnd = "onSeekRelease"}),
+      }))
+    else
+      local filledWidth = barWidth * fraction
+      local layers = {
         ui.row({key = "classic-track-layer", width = barWidth, height = inputHeight, align = "center"}, {
           ui.box({key = "classic-track", width = barWidth, height = barHeight, radius = barHeight / 2, fill = "#ffffff47"}),
         }),
-        ui.row({key = "classic-fill-layer", width = barWidth, height = inputHeight, gap = 0, align = "center"}, {
-          ui.box({key = "classic-fill", width = filledWidth, height = barHeight, radius = math.min(barHeight, filledWidth) / 2, fill = "#ffffff"}),
+        ui.row({key = "classic-fill-layer", width = barWidth, height = inputHeight, gap = 0, align = "center"}, flat and {
+          ui.progress({key = "flat-fill", width = barWidth, height = barHeight, radius = barHeight / 2,
+            progress = fraction, fill = "#ffffff", track = "#00000000"}),
+        } or {
+          ui.box({key = "classic-fill", width = filledWidth, height = barHeight, radius = flat and 0 or math.min(barHeight, filledWidth) / 2, fill = "#ffffff"}),
           ui.box({width = barWidth - filledWidth, height = 1, fill = "#00000000"}),
         }),
-        classicDrag and ui.slider({key = "classic-drag", width = barWidth, height = inputHeight,
-          min = 0, max = length / 1000000, step = 1, value = seekDraft or position / 1000000, opacity = 0,
-          onChange = "onSeekChange", onDragEnd = "onSeekRelease"})
-        or ui.graph({key = "classic-seek-pointer", width = barWidth, height = inputHeight, values = {0, 0},
+      }
+      if classicDrag then
+        renderedSeekValue = math.max(0, math.min(1, (filledWidth - 2) / (barWidth - 4)))
+        table.insert(layers, ui.row({key = "classic-drag-wrapper", width = barWidth, height = inputHeight, align = "center"}, {
+          ui.slider({key = "classic-drag", flexGrow = 1, controlSize = "md", min = 0, max = 1, step = 0,
+            value = renderedSeekValue, opacity = 0,
+            onChange = "onClassicDragChange", onDragEnd = "onSeekRelease"}),
+        }))
+      else
+        table.insert(layers, ui.graph({key = "classic-seek-pointer", width = barWidth, height = inputHeight, values = {0, 0},
           color = "#00000000", lineWidth = 0, fillOpacity = 0,
-          onPointerMove = "onClassicSeekMove", onPointerLeave = "onClassicSeekLeave"}),
-      }))
+          onPointerMove = "onClassicSeekMove", onPointerLeave = "onClassicSeekLeave"}))
+      end
+      table.insert(children, ui.row({key = "classic-progress-hit", width = barWidth, height = inputHeight, gap = -barWidth, align = "center",
+        onClick = "onClassicSeekClick"}, layers))
     end
-    if #parts == 0 then
-      table.insert(parts, ui.glyph({name = playing and "player-play-filled" or "player-pause-filled", size = coverSize}))
-    end
-    table.insert(children, (barWidget.isVertical() and ui.column or ui.row)({key = "classic-art-progress",
-      gap = coverSize * COMBO_GAP / ROUND_SIZE, align = "center"}, parts))
   end
   local full = fullText()
   local compactLen, expandLen = widthRange()
@@ -383,8 +413,26 @@ render = function()
       text = utf8Window(loop .. full, scrollOffset % (utf8.len(loop) or #loop), width)
     else text = `{utf8Sub(full, math.max(width - 3, 1))}...` end
   end
-  table.insert(children, ui.label({key = "title", text = text}))
-  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center", onHover = "onMediaInlineHover"}, children))
+  if background then
+    -- Background is visual, like the native media widget. Buttons keep their
+    -- own targets; artwork/title still play/pause and right-click opens Media.
+    table.insert(children, ui.label({key = "title", text = text, flexGrow = 1, maxWidth = bgWidth - coverSize - (controls and 60 or 0) - 36}))
+    barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth, align = "center", onHover = "onMediaInlineHover"}, {
+      ui.row({key = "background-track-layer", width = bgWidth, height = inputHeight, align = "center"}, {
+        ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = "primary/0.12"}),
+      }),
+      ui.row({key = "background-fill-layer", width = bgWidth, height = inputHeight, gap = 0, align = "center"}, flat and {
+        ui.progress({width = bgWidth, height = bgHeight, radius = bgHeight / 2, progress = fraction, fill = "primary/0.3", track = "#00000000"}),
+      } or {
+        ui.box({width = bgWidth * fraction, height = bgHeight, radius = flat and 0 or math.min(bgHeight, bgWidth * fraction) / 2, fill = "primary/0.3"}),
+        ui.box({width = bgWidth * (1 - fraction), height = 1, fill = "#00000000"}),
+      }),
+      ui.row({key = "media-foreground", width = bgWidth, height = inputHeight, gap = 6, paddingH = 8, align = "center", onHover = "onMediaInlineHover"}, children),
+    }))
+  else
+    table.insert(children, ui.label({key = "title", text = text}))
+    barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center", onHover = "onMediaInlineHover"}, children))
+  end
 end
 
 local function step()

@@ -47,11 +47,11 @@
         "description": "Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab."
       },
       "show_knob": {
-        "label": "Show circle knob",
-        "description": "Show the circular volume handle. Turn off for a plain rounded bar; clicking and dragging still work."
+        "label": "Show handle",
+        "description": "Show the circle or flat handle at the current volume. Turn off for a plain bar."
       },
       "knob_color": {
-        "label": "Circle colour",
+        "label": "Handle colour",
         "description": "Independent knob colour. On-primary matches the knob used by native Settings sliders.",
         "options": {
           "on_primary": "On-primary (native slider)",
@@ -60,6 +60,14 @@
           "secondary": "Secondary",
           "tertiary": "Tertiary",
           "error": "Error"
+        }
+      },
+      "point_style": {
+        "label": "Point style",
+        "description": "Rounded or flat moving progress edge. Flat also uses a slim rectangular volume handle.",
+        "options": {
+          "rounded": "Rounded",
+          "flat": "Flat"
         }
       }
     }
@@ -178,6 +186,34 @@
       "progress_thickness": {
         "label": "Progress thickness (px)",
         "description": "Progress bar thickness, independent of cover size and width. Rounded ends stay circular."
+      },
+      "point_style": {
+        "label": "Point style",
+        "description": "Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style.",
+        "options": {
+          "rounded": "Rounded",
+          "flat": "Flat"
+        }
+      },
+      "show_controls": {
+        "label": "Playback controls",
+        "description": "Show previous, play/pause and next buttons."
+      },
+      "progress_layout": {
+        "label": "Progress placement",
+        "description": "Inline seekable bar or native-like progress behind the media content. Background progress is visual; artwork/title retain play/pause.",
+        "options": {
+          "inline": "Inline",
+          "background": "Background"
+        }
+      },
+      "background_width": {
+        "label": "Background width",
+        "description": "Width of the media widget in background mode, in pixels."
+      },
+      "background_height": {
+        "label": "Background thickness",
+        "description": "Thickness of the background progress pill, in pixels."
       }
     }
   },

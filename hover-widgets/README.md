@@ -40,7 +40,7 @@ Hover to reveal the full weekday, ordinal date, month and seconds. Uses local ti
 
 ### Hover Volume (`volume`)
 
-Hover expands the original rounded track and circular knob. Click the speaker to mute/unmute; click the track to set volume. Percentage/padding and right-click open the anchored Audio panel. Speaker click can select Audio instead. Rapid writes are serialized and coalesced; stale reads cannot overwrite a newer request. Width and thickness are independent. Circle colour is separate from the track, defaulting to the native Settings slider colour. Turn Show circle knob off for a plain rounded bar.
+Hover expands the original rounded track and circular knob. Click the speaker to mute/unmute; click the track to set volume. Percentage/padding and right-click open the anchored Audio panel. Speaker click can select Audio instead. Rapid writes are serialized and coalesced; stale reads cannot overwrite a newer request. Width and thickness are independent. Handle colour is separate from the track, defaulting to the native Settings slider colour. Turn Show handle off for a plain rounded bar.
 
 Enable dragging to drag the same classic track; it stays expanded in that mode. Volume changes continuously during dragging. This is optional and off by default.
 
@@ -90,7 +90,8 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `show_knob` | `bool` | `true` | Show the circular volume handle. Turn off for a plain rounded bar; clicking and dragging still work. |
+| `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Flat also uses a slim rectangular volume handle. |
+| `show_knob` | `bool` | `true` | Show the circle or flat handle at the current volume. Turn off for a plain bar. |
 | `knob_color` | `select` | `on_primary` | Independent knob colour. On-primary matches the knob used by native Settings sliders. |
 | `drag_enabled` | `bool` | `false` | Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab. |
 | `slider_thickness` | `int` | `12` | Track thickness, independent of its width. The circular knob is 1.5 times this size. |
@@ -149,6 +150,11 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
+| `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
+| `show_controls` | `bool` | `false` | Show previous, play/pause and next buttons. |
+| `progress_layout` | `select` | `inline` | Inline seekable bar or native-like progress behind the media content. Background progress is visual; artwork/title retain play/pause. |
+| `background_width` | `int` | `260` | Width of the media widget in background mode, in pixels. |
+| `background_height` | `int` | `22` | Thickness of the background progress pill, in pixels. |
 | `progress_thickness` | `int` | `8` | Progress bar thickness, independent of cover size and width. Rounded ends stay circular. |
 | `progress_style` | `select` | `classic` | Classic supports clicks. Classic with dragging keeps the same pill, uses expanded width, previews while dragging and seeks on release. Interactive uses the native slider appearance. |
 | `show_cover_art` | `bool` | `true` | Replace the play/pause icon with the track's (rounded) cover art when available. |
@@ -249,3 +255,7 @@ Volume uses a serialized latest-request queue and discards stale polling results
 ## Version 1.4.0
 
 Adds a separate Circle colour selector (default: on-primary, matching native Settings sliders) and Show circle knob toggle. Drawing and pointer layers share a fixed centre line, so changing thickness keeps the bars vertically aligned in click and drag modes. Track and moving fill ends use rounded shapes.
+
+## Version 1.5.0
+
+Adds Rounded/Flat point styles to volume and media. Flat gives the volume handle a slim rectangular shape; Show handle and Handle colour apply to both shapes. Fixes drag input width and maps pointer positions to the visible handle/playhead. Optional playback controls add previous, play/pause and next. Progress placement can put a tinted progress pill behind media content, with independent background width and thickness. Background progress is visual; use Inline for seeking. Vertical bars use the inline layout.
