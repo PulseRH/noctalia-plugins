@@ -3,6 +3,10 @@
     "gauge": {
       "label": "Show gauge bar",
       "description": "Compact display: gauge bar (on) or plain percentage (off)"
+    },
+    "amount_first": {
+      "label": "Show used amount by default",
+      "description": "On: shows used GB by default, revealing the percentage and total on hover. Off: shows the percentage by default, revealing used/total GB on hover."
     }
   }
 }

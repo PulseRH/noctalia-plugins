@@ -1,0 +1,306 @@
+id = "pulser/hover-widgets"
+name = "Hover Widgets"
+version = "1.0.1"
+plugin_api = 32
+author = "pulser"
+license = "MIT"
+dependencies = ["noctalia", "wpctl", "playerctl", "sh", "wlrctl"]
+tags = ["bar", "clock", "audio", "media", "system", "network", "utility"]
+icon = "layout-navbar"
+description = "Nine compact bar widgets with hover expansion: clock, volume, media, active window and system monitors."
+
+[[widget]]
+id = "clock"
+entry = "clock.luau"
+
+[widget.actions]
+left = "panel-toggle control-center calendar"
+
+[[widget]]
+id = "volume"
+entry = "volume.luau"
+
+[widget.actions]
+left = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "bar_color"
+type = "select"
+label_key = "volume_hover.settings.bar_color.label"
+description_key = "volume_hover.settings.bar_color.description"
+default = "primary"
+options = [
+  { value = "primary", label_key = "volume_hover.settings.bar_color.options.primary" },
+  { value = "onsurface", label_key = "volume_hover.settings.bar_color.options.onsurface" },
+  { value = "secondary", label_key = "volume_hover.settings.bar_color.options.secondary" },
+  { value = "tertiary", label_key = "volume_hover.settings.bar_color.options.tertiary" },
+  { value = "hover", label_key = "volume_hover.settings.bar_color.options.hover" },
+  { value = "error", label_key = "volume_hover.settings.bar_color.options.error" },
+]
+
+[[widget.setting]]
+key = "slider_width"
+type = "int"
+label_key = "volume_hover.settings.slider_width.label"
+description_key = "volume_hover.settings.slider_width.description"
+default = 90
+min = 40
+max = 240
+step = 2
+
+[[widget.setting]]
+key = "scroll_step"
+type = "int"
+label_key = "volume_hover.settings.scroll_step.label"
+description_key = "volume_hover.settings.scroll_step.description"
+default = 5
+min = 1
+max = 25
+step = 1
+
+[[widget.setting]]
+key = "invert_scroll"
+type = "bool"
+label_key = "volume_hover.settings.invert_scroll.label"
+description_key = "volume_hover.settings.invert_scroll.description"
+default = false
+
+[[widget.setting]]
+key = "show_percent"
+type = "bool"
+label_key = "volume_hover.settings.show_percent.label"
+description_key = "volume_hover.settings.show_percent.description"
+default = true
+
+[[widget]]
+id = "cpu"
+entry = "cpu.luau"
+
+[widget.actions]
+left = "panel-toggle control-center system"
+
+  [[widget.setting]]
+  key = "gauge"
+  type = "bool"
+  label_key = "sysmon_cpu.settings.gauge.label"
+  description_key = "sysmon_cpu.settings.gauge.description"
+  default = true
+
+[[widget]]
+id = "ram"
+entry = "ram.luau"
+
+[widget.actions]
+left = "panel-toggle control-center system"
+
+  [[widget.setting]]
+  key = "gauge"
+  type = "bool"
+  label_key = "sysmon_ram.settings.gauge.label"
+  description_key = "sysmon_ram.settings.gauge.description"
+  default = true
+
+  [[widget.setting]]
+  key = "amount_first"
+  type = "bool"
+  label_key = "sysmon_ram.settings.amount_first.label"
+  description_key = "sysmon_ram.settings.amount_first.description"
+  default = false
+
+[[widget]]
+id = "temp"
+entry = "temp.luau"
+
+[widget.actions]
+left = "panel-toggle control-center system"
+
+  [[widget.setting]]
+  key = "show_gpu"
+  type = "bool"
+  label_key = "sysmon_temp.settings.show_gpu.label"
+  default = true
+
+  [[widget.setting]]
+  key = "show_nvme"
+  type = "bool"
+  label_key = "sysmon_temp.settings.show_nvme.label"
+  default = false
+
+  [[widget.setting]]
+  key = "show_ram"
+  type = "bool"
+  label_key = "sysmon_temp.settings.show_ram.label"
+  default = false
+
+  [[widget.setting]]
+  key = "show_hottest_core"
+  type = "bool"
+  label_key = "sysmon_temp.settings.show_hottest_core.label"
+  default = false
+
+[[widget]]
+id = "net-down"
+entry = "net_down.luau"
+
+[widget.actions]
+left = "panel-toggle control-center system"
+
+  [[widget.setting]]
+  key = "threshold_kbps"
+  type = "int"
+  label_key = "sysmon_net_down.settings.threshold_kbps.label"
+  description_key = "sysmon_net_down.settings.threshold_kbps.description"
+  default = 1024
+  min = 0
+  max = 20480
+  step = 32
+
+  [[widget.setting]]
+  key = "compact_units"
+  type = "bool"
+  label_key = "sysmon_net_down.settings.compact_units.label"
+  description_key = "sysmon_net_down.settings.compact_units.description"
+  default = true
+
+  [[widget.setting]]
+  key = "hide_completely"
+  type = "bool"
+  label_key = "sysmon_net_down.settings.hide_completely.label"
+  description_key = "sysmon_net_down.settings.hide_completely.description"
+  default = true
+
+[[widget]]
+id = "net-up"
+entry = "net_up.luau"
+
+[widget.actions]
+left = "panel-toggle control-center system"
+
+  [[widget.setting]]
+  key = "threshold_kbps"
+  type = "int"
+  label_key = "sysmon_net_up.settings.threshold_kbps.label"
+  description_key = "sysmon_net_up.settings.threshold_kbps.description"
+  default = 1024
+  min = 0
+  max = 20480
+  step = 32
+
+  [[widget.setting]]
+  key = "compact_units"
+  type = "bool"
+  label_key = "sysmon_net_up.settings.compact_units.label"
+  description_key = "sysmon_net_up.settings.compact_units.description"
+  default = true
+
+  [[widget.setting]]
+  key = "hide_completely"
+  type = "bool"
+  label_key = "sysmon_net_up.settings.hide_completely.label"
+  description_key = "sysmon_net_up.settings.hide_completely.description"
+  default = true
+
+[[widget]]
+id = "media"
+entry = "media.luau"
+
+[widget.actions]
+right = "panel-toggle control-center media"
+
+[[widget.setting]]
+key = "show_cover_art"
+type = "bool"
+label_key = "media_mini.settings.show_cover_art.label"
+description_key = "media_mini.settings.show_cover_art.description"
+default = true
+
+[[widget.setting]]
+key = "show_progress_bar"
+type = "bool"
+label_key = "media_mini.settings.show_progress_bar.label"
+description_key = "media_mini.settings.show_progress_bar.description"
+default = true
+
+[[widget.setting]]
+key = "compact_width"
+type = "int"
+label_key = "media_mini.settings.compact_width.label"
+description_key = "media_mini.settings.compact_width.description"
+default = 20
+min = 8
+max = 60
+step = 1
+
+[[widget.setting]]
+key = "expand_width"
+type = "int"
+label_key = "media_mini.settings.expand_width.label"
+description_key = "media_mini.settings.expand_width.description"
+default = 40
+min = 8
+max = 100
+step = 1
+
+[[widget.setting]]
+key = "cover_size"
+type = "int"
+label_key = "media_mini.settings.cover_size.label"
+description_key = "media_mini.settings.cover_size.description"
+default = 20
+min = 12
+max = 40
+step = 1
+
+[[widget.setting]]
+key = "corner_rounding"
+type = "int"
+label_key = "media_mini.settings.corner_rounding.label"
+description_key = "media_mini.settings.corner_rounding.description"
+default = 100
+min = 0
+max = 100
+step = 5
+
+[[widget]]
+id = "active-window"
+entry = "active_window.luau"
+
+[[widget.setting]]
+key = "compact_width"
+type = "int"
+label_key = "active_window_hover.settings.compact_width.label"
+description_key = "active_window_hover.settings.compact_width.description"
+default = 20
+min = 8
+max = 60
+step = 1
+
+[[widget.setting]]
+key = "expand_width"
+type = "int"
+label_key = "active_window_hover.settings.expand_width.label"
+description_key = "active_window_hover.settings.expand_width.description"
+default = 40
+min = 8
+max = 100
+step = 1
+
+[[widget.setting]]
+key = "icon_size"
+type = "int"
+label_key = "active_window_hover.settings.icon_size.label"
+description_key = "active_window_hover.settings.icon_size.description"
+default = 20
+min = 12
+max = 40
+step = 1
+
+[[widget.setting]]
+key = "icon_size_hover"
+type = "int"
+label_key = "active_window_hover.settings.icon_size_hover.label"
+description_key = "active_window_hover.settings.icon_size_hover.description"
+default = 28
+min = 12
+max = 48
+step = 1
