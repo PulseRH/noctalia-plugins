@@ -334,3 +334,11 @@ Inline visualiser width is visible only for Inline progress placement.
 ## Version 1.12.0
 
 Hover expansion fits the title up to the configured maximum. Capped titles continue cycling on hover. Background width estimates include artwork, revealed controls and proportional text advances; estimates are cached per title. Inline character limits also stop at the title length. Inverted progress-side visualiser bars use a softer translucent dark colour.
+
+## Version 1.12.1
+
+RAM uses the Lucide memory-stick icon, tinted to the active on_surface theme colour and cached per palette.
+
+### Icon attribution
+
+`assets/memory-stick.svg` is from [Lucide](https://github.com/lucide-icons/lucide/blob/main/icons/memory-stick.svg), copyright Lucide Icons and Contributors, under the ISC license included in `assets/LUCIDE-LICENSE.txt`. The runtime substitutes the theme colour for currentColor.

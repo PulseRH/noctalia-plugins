@@ -52,13 +52,13 @@ description = "Compact gauge bar or plain percentage (toggle below); optional GP
 [[plugin]]
 id = "pulser/sysmon-ram"
 name = "RAM (mini)"
-version = "0.2.0"
-plugin_api = 5
+version = "0.3.0"
+plugin_api = 31
 author = "pulser"
 license = "MIT"
 icon = "memory"
 description = "Compact gauge bar or plain percentage (toggle below); hover reveals the other figure -- used/total GB by default, or the percentage if you show the amount by default instead. Total is auto-detected."
-min_noctalia = "5.0.0"
+min_noctalia = "5.2.0"
 tags = ["system"]
 
 [[plugin]]
@@ -112,7 +112,7 @@ description = "Classic now-playing artwork and progress pill, configurable width
 [[plugin]]
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.12.0"
+version = "1.12.1"
 plugin_api = 32
 author = "pulser"
 license = "MIT"

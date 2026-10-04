@@ -1,8 +1,8 @@
 id = "pulser/sysmon-ram"
 name = "RAM (mini)"
-version = "0.2.0"
-plugin_api = 5
-min_noctalia = "5.0.0"
+version = "0.3.0"
+plugin_api = 31
+min_noctalia = "5.2.0"
 author = "pulser"
 license = "MIT"
 dependencies = []
