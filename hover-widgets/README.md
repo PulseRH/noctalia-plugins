@@ -358,3 +358,7 @@ RAM contacts are narrower than the stick body, with an off-centre key notch and 
 ## Version 1.12.5
 
 Repositions the right contact bank and widens the gaps following the user markup for small-size legibility.
+
+## Version 1.12.6
+
+Volume uses a 120ms leave grace like media instead of a 1.2-second delay when dragging is enabled. Repeated leave events do not prolong the timer; drag release resumes the collapse timer immediately.

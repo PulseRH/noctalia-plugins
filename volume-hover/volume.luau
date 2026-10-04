@@ -12,7 +12,8 @@ local generation = 0
 local wantedVolume, wantedMute = nil, nil
 local writePending, pollPending = false, false
 local pollElapsed = 300
-local render, poll, flush
+local render, poll, flush, step
+local LEAVE_GRACE_MS = 120
 local function clamp(v, low, high) return math.max(low, math.min(high, v)) end
 local function number(key, default)
   local value = noctalia.getConfig(key)
@@ -82,7 +83,8 @@ function onVolumeDrag(value)
 end
 function onVolumeDragEnd()
   dragging, dragWidth = false, nil
-  if not hovering then leaveDelay = 500 end
+  if not hovering then leaveDelay = LEAVE_GRACE_MS end
+  step()
   flush()
 end
 function onSpeakerClick()
@@ -174,7 +176,7 @@ render = function()
   barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center",
     onHover = "onInlineHover"}, children))
 end
-local function step()
+step = function()
   local interval = 300
   if dragging then target = 1
   elseif leaveDelay > 0 then
@@ -195,8 +197,11 @@ function update() step() end
 function onHover(value)
   hovering = value
   if value then target, leaveDelay = 1, 0
-  elseif boolean("drag_enabled", false) then leaveDelay = 1200
-  else target = 0 end
+  else
+    -- Child targets emit leave/enter pairs when crossing the widget. Match the
+    -- media widget's short grace without restarting it on repeated leaves.
+    if leaveDelay == 0 then leaveDelay = LEAVE_GRACE_MS end
+  end
   step()
 end
 function onConfigChanged() render() end
