@@ -337,15 +337,18 @@ local function resolveStandaloneBar(bucket: number): string?
   return nil
 end
 
-local function togglePlayback()
+function onMediaInlineHover(state)
+  onHover(state == "true")
+end
+function onPlaybackClick()
   if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "play-pause"}) end
 end
-local function previewSeek(value)
+function onSeekChange(value)
   if length <= 0 or activePlayer == "" then return end
   if seekDraft == nil then seekPlayer, seekTrack = activePlayer, trackKey() end
   seekDraft = math.max(0, math.min(length / 1000000, tonumber(value) or 0))
 end
-local function finishSeek()
+function onSeekRelease()
   if seekDraft == nil then return end
   local value, player, track = seekDraft, seekPlayer, seekTrack
   seekDraft, seekPlayer, seekTrack = nil, nil, nil
@@ -369,11 +372,11 @@ render = function()
   end
   if imagePath then
     table.insert(children, ui.image({key = "cover", path = imagePath, width = coverSize, height = coverSize,
-      fit = "cover", onClick = togglePlayback, tooltip = "Play / pause"}))
+      fit = "cover", onClick = "onPlaybackClick", onHover = "onMediaInlineHover", tooltip = "Play / pause"}))
   else
     table.insert(children, ui.button({key = "playback", glyph = playing and "player-pause-filled" or "player-play-filled",
       glyphSize = coverSize, width = coverSize + 4, height = coverSize + 4,
-      variant = "ghost", onClick = togglePlayback, tooltip = "Play / pause"}))
+      variant = "ghost", onClick = "onPlaybackClick", onHover = "onMediaInlineHover", tooltip = "Play / pause"}))
   end
   if noctalia.getConfig("show_progress_bar") ~= false and length > 0 then
     local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
@@ -381,7 +384,7 @@ render = function()
     table.insert(children, ui.slider({key = "song-progress", min = 0, max = length / 1000000, step = 1,
       value = seekDraft or math.max(0, math.min(length, position)) / 1000000,
       width = compact + (expanded - compact) * progress, height = 16, controlSize = "sm",
-      onChange = previewSeek, onDragEnd = finishSeek}))
+      onChange = "onSeekChange", onDragEnd = "onSeekRelease"}))
   end
   else
     local showBar = noctalia.getConfig("show_progress_bar") ~= false and length > 0
@@ -394,7 +397,7 @@ render = function()
     local parts = {}
     if cover then
       table.insert(parts, ui.image({key = "cover", path = cover, width = coverSize, height = coverSize,
-        onClick = togglePlayback}))
+        onClick = "onPlaybackClick", onHover = "onMediaInlineHover"}))
     end
     if showBar then
       local bar = resolveStandaloneBar(fillBucket())
@@ -402,7 +405,7 @@ render = function()
         local barHeight = cover and coverSize * COMBO_BAR_H / ROUND_SIZE
           or coverSize * STANDALONE_DISP_SCALE * STANDALONE_BAR_H / STANDALONE_BAR_W
         table.insert(parts, ui.image({key = "classic-progress", path = bar, width = barWidth,
-          height = barHeight, fit = "stretch", onClick = togglePlayback}))
+          height = barHeight, fit = "stretch", onClick = "onPlaybackClick", onHover = "onMediaInlineHover"}))
       end
     end
     if #parts == 0 then
@@ -423,7 +426,7 @@ render = function()
     else text = `{utf8Sub(full, math.max(width - 3, 1))}...` end
   end
   table.insert(children, ui.label({key = "title", text = text}))
-  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center"}, children))
+  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center", onHover = "onMediaInlineHover"}, children))
 end
 
 local function step()

@@ -1,6 +1,6 @@
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "0.6.0"
+version = "0.6.1"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -76,4 +76,3 @@ type = "bool"
 label_key = "volume_hover.settings.show_percent.label"
 description_key = "volume_hover.settings.show_percent.description"
 default = true
-

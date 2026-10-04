@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.0.0"
+version = "1.0.1"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -100,4 +100,3 @@ default = 35
 min = 24
 max = 500
 step = 2
-

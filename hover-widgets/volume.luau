@@ -140,18 +140,21 @@ local function prebake(bucket)
 end
 
 -- ── render ────────────────────────────────────────────────────────────────────
-local function toggleMute()
+function onSpeakerClick()
   noctalia.runAsync({"wpctl", "set-mute", SINK, "toggle"}, nil, 1500)
+end
+function onInlineHover(state)
+  onHover(state == "true")
 end
 local function drawClassic(path, width, height)
   local children = {}
-  local click = if noctalia.getConfig("icon_click") == "panel" then nil else toggleMute
+  local click = if noctalia.getConfig("icon_click") == "panel" then nil else "onSpeakerClick"
   if path then
     table.insert(children, ui.image({key = "speaker-bar", path = path, width = width, height = height,
-      onClick = click}))
+      onClick = click, onHover = "onInlineHover"}))
   elseif click then
     table.insert(children, ui.button({key = "speaker", glyph = if muted then "volume-off" elseif vol < 0.4 then "volume-2" else "volume",
-      glyphSize = 20, width = 24, height = 24, variant = "ghost", onClick = click}))
+      glyphSize = 20, width = 24, height = 24, variant = "ghost", onClick = click, onHover = "onInlineHover"}))
   else
     table.insert(children, ui.glyph({key = "speaker", name = if muted then "volume-off" elseif vol < 0.4 then "volume-2" else "volume", size = 20}))
   end
@@ -159,7 +162,7 @@ local function drawClassic(path, width, height)
     table.insert(children, ui.label({key = "percentage", text = if muted then "muted" else `{round(vol * 100)}%`}))
   end
   barWidget.setTooltip(if muted then "Muted" else `Volume {round(vol * 100)}%`)
-  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center"}, children))
+  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center", onHover = "onInlineHover"}, children))
 end
 
 local function render()
