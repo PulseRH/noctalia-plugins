@@ -46,6 +46,7 @@ local renderedSeekValue = nil
 local hoveredControl, highlightedControl = nil, nil
 local hoverLeaveMs = 0
 local backgroundSeekX, backgroundSeekOffset, backgroundSeekWidth, backgroundWidth = nil, 0, 0, 0
+local spectrumValues, spectrumActive = {}, false
 local function trackKey() return `{activePlayer}|{artist}|{title}|{length}` end
 
 -- Cover art is only ever a local file (barWidget.setImage has no network
@@ -369,6 +370,39 @@ function onBackgroundSeekClick()
   onSeekChange(tostring(fraction * length / 1000000))
   onSeekRelease()
 end
+local function visualiser(width, inputHeight)
+  local height = math.max(4, math.min(24, noctalia.getConfig("visualiser_height") or 12))
+  local color = tostring(noctalia.getConfig("visualiser_color") or "secondary")
+  local opacity = math.max(0, math.min(100, noctalia.getConfig("visualiser_opacity") or 35)) / 100
+  local count = math.max(16, #spectrumValues)
+  local gap = 2
+  local barWidth = math.max(1, (width - gap * (count - 1)) / count)
+  local bars = {}
+  for i = 1, count do
+    local value = math.max(0, math.min(1, spectrumValues[i] or 0))
+    table.insert(bars, ui.box({key = "spectrum-" .. i, width = barWidth,
+      height = math.max(1, value * height), radius = math.min(1, barWidth / 2), fill = color}))
+  end
+  return ui.row({key = "media-visualiser", width = width, height = inputHeight,
+    gap = gap, align = "center", opacity = opacity}, bars)
+end
+function onAudioSpectrum(valuesCsv, stateCsv)
+  if noctalia.getConfig("audio_spectrum") ~= true then return end
+  local active = playing and string.sub(stateCsv or "", 1, 1) == "1"
+  if not active then
+    if spectrumActive then
+      spectrumValues, spectrumActive = {}, false
+      if render then render() end
+    end
+    return
+  end
+  local values = {}
+  for value in string.gmatch(valuesCsv or "", "[^,]+") do
+    table.insert(values, math.max(0, math.min(1, tonumber(value) or 0)))
+  end
+  spectrumValues, spectrumActive = values, #values > 0
+  if render then render() end
+end
 local function progressShade(key, width, height, inputHeight, fraction, flat, amount)
   local shade = string.format("#000000%02x", math.floor(amount * 255 + 0.5))
   return ui.row({key = key, width = width, height = inputHeight, gap = 0, align = "center"}, flat and {
@@ -423,6 +457,9 @@ render = function()
       playbackButton("pause", playing and "player-pause-filled" or "player-play-filled", "onPlaybackClick", "Play / pause", 20, controlsReveal),
       playbackButton("next", "player-skip-forward-filled", "onNextClick", "Next", 20, controlsReveal),
     }))
+  end
+  if noctalia.getConfig("audio_spectrum") == true and not background then
+    table.insert(children, visualiser(math.max(24, math.min(160, noctalia.getConfig("visualiser_width") or 48)), inputHeight))
   end
   if showBar and not background then
     classicBarWidth = barWidth
@@ -512,6 +549,9 @@ render = function()
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onBackgroundBarMove", onPointerLeave = "onBackgroundSeekLeave"}),
     }
+    if noctalia.getConfig("audio_spectrum") == true and spectrumActive then
+      table.insert(backgroundLayers, 3, visualiser(bgWidth, inputHeight))
+    end
     if progressDarkening > 0 then
       table.insert(backgroundLayers, 3, progressShade("background-progress-shade", bgWidth, bgHeight, inputHeight, fraction, flat, progressDarkening))
     end

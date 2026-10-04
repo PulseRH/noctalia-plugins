@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.8.6"
+version = "1.9.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -80,6 +80,54 @@ default = 5
 min = 1
 max = 60
 step = 1
+
+[[widget.setting]]
+key = "audio_spectrum"
+type = "bool"
+label_key = "media_mini.settings.audio_spectrum.label"
+description_key = "media_mini.settings.audio_spectrum.description"
+default = false
+
+[[widget.setting]]
+key = "visualiser_color"
+visible_when = { key = "audio_spectrum", values = ["true"] }
+type = "color"
+label_key = "media_mini.settings.visualiser_color.label"
+description_key = "media_mini.settings.visualiser_color.description"
+default = "secondary"
+
+[[widget.setting]]
+key = "visualiser_opacity"
+visible_when = { key = "audio_spectrum", values = ["true"] }
+type = "int"
+label_key = "media_mini.settings.visualiser_opacity.label"
+description_key = "media_mini.settings.visualiser_opacity.description"
+default = 35
+min = 0
+max = 100
+step = 1
+
+[[widget.setting]]
+key = "visualiser_height"
+visible_when = { key = "audio_spectrum", values = ["true"] }
+type = "int"
+label_key = "media_mini.settings.visualiser_height.label"
+description_key = "media_mini.settings.visualiser_height.description"
+default = 12
+min = 4
+max = 24
+step = 1
+
+[[widget.setting]]
+key = "visualiser_width"
+visible_when = { key = "audio_spectrum", values = ["true"] }
+type = "int"
+label_key = "media_mini.settings.visualiser_width.label"
+description_key = "media_mini.settings.visualiser_width.description"
+default = 48
+min = 24
+max = 160
+step = 2
 
 [[widget.setting]]
 key = "show_progress_bar"

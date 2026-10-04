@@ -272,6 +272,26 @@
       "progress_darkening": {
         "label": "Progress darkening (%)",
         "description": "Darken the played progress fill itself, from 0% (original colour) to 80%. Applies to background and classic progress."
+      },
+      "audio_spectrum": {
+        "label": "Audio visualiser",
+        "description": "Show live audio bars behind background progress, or beside the controls for inline progress. Uses the shell\u2019s shared audio spectrum; rests when paused or silent."
+      },
+      "visualiser_color": {
+        "label": "Visualiser colour",
+        "description": "Choose a theme or custom colour for the audio bars."
+      },
+      "visualiser_opacity": {
+        "label": "Visualiser opacity (%)",
+        "description": "Opacity of the audio visualiser, independent of progress colour and darkening."
+      },
+      "visualiser_height": {
+        "label": "Visualiser height (px)",
+        "description": "Maximum height of the centred audio bars."
+      },
+      "visualiser_width": {
+        "label": "Inline visualiser width (px)",
+        "description": "Width when progress is inline; background mode uses the media widget\u2019s full width."
       }
     }
   },

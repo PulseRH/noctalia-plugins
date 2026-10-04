@@ -163,6 +163,11 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 | `show_progress_bar` | `bool` | `true` | Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph. |
 | `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
 | `progress_layout` | `select` | `inline` | Inline seekable bar or progress behind the media content. Click the background title/progress area to seek; artwork and buttons retain playback actions. |
+| `audio_spectrum` | `bool` | `false` | Optional live audio visualiser, using the shell’s shared spectrum. |
+| `visualiser_color` | `color` | `secondary` | Theme/custom visualiser colour. |
+| `visualiser_opacity` | `int` | `35` | Visualiser opacity, 0–100%. |
+| `visualiser_height` | `int` | `12` | Maximum bar height, 4–24px. |
+| `visualiser_width` | `int` | `48` | Inline visualiser width, 24–160px; background mode uses the full media width. |
 | `background_progress_color` | `color` | `primary` | Native theme/custom colour picker for background progress. |
 | `progress_darkening` | `int` | `0` | Darken the played fill itself, 0–80%, for background and classic progress. |
 | `background_darkening` | `int` | `0` | Darkening of the unplayed background, 0–60%. Progress stays at full colour. |
@@ -311,3 +316,7 @@ The upper/lower 2px of media control targets no longer highlight the playback bu
 ## Version 1.9.6
 
 Left-click the top/bottom 5px seek areas of playback controls to seek without a button highlight. Left-click their centres for playback; right-click anywhere over them to seek.
+
+## Version 1.10.0
+
+Adds optional audio bars using Noctalia’s shared PipeWire spectrum callback. Visualiser rendering stays below pointer/control layers. Paused/idle audio clears the spectrum and avoids repeated idle rendering; inline width remains stable. The feature defaults off, with conditional appearance settings.
