@@ -7,6 +7,7 @@ local hovering, progress, target = false, 0, 0
 local pointerX, trackWidth = nil, 0
 local handleWidth = 0
 local renderedSliderValue = nil
+local sliderEchoes = {}
 local dragging, dragWidth, leaveDelay = false, nil, 0
 local generation = 0
 local wantedVolume, wantedMute = nil, nil
@@ -74,7 +75,17 @@ local function requestVolume(value)
 end
 function onVolumeDrag(value)
   local requested = tonumber(value)
-  if requested and renderedSliderValue ~= nil and math.abs(requested - renderedSliderValue) < 0.000001 then return end
+  if requested then
+    -- Native setValue also emits onChange. Its queued callback can arrive after
+    -- another animation render, so compare against all outstanding layout values.
+    for i, value in ipairs(sliderEchoes) do
+      if math.abs(requested - value) < 0.000001 then
+        table.remove(sliderEchoes, i)
+        return
+      end
+    end
+    if renderedSliderValue ~= nil and math.abs(requested - renderedSliderValue) < 0.000001 then return end
+  end
   if requested and trackWidth > 4 then
     dragging, dragWidth, leaveDelay = true, trackWidth, 0
     local x = 2 + requested * (trackWidth - 4)
@@ -83,7 +94,7 @@ function onVolumeDrag(value)
 end
 function onVolumeDragEnd()
   dragging, dragWidth = false, nil
-  if not hovering then leaveDelay = LEAVE_GRACE_MS end
+  if not hovering then leaveDelay = 500 end
   step()
   flush()
 end
@@ -122,12 +133,12 @@ render = function()
   trackWidth = 0
   local draggingEnabled = boolean("drag_enabled", false)
   if progress > 0.01 or dragging then
-    trackWidth = dragWidth or math.max(thickness() * 2, clamp(number("slider_width", 90), 40, 300) * progress)
-    local h = thickness()
+    trackWidth = dragWidth or math.max(1, clamp(number("slider_width", 90), 40, 300) * progress)
+    local h = math.min(thickness(), trackWidth)
     local showKnob = boolean("show_knob", true)
     local flat = noctalia.getConfig("point_style") == "flat"
-    local diameter = math.floor(h * 1.5 + 0.5)
-    handleWidth = showKnob and (flat and 3 or diameter) or 0
+    local diameter = math.min(trackWidth, math.floor(h * 1.5 + 0.5))
+    handleWidth = showKnob and (flat and math.min(3, trackWidth) or diameter) or 0
     local knobStart = clamp(vol, 0, 1) * (trackWidth - handleWidth)
     local filledWidth = knobStart + handleWidth / 2
     local layers = {
@@ -151,10 +162,14 @@ render = function()
         ui.box({width = math.max(0, trackWidth - handleWidth - knobStart), height = 1, fill = "#00000000"}),
       }))
     end
-    if draggingEnabled then
+    if draggingEnabled and trackWidth > 4 then
       -- API 32 sliders ignore width: flexGrow inside a fixed-width wrapper
       -- supplies the actual input width. Undo its 2px inset to follow the handle.
       local sliderValue = clamp((filledWidth - 2) / (trackWidth - 4), 0, 1)
+      if renderedSliderValue == nil or math.abs(sliderValue - renderedSliderValue) > 0.000001 then
+        table.insert(sliderEchoes, sliderValue)
+        if #sliderEchoes > 64 then table.remove(sliderEchoes, 1) end
+      end
       renderedSliderValue = sliderValue
       table.insert(layers, ui.row({key = "volume-drag-wrapper", width = trackWidth, height = inputHeight, align = "center"}, {
         ui.slider({key = "volume-drag", flexGrow = 1, controlSize = "md",
@@ -199,8 +214,9 @@ function onHover(value)
   if value then target, leaveDelay = 1, 0
   else
     -- Child targets emit leave/enter pairs when crossing the widget. Match the
-    -- media widget's short grace without restarting it on repeated leaves.
-    if leaveDelay == 0 then leaveDelay = LEAVE_GRACE_MS end
+    -- short grace without dragging, or the longer slider handoff delay when
+    -- dragging is enabled. Repeated leaves do not restart the timer.
+    if leaveDelay == 0 then leaveDelay = boolean("drag_enabled", false) and 1200 or LEAVE_GRACE_MS end
   end
   step()
 end

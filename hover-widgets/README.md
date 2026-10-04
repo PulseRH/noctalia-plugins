@@ -362,3 +362,9 @@ Repositions the right contact bank and widens the gaps following the user markup
 ## Version 1.12.6
 
 Volume uses a 120ms leave grace like media instead of a 1.2-second delay when dragging is enabled. Repeated leave events do not prolong the timer; drag release resumes the collapse timer immediately.
+
+## Version 1.12.7
+
+Filters queued native slider layout-value callbacks, preventing a resize during collapse from being mistaken for an active drag. Removes the minimum closing-track width so the last part keeps shrinking instead of remaining as a short stub. Slider input is removed below 4px, avoiding invalid inset calculations.
+
+Restores the 1.2-second leave delay with dragging enabled and the 500ms delay after releasing outside, as requested. Retains layout-callback filtering and continuous closing-width shrink.
