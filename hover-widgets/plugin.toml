@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.6.0"
+version = "1.7.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -44,6 +44,7 @@ default = true
 
 [[widget.setting]]
 key = "knob_color"
+visible_when = { key = "show_knob", values = ["true"] }
 type = "select"
 label_key = "volume_hover.settings.knob_color.label"
 description_key = "volume_hover.settings.knob_color.description"
@@ -271,6 +272,7 @@ right = "panel-toggle control-center media"
 
 [[widget.setting]]
 key = "controls_on_hover"
+visible_when = { key = "show_controls", values = ["true"] }
 type = "bool"
 label_key = "media_mini.settings.controls_on_hover.label"
 description_key = "media_mini.settings.controls_on_hover.description"
@@ -278,6 +280,7 @@ default = false
 
 [[widget.setting]]
 key = "background_expand_width"
+visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
 label_key = "media_mini.settings.background_expand_width.label"
 description_key = "media_mini.settings.background_expand_width.description"
@@ -288,6 +291,7 @@ step = 2
 
 [[widget.setting]]
 key = "bar_color"
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "select"
 label_key = "media_mini.settings.bar_color.label"
 description_key = "media_mini.settings.bar_color.description"
@@ -302,6 +306,7 @@ options = [
 
 [[widget.setting]]
 key = "point_style"
+visible_when = { key = "show_progress_bar", values = ["true"] }
 type = "select"
 label_key = "media_mini.settings.point_style.label"
 description_key = "media_mini.settings.point_style.description"
@@ -320,6 +325,7 @@ default = false
 
 [[widget.setting]]
 key = "progress_layout"
+visible_when = { key = "show_progress_bar", values = ["true"] }
 type = "select"
 label_key = "media_mini.settings.progress_layout.label"
 description_key = "media_mini.settings.progress_layout.description"
@@ -331,6 +337,7 @@ options = [
 
 [[widget.setting]]
 key = "background_width"
+visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
 label_key = "media_mini.settings.background_width.label"
 description_key = "media_mini.settings.background_width.description"
@@ -341,6 +348,7 @@ step = 2
 
 [[widget.setting]]
 key = "background_height"
+visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
 label_key = "media_mini.settings.background_height.label"
 description_key = "media_mini.settings.background_height.description"
@@ -351,6 +359,7 @@ step = 1
 
 [[widget.setting]]
 key = "progress_thickness"
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.progress_thickness.label"
 description_key = "media_mini.settings.progress_thickness.description"
@@ -361,6 +370,7 @@ step = 1
 
 [[widget.setting]]
 key = "progress_style"
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "select"
 label_key = "media_mini.settings.progress_style.label"
 description_key = "media_mini.settings.progress_style.description"
@@ -417,6 +427,7 @@ step = 1
 
 [[widget.setting]]
 key = "corner_rounding"
+visible_when = { key = "show_cover_art", values = ["true"] }
 type = "int"
 label_key = "media_mini.settings.corner_rounding.label"
 description_key = "media_mini.settings.corner_rounding.description"
@@ -427,6 +438,7 @@ step = 5
 
 [[widget.setting]]
 key = "progress_width"
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.progress_width.label"
 description_key = "media_mini.settings.progress_width.description"
@@ -437,6 +449,7 @@ step = 2
 
 [[widget.setting]]
 key = "progress_expand_width"
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.progress_expand_width.label"
 description_key = "media_mini.settings.progress_expand_width.description"

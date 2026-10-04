@@ -74,7 +74,7 @@ Shows transmit throughput. Hover expands the reading. Set Hide completely to fal
 
 Click the rounded classic progress pill to seek. Width and thickness are independent of cover size; the point style can be Rounded or Flat. Choose Classic with dragging to keep the same pill and drag its playhead: the fill previews your target and seeks on release, using expanded width. Interactive uses the native slider appearance. Seeking requires player support.
 
-Optional playback controls can appear always or only on hover. Hover highlights follow the theme. Classic progress uses a selectable theme colour. Background progress grows between compact and expanded widths and keeps its title on one line.
+Optional playback controls can appear always or only on hover. Hover highlights follow the theme. Classic progress uses a selectable theme colour. Background progress grows between compact and expanded widths and keeps its title on one line. Clicking the title/progress area seeks; artwork and playback controls retain their actions.
 
 Cover/title clicks toggle playback; right-click opens Media; scrolling skips tracks. Hover expands the title. Hidden when no player is available.
 
@@ -152,12 +152,12 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `controls_on_hover` | `bool` | `false` | When Playback controls is enabled, reveal those buttons only while hovering. |
+| `controls_on_hover` | `bool` | `false` | When Playback controls is enabled, animate those buttons in and out on hover. |
 | `background_expand_width` | `int` | `420` | Background pill width on hover, in pixels. Never smaller than Background width. |
 | `bar_color` | `select` | `on_surface` | Theme colour for the classic media track and progress fill. |
 | `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
 | `show_controls` | `bool` | `false` | Show previous, play/pause and next buttons. |
-| `progress_layout` | `select` | `inline` | Inline seekable bar or native-like progress behind the media content. Background progress is visual; artwork/title retain play/pause. |
+| `progress_layout` | `select` | `inline` | Inline seekable bar or progress behind the media content. Click the background title/progress area to seek; artwork and buttons retain playback actions. |
 | `background_width` | `int` | `260` | Compact background pill width, in pixels; it grows to Expanded background width on hover. |
 | `background_height` | `int` | `22` | Thickness of the background progress pill, in pixels. |
 | `progress_thickness` | `int` | `8` | Progress bar thickness, independent of cover size and width. Rounded ends stay circular. |
@@ -263,8 +263,12 @@ Adds a separate Circle colour selector (default: on-primary, matching native Set
 
 ## Version 1.5.0
 
-Adds Rounded/Flat point styles to volume and media. Flat gives the volume handle a slim rectangular shape; Show handle and Handle colour apply to both shapes. Fixes drag input width and maps pointer positions to the visible handle/playhead. Optional playback controls add previous, play/pause and next. Progress placement can put a tinted progress pill behind media content, with independent background width and thickness. Background progress is visual; use Inline for seeking. Vertical bars use the inline layout.
+Adds Rounded/Flat point styles to volume and media. Flat gives the volume handle a slim rectangular shape; Show handle and Handle colour apply to both shapes. Fixes drag input width and maps pointer positions to the visible handle/playhead. Optional playback controls add previous, play/pause and next. Progress placement can put a tinted progress pill behind media content, with independent background width and thickness. Background progress is seekable by clicking the title/progress area; artwork and buttons retain playback actions. Vertical bars use the inline layout.
 
 ## Version 1.6.0
 
 Restores folding in volume drag mode and keeps input width fixed during an active drag. Correctly preserves explicit false settings, fixing Show handle and Show percentage. Handles have a contrasting theme outline. Adds media Controls only on hover, themed hover highlights, classic Progress colour, and Expanded background width. Media labels are limited to one line.
+
+## Version 1.7.0
+
+Hover-only controls fade and expand into place. A 120ms leave grace period prevents child-to-child hover transitions collapsing the widget or restarting the marquee. Background progress is seekable from the title area and unoccupied background; artwork and buttons keep playback actions. Related settings use Noctalia conditional visibility for controls, cover art, handle colour and progress placement.

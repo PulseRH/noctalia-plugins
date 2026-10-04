@@ -50,3 +50,5 @@ Version 1.4.0 adds Circle colour and Show circle knob settings, centres thin bar
 Version 1.5.0: Rounded/Flat point style, optional media playback controls and background progress, plus corrected drag input geometry. The background is visual; inline progress remains seekable.
 
 Version 1.6.0 fixes volume folding and handle visibility, adds media controls only on hover and theme colours, and expands background progress without wrapping the title.
+
+Version 1.7.0 adds animated hover controls, stable hover transitions, clickable background seeking and conditional settings visibility.

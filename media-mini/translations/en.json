@@ -201,7 +201,7 @@
       },
       "progress_layout": {
         "label": "Progress placement",
-        "description": "Inline seekable bar or native-like progress behind the media content. Background progress is visual; artwork/title retain play/pause.",
+        "description": "Inline seekable bar or progress behind the media content. Click the background title/progress area to seek; artwork and buttons retain playback actions.",
         "options": {
           "inline": "Inline",
           "background": "Background"
@@ -217,7 +217,7 @@
       },
       "controls_on_hover": {
         "label": "Controls only on hover",
-        "description": "When Playback controls is enabled, reveal those buttons only while hovering."
+        "description": "When Playback controls is enabled, animate those buttons in and out on hover."
       },
       "background_expand_width": {
         "label": "Expanded background width",

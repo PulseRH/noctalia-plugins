@@ -37,6 +37,7 @@ default = true
 
 [[widget.setting]]
 key = "knob_color"
+visible_when = { key = "show_knob", values = ["true"] }
 type = "select"
 label_key = "volume_hover.settings.knob_color.label"
 description_key = "volume_hover.settings.knob_color.description"

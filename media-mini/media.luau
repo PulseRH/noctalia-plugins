@@ -43,6 +43,8 @@ local render
 local classicBarWidth = 0
 local renderedSeekValue = nil
 local hoveredControl = nil
+local hoverLeaveMs = 0
+local backgroundSeekX, backgroundSeekOffset, backgroundSeekWidth, backgroundWidth = nil, 0, 0, 0
 local function trackKey() return `{activePlayer}|{artist}|{title}|{length}` end
 
 -- Cover art is only ever a local file (barWidget.setImage has no network
@@ -275,11 +277,12 @@ function onMediaControlHover(state, key)
   elseif hoveredControl == key then hoveredControl = nil end
   onHover(state == "true")
 end
-local function playbackButton(key, glyph, action, tooltip, size)
+local function playbackButton(key, glyph, action, tooltip, size, reveal)
+  reveal = reveal or 1
   local highlighted = hoveredControl == key
-  return ui.row({key = key, width = size, height = size, align = "center", justify = "center", radius = 5,
+  return ui.row({key = key, width = size * reveal, height = size, align = "center", justify = "center", radius = 5,
     fill = highlighted and "primary/0.2" or "#00000000", onClick = action, onHover = "onMediaControlHover", tooltip = tooltip}, {
-    ui.glyph({name = glyph, size = math.min(16, size - 4), color = highlighted and "primary" or "on_surface"}),
+    ui.glyph({name = glyph, size = math.min(16, size - 4) * reveal, color = highlighted and "primary" or "on_surface"}),
   })
 end
 function onMediaInlineHover(state)
@@ -338,14 +341,34 @@ function onClassicSeekClick()
   onSeekChange(tostring(math.max(0, math.min(1, classicSeekX)) * length / 1000000))
   onSeekRelease()
 end
+function onBackgroundSeekMove(x)
+  local localX = tonumber(x)
+  backgroundSeekX = localX and (backgroundSeekOffset + localX * backgroundSeekWidth) / math.max(1, backgroundWidth) or nil
+  onHover(true)
+end
+function onBackgroundBarMove(x)
+  backgroundSeekX = tonumber(x)
+  onHover(true)
+end
+function onBackgroundSeekLeave()
+  backgroundSeekX = nil
+  onHover(false)
+end
+function onBackgroundSeekClick()
+  if backgroundSeekX == nil or backgroundWidth <= 0 or length <= 0 then return end
+  local fraction = math.max(0, math.min(1, backgroundSeekX))
+  onSeekChange(tostring(fraction * length / 1000000))
+  onSeekRelease()
+end
 render = function()
   barWidget.setVisible(hasMedia)
   if not hasMedia then return end
   local coverSize = noctalia.getConfig("cover_size") or COVER_SIZE_DEFAULT
   local showBar = noctalia.getConfig("show_progress_bar") ~= false and length > 0
   local background = noctalia.getConfig("progress_layout") == "background" and showBar and not barWidget.isVertical()
-  local controls = noctalia.getConfig("show_controls") == true
-    and (noctalia.getConfig("controls_on_hover") ~= true or hovering or progress > 0.05)
+  local controlsReveal = noctalia.getConfig("show_controls") == true
+    and (noctalia.getConfig("controls_on_hover") == true and progress or 1) or 0
+  local controls = controlsReveal > 0.01
   local barColor = tostring(noctalia.getConfig("bar_color") or "on_surface")
   local flat = noctalia.getConfig("point_style") == "flat"
   local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
@@ -371,10 +394,10 @@ render = function()
       "onPlaybackClick", "Play / pause", coverSize + 4))
   end
   if controls then
-    table.insert(children, ui.row({key = "controls", gap = 0, align = "center"}, {
-      playbackButton("previous", "player-skip-back-filled", "onPreviousClick", "Previous", 20),
-      playbackButton("pause", playing and "player-pause-filled" or "player-play-filled", "onPlaybackClick", "Play / pause", 20),
-      playbackButton("next", "player-skip-forward-filled", "onNextClick", "Next", 20),
+    table.insert(children, ui.row({key = "controls", width = 60 * controlsReveal, gap = 0, align = "center", opacity = controlsReveal}, {
+      playbackButton("previous", "player-skip-back-filled", "onPreviousClick", "Previous", 20, controlsReveal),
+      playbackButton("pause", playing and "player-pause-filled" or "player-play-filled", "onPlaybackClick", "Play / pause", 20, controlsReveal),
+      playbackButton("next", "player-skip-forward-filled", "onNextClick", "Next", 20, controlsReveal),
     }))
   end
   if showBar and not background then
@@ -427,10 +450,21 @@ render = function()
     else text = `{utf8Sub(full, math.max(width - 3, 1))}...` end
   end
   if background then
-    -- Background is visual, like the native media widget. Buttons keep their
-    -- own targets; artwork/title still play/pause and right-click opens Media.
-    table.insert(children, ui.label({key = "title", text = text, maxLines = 1, flexGrow = 1, maxWidth = math.max(1, bgWidth - coverSize - (controls and 60 or 0) - 36)}))
-    barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth, align = "center", onHover = "onMediaInlineHover"}, {
+    -- The title/progress area seeks. Artwork and control targets stay above
+    -- the background and keep their own playback actions.
+    backgroundWidth = bgWidth
+    backgroundSeekOffset = 8 + (cover and coverSize or coverSize + 4) + 6 + (controls and (60 * controlsReveal + 6) or 0)
+    backgroundSeekWidth = math.max(1, bgWidth - backgroundSeekOffset - 8)
+    table.insert(children, ui.row({key = "background-seek-hit", width = backgroundSeekWidth, height = inputHeight,
+      gap = -backgroundSeekWidth, align = "center", onClick = "onBackgroundSeekClick", tooltip = "Click progress to seek"}, {
+      ui.row({key = "background-title-layer", width = backgroundSeekWidth, height = inputHeight, align = "center"}, {
+        ui.label({key = "title", text = text, maxLines = 1, maxWidth = backgroundSeekWidth}),
+      }),
+      ui.graph({key = "background-seek-pointer", width = backgroundSeekWidth, height = inputHeight, values = {0, 0},
+        color = "#00000000", lineWidth = 0, fillOpacity = 0,
+        onPointerMove = "onBackgroundSeekMove", onPointerLeave = "onBackgroundSeekLeave"}),
+    }))
+    barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth, align = "center", onHover = "onMediaInlineHover", onClick = "onBackgroundSeekClick"}, {
       ui.row({key = "background-track-layer", width = bgWidth, height = inputHeight, align = "center"}, {
         ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = "primary/0.12"}),
       }),
@@ -440,7 +474,10 @@ render = function()
         ui.box({width = bgWidth * fraction, height = bgHeight, radius = flat and 0 or math.min(bgHeight, bgWidth * fraction) / 2, fill = "primary/0.3"}),
         ui.box({width = bgWidth * (1 - fraction), height = 1, fill = "#00000000"}),
       }),
-      ui.row({key = "media-foreground", width = bgWidth, height = inputHeight, gap = 6, paddingH = 8, align = "center", onHover = "onMediaInlineHover"}, children),
+      ui.graph({key = "background-wide-pointer", width = bgWidth, height = inputHeight, values = {0, 0},
+        color = "#00000000", lineWidth = 0, fillOpacity = 0,
+        onPointerMove = "onBackgroundBarMove", onPointerLeave = "onBackgroundSeekLeave"}),
+      ui.row({key = "media-foreground", width = bgWidth, height = inputHeight, gap = 6, paddingH = 8, align = "center"}, children),
     }))
   else
     table.insert(children, ui.label({key = "title", text = text, maxLines = 1}))
@@ -449,6 +486,13 @@ render = function()
 end
 
 local function step()
+  if hoverLeaveMs > 0 then
+    hoverLeaveMs = math.max(0, hoverLeaveMs - ANIM_INTERVAL)
+    if hoverLeaveMs == 0 then hovering, target = false, 0 end
+    noctalia.setUpdateInterval(ANIM_INTERVAL)
+    render()
+    return
+  end
   if math.abs(progress - target) >= 0.01 then
     progress = progress + (target - progress) * EASE
     noctalia.setUpdateInterval(ANIM_INTERVAL)
@@ -485,10 +529,15 @@ function update()
 end
 
 function onHover(isHovering: boolean)
-  hovering = isHovering
-  target = isHovering and 1.0 or 0.0
   if isHovering then
-    scrollOffset = 0
+    if not hovering then scrollOffset = 0 end
+    hovering, target, hoverLeaveMs = true, 1, 0
+  else
+    -- Noctalia reports leaves between neighbouring child targets. Keep the
+    -- current expansion until a short grace period confirms a real exit.
+    hoverLeaveMs = 120
+    noctalia.setUpdateInterval(ANIM_INTERVAL)
+    return
   end
   step()
 end
