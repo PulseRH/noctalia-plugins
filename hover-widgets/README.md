@@ -164,6 +164,8 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 | `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
 | `progress_layout` | `select` | `inline` | Inline seekable bar or progress behind the media content. Click the background title/progress area to seek; artwork and buttons retain playback actions. |
 | `audio_spectrum` | `bool` | `false` | Optional live audio visualiser, using the shell’s shared spectrum. |
+| `audio_spectrum_bands` | `int` | `16` | Frequency bands, 8–128. |
+| `visualiser_mode` | `select` | `overlay` | Background masking: overlay, played_only, inverted, progress. |
 | `visualiser_color` | `color` | `secondary` | Theme/custom visualiser colour. |
 | `visualiser_opacity` | `int` | `35` | Visualiser opacity, 0–100%. |
 | `visualiser_height` | `int` | `12` | Maximum bar height, 4–24px. |
@@ -320,3 +322,7 @@ Left-click the top/bottom 5px seek areas of playback controls to seek without a 
 ## Version 1.10.0
 
 Adds optional audio bars using Noctalia’s shared PipeWire spectrum callback. Visualiser rendering stays below pointer/control layers. Paused/idle audio clears the spectrum and avoids repeated idle rendering; inline width remains stable. The feature defaults off, with conditional appearance settings.
+
+## Version 1.11.0
+
+Adds adjustable band count and four visualiser masks in background layout. Played-only hides bars over unplayed background. Inverted uses black bars over progress and Visualiser colour outside it. Progress replaces the solid fill with played audio bars, using Progress colour and darkening; a quiet/paused baseline retains position. Bands crossing the position boundary split precisely. Band widths and gaps scale to fit, including 128 bands in compact widgets.

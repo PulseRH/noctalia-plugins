@@ -370,18 +370,44 @@ function onBackgroundSeekClick()
   onSeekChange(tostring(fraction * length / 1000000))
   onSeekRelease()
 end
-local function visualiser(width, inputHeight)
+local function visualiser(width, inputHeight, fraction, mode)
   local height = math.max(4, math.min(24, noctalia.getConfig("visualiser_height") or 12))
   local color = tostring(noctalia.getConfig("visualiser_color") or "secondary")
   local opacity = math.max(0, math.min(100, noctalia.getConfig("visualiser_opacity") or 35)) / 100
-  local count = math.max(16, #spectrumValues)
-  local gap = 2
-  local barWidth = math.max(1, (width - gap * (count - 1)) / count)
+  local count = math.max(8, math.min(128, noctalia.getConfig("audio_spectrum_bands") or 16))
+  local gap = math.min(2, width / (count * 3))
+  local barWidth = (width - gap * (count - 1)) / count
+  local boundary = math.max(0, math.min(1, fraction or 0)) * width
+  mode = mode or "overlay"
+  local playedColor = mode == "inverted" and "#000000" or color
+  if mode == "progress" then playedColor = tostring(noctalia.getConfig("background_progress_color") or "primary") end
+  local shade = math.max(0, math.min(80, noctalia.getConfig("progress_darkening") or 0)) / 100
+  local shadeColor = string.format("#000000%02x", math.floor(shade * 255 + 0.5))
   local bars = {}
   for i = 1, count do
     local value = math.max(0, math.min(1, spectrumValues[i] or 0))
-    table.insert(bars, ui.box({key = "spectrum-" .. i, width = barWidth,
-      height = math.max(1, value * height), radius = math.min(1, barWidth / 2), fill = color}))
+    local barHeight = math.max(1, value * height)
+    local x = (i - 1) * (barWidth + gap)
+    local playedWidth = math.max(0, math.min(barWidth, boundary - x))
+    local pieces = {}
+    if mode == "overlay" then
+      table.insert(pieces, ui.box({width = barWidth, height = barHeight, radius = math.min(1, barWidth / 2), fill = color}))
+    else
+      if playedWidth > 0 then
+        local played = ui.box({width = playedWidth, height = barHeight, fill = playedColor})
+        if mode == "progress" and shade > 0 then
+          played = ui.row({width = playedWidth, height = barHeight, gap = -playedWidth}, {
+            played, ui.box({width = playedWidth, height = barHeight, fill = shadeColor}),
+          })
+        end
+        table.insert(pieces, played)
+      end
+      if playedWidth < barWidth then
+        table.insert(pieces, ui.box({width = barWidth - playedWidth, height = barHeight,
+          fill = mode == "inverted" and color or "#00000000"}))
+      end
+    end
+    table.insert(bars, ui.row({key = "spectrum-" .. i, width = barWidth, height = barHeight, gap = 0}, pieces))
   end
   return ui.row({key = "media-visualiser", width = width, height = inputHeight,
     gap = gap, align = "center", opacity = opacity}, bars)
@@ -437,7 +463,9 @@ render = function()
   local bgExpanded = math.max(bgCompact, math.min(1000, noctalia.getConfig("background_expand_width") or 420))
   local bgWidth = bgCompact + (bgExpanded - bgCompact) * progress
   local bgHeight = math.max(16, math.min(40, noctalia.getConfig("background_height") or 22))
-  local backgroundColor = tostring(noctalia.getConfig("background_progress_color") or "primary")
+  local visualiserMode = tostring(noctalia.getConfig("visualiser_mode") or "overlay")
+  local spectrumProgress = noctalia.getConfig("audio_spectrum") == true and visualiserMode == "progress"
+  local backgroundColor = spectrumProgress and "#00000000" or tostring(noctalia.getConfig("background_progress_color") or "primary")
   local backgroundDarkening = math.max(0, math.min(60, noctalia.getConfig("background_darkening") or 0)) / 100
   local backgroundTrack = string.format("#000000%02x", math.floor(backgroundDarkening * 255 + 0.5))
   local children = {}
@@ -549,10 +577,10 @@ render = function()
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onBackgroundBarMove", onPointerLeave = "onBackgroundSeekLeave"}),
     }
-    if noctalia.getConfig("audio_spectrum") == true and spectrumActive then
-      table.insert(backgroundLayers, 3, visualiser(bgWidth, inputHeight))
+    if noctalia.getConfig("audio_spectrum") == true and (spectrumActive or spectrumProgress) then
+      table.insert(backgroundLayers, 3, visualiser(bgWidth, inputHeight, fraction, visualiserMode))
     end
-    if progressDarkening > 0 then
+    if progressDarkening > 0 and not spectrumProgress then
       table.insert(backgroundLayers, 3, progressShade("background-progress-shade", bgWidth, bgHeight, inputHeight, fraction, flat, progressDarkening))
     end
     local foregroundHeight = math.max(cover and coverSize or coverSize + 4, 20)

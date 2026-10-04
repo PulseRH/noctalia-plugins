@@ -100,7 +100,7 @@ tags = ["system"]
 [[plugin]]
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.9.0"
+version = "1.10.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -112,7 +112,7 @@ description = "Classic now-playing artwork and progress pill, configurable width
 [[plugin]]
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.10.0"
+version = "1.11.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"

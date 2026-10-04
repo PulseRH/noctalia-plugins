@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.9.0"
+version = "1.10.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -87,6 +87,31 @@ type = "bool"
 label_key = "media_mini.settings.audio_spectrum.label"
 description_key = "media_mini.settings.audio_spectrum.description"
 default = false
+
+[[widget.setting]]
+key = "audio_spectrum_bands"
+visible_when = { key = "audio_spectrum", values = ["true"] }
+type = "int"
+label_key = "media_mini.settings.audio_spectrum_bands.label"
+description_key = "media_mini.settings.audio_spectrum_bands.description"
+default = 16
+min = 8
+max = 128
+step = 4
+
+[[widget.setting]]
+key = "visualiser_mode"
+visible_when = { key = "audio_spectrum", values = ["true"] }
+type = "select"
+label_key = "media_mini.settings.visualiser_mode.label"
+description_key = "media_mini.settings.visualiser_mode.description"
+default = "overlay"
+options = [
+  { value = "overlay", label_key = "media_mini.settings.visualiser_mode.options.overlay" },
+  { value = "played_only", label_key = "media_mini.settings.visualiser_mode.options.played_only" },
+  { value = "inverted", label_key = "media_mini.settings.visualiser_mode.options.inverted" },
+  { value = "progress", label_key = "media_mini.settings.visualiser_mode.options.progress" },
+]
 
 [[widget.setting]]
 key = "visualiser_color"

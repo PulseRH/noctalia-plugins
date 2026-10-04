@@ -279,7 +279,7 @@
       },
       "visualiser_color": {
         "label": "Visualiser colour",
-        "description": "Choose a theme or custom colour for the audio bars."
+        "description": "Theme/custom audio-bar colour. In inverted mode this is the lighter background colour; progress mode uses Progress colour."
       },
       "visualiser_opacity": {
         "label": "Visualiser opacity (%)",
@@ -292,6 +292,20 @@
       "visualiser_width": {
         "label": "Inline visualiser width (px)",
         "description": "Width when progress is inline; background mode uses the media widget\u2019s full width."
+      },
+      "audio_spectrum_bands": {
+        "label": "Visualiser bands",
+        "description": "Number of live frequency bands, from 8 to 128. Bars and gaps adapt to fit the widget."
+      },
+      "visualiser_mode": {
+        "label": "Visualiser masking",
+        "description": "Background layout: overlay, show only on played progress, dark on progress/light on background, or use the audio bars as the progress fill. Inline visualisers keep the overlay style.",
+        "options": {
+          "overlay": "Overlay everywhere",
+          "played_only": "Only on played progress",
+          "inverted": "Dark on progress / light on background",
+          "progress": "Visualiser is progress"
+        }
       }
     }
   },
