@@ -341,7 +341,7 @@ RAM uses the Lucide memory-stick icon, tinted to the active on_surface theme col
 
 ### RAM icon asset
 
-`assets/memory.svg` is a clean vector RAM outline based on the user-provided reference, with three chip windows, side notches and six bold protruding contacts. It uses currentColor and is tinted to the active theme.
+`assets/memory.svg` is a clean vector RAM outline based on the user-provided reference, with three chip windows, side notches and inset flat edge contacts split by an off-centre key notch. It uses currentColor and is tinted to the active theme.
 
 ## Version 1.12.2
 
@@ -350,3 +350,7 @@ RAM uses the bolder Bootstrap memory icon with three large chip cut-outs, displa
 ## Version 1.12.3
 
 Uses a clean vector three-chip RAM outline based on the user reference, with a thicker 1.8-unit outline, six wider protruding contacts, a tightly fitted SVG viewport and theme tint.
+
+## Version 1.12.4
+
+RAM contacts are narrower than the stick body, with an off-centre key notch and unequal banks. The theme tint and 20px icon size are retained.
