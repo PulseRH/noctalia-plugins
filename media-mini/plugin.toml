@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.1.0"
+version = "1.2.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -17,6 +17,16 @@ entry = "media.luau"
 right = "panel-toggle control-center media"
 
 [[widget.setting]]
+key = "progress_thickness"
+type = "int"
+label_key = "media_mini.settings.progress_thickness.label"
+description_key = "media_mini.settings.progress_thickness.description"
+default = 8
+min = 4
+max = 24
+step = 1
+
+[[widget.setting]]
 key = "progress_style"
 type = "select"
 label_key = "media_mini.settings.progress_style.label"
@@ -24,6 +34,7 @@ description_key = "media_mini.settings.progress_style.description"
 default = "classic"
 options = [
   { value = "classic", label_key = "media_mini.settings.progress_style.options.classic" },
+  { value = "classic_drag", label_key = "media_mini.settings.progress_style.options.classic_drag" },
   { value = "interactive", label_key = "media_mini.settings.progress_style.options.interactive" },
 ]
 

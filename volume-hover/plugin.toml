@@ -1,6 +1,6 @@
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "0.7.1"
+version = "0.8.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -16,6 +16,23 @@ entry = "volume.luau"
 [widget.actions]
 left = "panel-toggle control-center audio"
 right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "drag_enabled"
+type = "bool"
+label_key = "volume_hover.settings.drag_enabled.label"
+description_key = "volume_hover.settings.drag_enabled.description"
+default = false
+
+[[widget.setting]]
+key = "slider_thickness"
+type = "int"
+label_key = "volume_hover.settings.slider_thickness.label"
+description_key = "volume_hover.settings.slider_thickness.description"
+default = 12
+min = 4
+max = 24
+step = 1
 
 [[widget.setting]]
 key = "icon_click"
@@ -50,7 +67,7 @@ label_key = "volume_hover.settings.slider_width.label"
 description_key = "volume_hover.settings.slider_width.description"
 default = 90
 min = 40
-max = 240
+max = 300
 step = 2
 
 [[widget.setting]]

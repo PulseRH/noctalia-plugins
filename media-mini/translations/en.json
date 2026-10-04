@@ -4,7 +4,7 @@
     "settings": {
       "bar_color": {
         "label": "Bar colour",
-        "description": "Theme colour role used for the classic filled bar and knob.",
+        "description": "Theme colour role used for the classic filled track and circular knob.",
         "options": {
           "primary": "Primary (accent)",
           "onsurface": "On-surface (text)",
@@ -16,7 +16,7 @@
       },
       "slider_width": {
         "label": "Slider width (px)",
-        "description": "Width of the classic hover slider image. Height scales with it."
+        "description": "Expanded track width in pixels, independent of thickness and speaker size."
       },
       "scroll_step": {
         "label": "Scroll step (%)",
@@ -37,6 +37,14 @@
           "mute": "Toggle mute",
           "panel": "Open Audio panel"
         }
+      },
+      "slider_thickness": {
+        "label": "Slider thickness (px)",
+        "description": "Track thickness, independent of its width. The circular knob is 1.5 times this size."
+      },
+      "drag_enabled": {
+        "label": "Enable dragging",
+        "description": "Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab."
       }
     }
   },
@@ -144,11 +152,16 @@
       },
       "progress_style": {
         "label": "Progress style",
-        "description": "Classic keeps the original solid pill and accepts click-to-seek. Interactive uses a native slider with dragging.",
+        "description": "Classic supports clicks. Classic with dragging keeps the same pill, uses expanded width, previews while dragging and seeks on release. Interactive uses the native slider appearance.",
         "options": {
           "classic": "Classic (original look)",
-          "interactive": "Interactive seek slider"
+          "interactive": "Interactive seek slider",
+          "classic_drag": "Classic with dragging"
         }
+      },
+      "progress_thickness": {
+        "label": "Progress thickness (px)",
+        "description": "Progress bar thickness, independent of cover size and width. Rounded ends stay circular."
       }
     }
   },

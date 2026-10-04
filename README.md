@@ -42,3 +42,5 @@ All widgets share the same open/close animation timing (60fps ease) and use UTF-
 MIT
 
 **hover-widgets** bundles all nine entries into one install. Volume and media changes require plugin API 32 (Noctalia 5.2+). Classic media progress supports click-to-seek; choose Interactive for dragging.
+
+Version 1.3.0 adds independent bar thickness and width controls, serialized volume updates, and optional dragging with the classic shapes. Enable dragging keeps volume expanded; Classic with dragging uses media’s expanded width and seeks on release.

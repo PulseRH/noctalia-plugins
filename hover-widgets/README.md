@@ -15,7 +15,7 @@ One Noctalia plugin containing nine compact bar widgets. Each widget can be adde
 
 Noctalia 5.2.0 or later (plugin API 32), on Linux. Commands declared by this bundle: `noctalia`, `wpctl`, `playerctl`, `sh`, and `wlrctl`. The clock and basic system monitors don't invoke the specialised commands; volume uses `wpctl`, media uses `playerctl` and `sh`, and active-window uses `wlrctl`. Because dependencies are declared at plugin scope, missing tools can be reported even if you only use another widget.
 
-Optional `magick` or `convert` (ImageMagick) renders volume frames and rounded media artwork; those widgets have glyph/text fallback. Optional `nvidia-smi` provides NVIDIA temperature. `wlrctl` requires wlr-foreign-toplevel-management-v1 support from the compositor. CPU temperature currently targets Intel coretemp; power needs readable Intel RAPL. See Notes for other hardware limits.
+Optional `magick` or `convert` (ImageMagick) rounds media artwork. Volume and progress graphics are drawn directly and do not need ImageMagick. Optional `nvidia-smi` provides NVIDIA temperature. `wlrctl` requires wlr-foreign-toplevel-management-v1 support from the compositor. CPU temperature currently targets Intel coretemp; power needs readable Intel RAPL. See Notes for other hardware limits.
 
 ## Usage
 
@@ -40,7 +40,9 @@ Hover to reveal the full weekday, ordinal date, month and seconds. Uses local ti
 
 ### Hover Volume (`volume`)
 
-Keeps the original baked speaker and hover slider. Click the speaker to toggle mute; click anywhere on its expanded slider to set volume; click the percentage (or muted label) or right-click to open the anchored Audio Control Center. The Speaker click setting can make the image open Audio instead. Scroll adjusts volume. The classic slider accepts position clicks; use Audio for dragging.
+Hover expands the original rounded track and circular knob. Click the speaker to mute/unmute; click the track to set volume. Percentage/padding and right-click open the anchored Audio panel. Speaker click can select Audio instead. Rapid writes are serialized and coalesced; stale reads cannot overwrite a newer request. Width and thickness are independent.
+
+Enable dragging to drag the same classic track; it stays expanded in that mode. Volume changes continuously during dragging. This is optional and off by default.
 
 
 ### Hover CPU Monitor (`cpu`)
@@ -70,7 +72,9 @@ Shows transmit throughput. Hover expands the reading. Set Hide completely to fal
 
 ### Mini Media (`media`)
 
-Classic keeps the original cover art and solid progress pill. Compact and expanded progress widths are configurable independently; equal values keep a fixed length. Click the classic progress pill to seek to that point. Interactive style adds a native draggable slider. Seeking requires player support. Cover/title clicks toggle playback; right-click opens Media. Scroll skips tracks. Hidden when no player is available.
+Click the rounded classic progress pill to seek. Width and thickness are independent of cover size; the ends remain circular. Choose Classic with dragging to keep the same pill and drag its playhead: the fill previews your target and seeks on release, using expanded width. Interactive uses the native slider appearance. Seeking requires player support.
+
+Cover/title clicks toggle playback; right-click opens Media; scrolling skips tracks. Hover expands the title. Hidden when no player is available.
 
 
 ### Hover Active Window (`active-window`)
@@ -86,9 +90,11 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `icon_click` | `select` | `mute` | Click the speaker to toggle mute, or open Audio. Percentage/padding and right-click open Audio. |
-| `bar_color` | `select` | `primary` | Theme colour role used for the classic filled bar and knob. |
-| `slider_width` | `int` | `90` | Width of the classic hover slider image. Height scales with it. |
+| `drag_enabled` | `bool` | `false` | Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab. |
+| `slider_thickness` | `int` | `12` | Track thickness, independent of its width. The circular knob is 1.5 times this size. |
+| `icon_click` | `select` | `mute` | Click the speaker to toggle mute, or open Audio. Click the expanded track to set volume. Percentage/padding and right-click open Audio. |
+| `bar_color` | `select` | `primary` | Theme colour role used for the classic filled track and circular knob. |
+| `slider_width` | `int` | `90` | Expanded track width in pixels, independent of thickness and speaker size. |
 | `scroll_step` | `int` | `5` | How much one scroll notch changes the volume. |
 | `invert_scroll` | `bool` | `false` | By default scroll up raises the volume. Turn this on if it feels backwards. |
 | `show_percent` | `bool` | `true` | Show volume percentage or muted. Click this label to open Audio. |
@@ -141,7 +147,8 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `progress_style` | `select` | `classic` | Classic keeps the original solid pill and artwork. Interactive uses a native seek slider; click or drag it to seek. |
+| `progress_thickness` | `int` | `8` | Progress bar thickness, independent of cover size and width. Rounded ends stay circular. |
+| `progress_style` | `select` | `classic` | Classic supports clicks. Classic with dragging keeps the same pill, uses expanded width, previews while dragging and seeks on release. Interactive uses the native slider appearance. |
 | `show_cover_art` | `bool` | `true` | Replace the play/pause icon with the track's (rounded) cover art when available. |
 | `show_progress_bar` | `bool` | `true` | Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph. |
 | `compact_width` | `int` | `20` | Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put. |
@@ -232,3 +239,7 @@ Original visual styles remain the defaults. Volume has separate speaker, track a
 Classic progress bars now accept position clicks without changing their artwork. Volume clicks map onto the original knob travel; media clicks seek the displayed player to the corresponding point in the track. Media refreshes visibility as soon as a metadata query completes.
 
 Version 1.2.1 gives volume immediate click feedback and refreshes the classic knob as soon as its raster frame completes.
+
+## Version 1.3.0
+
+Volume uses a serialized latest-request queue and discards stale polling results. Rounded bars and knobs are drawn at their actual dimensions, with independent width/thickness. Optional dragging keeps classic shapes, using Noctalia pointer capture; volume updates continuously and media seeks on release.

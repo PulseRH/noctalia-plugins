@@ -9,25 +9,9 @@
 local COVER_SIZE_DEFAULT = 20 -- px, square cover-art icon in place of the play/pause glyph
 local ROUND_SIZE = 128 -- px, fixed processing canvas the mask is rendered at before downscale
 
--- The progress bar is rendered as an actual image (not text) so it's always
--- a flat solid fill and never has to share a font with the title label --
--- no installed font renders block/shade characters as a true flat fill
--- (they're dither patterns by design), and forcing a font for them fights
--- the widget's own per-widget Font setting. Position is discretized into
--- FILL_STEPS buckets so there are only ever a handful of distinct bar
--- images to render/cache, not one per frame.
-local FILL_STEPS = 24
--- When cover art is on, the bar sits *beside* the art (not over it): the art
--- and a progress pill are composited side by side into one image (the widget
--- only has a single image slot). Sizes are in the ROUND_SIZE processing space.
-local COMBO_GAP = 16 -- px, transparent gap between art and bar
-local COMBO_BAR_W = 220 -- px, bar width (kept wide vs. tall so it reads as a bar, not a blob)
-local COMBO_BAR_H = 52 -- px, bar height
-local COMBO_CANVAS_W = ROUND_SIZE + COMBO_GAP + COMBO_BAR_W -- total composited width
--- Standalone bar (cover art off), shown in place of the play/pause glyph.
-local STANDALONE_BAR_W = 200 -- px canvas
-local STANDALONE_BAR_H = 64
-local STANDALONE_DISP_SCALE = 2.4 -- display width = cover_size * this (bar has no art to size against)
+-- Progress graphics use native rounded shapes at their configured width and
+-- thickness. Cover art remains separate so resizing never distorts it.
+local COMBO_GAP = 16 -- gap relative to the 128px artwork processing canvas
 
 -- Same open/close tuning as the clock/volume/sysmon widgets: 0.16 @ 16ms.
 local EASE = 0.16
@@ -64,7 +48,6 @@ local function trackKey() return `{activePlayer}|{artist}|{title}|{length}` end
 local DATA_DIR = noctalia.pluginDataDir() or noctalia.expandPath("~/.cache/noctalia-plugins/media-mini")
 local CACHE_DIR = `{DATA_DIR}/cache/media-mini`
 local DOWNLOAD_PATH = `{CACHE_DIR}/cover-src.jpg`
-local standaloneReady, standalonePending = {}, {}
 local ROUND_PATH = `{CACHE_DIR}/cover-round.png`
 noctalia.mkdirAll(CACHE_DIR)
 
@@ -284,61 +267,6 @@ local function resolveCoverPath(pct: number): string?
   return nil
 end
 
--- 0..FILL_STEPS bucket for the current playback position, or 0 if unknown.
-local function fillBucket(): number
-  if not hasMedia or length <= 0 then
-    return 0
-  end
-  local frac = math.max(0, math.min(1, position / length))
-  return math.floor(frac * FILL_STEPS + 0.5)
-end
-
--- roundRectangle with a radius bigger than half the rect just renders as a
--- fully rounded pill, so no clamping needed for the small-fill edge cases.
-local function barDrawCmd(fillColor: string, x1: number, y1: number, x2: number, y2: number, r: number): string
-  return string.format(" -fill %s -draw \"roundRectangle %d,%d,%d,%d,%d,%d\"", fillColor, x1, y1, x2, y2, r, r)
-end
-
--- Composites the (already rounded) cover art and a progress pill side by side
--- into one image, so both can share the widget's single image slot without
--- the bar sitting on top of the art. Returns COVER_BAR_PATH once at least one
--- composite exists for the current art (subsequent bucket changes overwrite
--- that same file in place -- setImage watch=true reloads it, so the widget's
--- width never jitters), or the plain art path until the first bake lands.
--- Standalone flat pill bar for when cover art is off, shown in place of the
--- play/pause glyph. Purely a function of the fill bucket (not the track), so
--- each of the FILL_STEPS possible images only ever needs generating once.
-local function resolveStandaloneBar(bucket: number): string?
-  local path = `{CACHE_DIR}/bar-standalone-{bucket}.png`
-  if standaloneReady[bucket] then
-    return path
-  end
-  if not MAGICK_AVAILABLE then
-    return nil
-  end
-
-  if not standalonePending[bucket] then
-    standalonePending[bucket] = true
-    local filledW = math.floor((bucket / FILL_STEPS) * STANDALONE_BAR_W + 0.5)
-    local r = math.floor(STANDALONE_BAR_H / 2)
-
-    local cmd = string.format("%s -size %dx%d xc:none", MAGICK_CMD, STANDALONE_BAR_W, STANDALONE_BAR_H)
-      .. barDrawCmd("\"rgba(255,255,255,0.28)\"", 0, 0, STANDALONE_BAR_W - 1, STANDALONE_BAR_H - 1, r)
-      .. (filledW > 0 and barDrawCmd("white", 0, 0, filledW - 1, STANDALONE_BAR_H - 1, r) or "")
-      .. " "
-      .. shQuote(path)
-
-    noctalia.runAsync(cmd, function(result)
-      standalonePending[bucket] = false
-      if result.exitCode == 0 then
-        standaloneReady[bucket] = true
-      end
-    end)
-  end
-
-  return nil
-end
-
 function onMediaInlineHover(state)
   onHover(state == "true")
 end
@@ -349,6 +277,7 @@ function onSeekChange(value)
   if length <= 0 or activePlayer == "" then return end
   if seekDraft == nil then seekPlayer, seekTrack = activePlayer, trackKey() end
   seekDraft = math.max(0, math.min(length / 1000000, tonumber(value) or 0))
+  if render then render() end
 end
 function onSeekRelease()
   if seekDraft == nil then return end
@@ -399,14 +328,15 @@ render = function()
     local expanded = math.max(compact, math.min(500, noctalia.getConfig("progress_expand_width") or 35))
     table.insert(children, ui.slider({key = "song-progress", min = 0, max = length / 1000000, step = 1,
       value = seekDraft or math.max(0, math.min(length, position)) / 1000000,
-      width = compact + (expanded - compact) * progress, height = 16, controlSize = "sm",
+      width = compact + (expanded - compact) * progress, height = math.max(4, math.min(24, noctalia.getConfig("progress_thickness") or 8)), controlSize = "sm",
       onChange = "onSeekChange", onDragEnd = "onSeekRelease"}))
   end
   else
     local showBar = noctalia.getConfig("show_progress_bar") ~= false and length > 0
     local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
     local expanded = math.max(compact, math.min(500, noctalia.getConfig("progress_expand_width") or 35))
-    local barWidth = compact + (expanded - compact) * progress
+    local classicDrag = noctalia.getConfig("progress_style") == "classic_drag"
+    local barWidth = classicDrag and expanded or compact + (expanded - compact) * progress
     local roundPct = noctalia.getConfig("corner_rounding") or 100
     local cover = nil
     if noctalia.getConfig("show_cover_art") ~= false then cover = resolveCoverPath(roundPct) end
@@ -416,18 +346,22 @@ render = function()
         onClick = "onPlaybackClick", onHover = "onMediaInlineHover"}))
     end
     if showBar then
-      local bar = resolveStandaloneBar(fillBucket())
-      if bar then
-        local barHeight = cover and coverSize * COMBO_BAR_H / ROUND_SIZE
-          or coverSize * STANDALONE_DISP_SCALE * STANDALONE_BAR_H / STANDALONE_BAR_W
-        table.insert(parts, ui.row({key = "classic-progress-hit", gap = -barWidth, align = "center",
-          onClick = "onClassicSeekClick"}, {
-          ui.image({key = "classic-progress", path = bar, width = barWidth, height = barHeight, fit = "stretch"}),
-          ui.graph({key = "classic-seek-pointer", width = barWidth, height = barHeight, values = {0, 0},
-            color = "#00000000", lineWidth = 0, fillOpacity = 0,
-            onPointerMove = "onClassicSeekMove", onPointerLeave = "onClassicSeekLeave"}),
-        }))
-      end
+      local barHeight = math.max(4, math.min(24, noctalia.getConfig("progress_thickness") or 8))
+      local filledWidth = barWidth * math.max(0, math.min(1, (seekDraft or position / 1000000) * 1000000 / length))
+      table.insert(parts, ui.row({key = "classic-progress-hit", gap = -barWidth, align = "center",
+        onClick = "onClassicSeekClick"}, {
+        ui.box({key = "classic-track", width = barWidth, height = barHeight, radius = barHeight / 2, fill = "#ffffff47"}),
+        ui.row({key = "classic-fill-layer", width = barWidth, height = barHeight, gap = 0, align = "center"}, {
+          ui.box({key = "classic-fill", width = filledWidth, height = barHeight, radius = barHeight / 2, fill = "#ffffff"}),
+          ui.box({width = barWidth - filledWidth, height = 1, fill = "#00000000"}),
+        }),
+        classicDrag and ui.slider({key = "classic-drag", width = barWidth, height = barHeight,
+          min = 0, max = length / 1000000, step = 1, value = seekDraft or position / 1000000, opacity = 0,
+          onChange = "onSeekChange", onDragEnd = "onSeekRelease"})
+        or ui.graph({key = "classic-seek-pointer", width = barWidth, height = barHeight, values = {0, 0},
+          color = "#00000000", lineWidth = 0, fillOpacity = 0,
+          onPointerMove = "onClassicSeekMove", onPointerLeave = "onClassicSeekLeave"}),
+      }))
     end
     if #parts == 0 then
       table.insert(parts, ui.glyph({name = playing and "player-play-filled" or "player-pause-filled", size = coverSize}))
