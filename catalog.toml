@@ -27,7 +27,7 @@ tags = ["clock"]
 [[plugin]]
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "1.1.0"
+version = "1.2.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -39,14 +39,15 @@ description = "Classic hover volume: speaker toggles mute, percentage opens Audi
 [[plugin]]
 id = "pulser/sysmon-cpu"
 name = "CPU (mini)"
-version = "0.1.0"
-plugin_api = 5
+version = "0.2.0"
+plugin_api = 32
+min_noctalia = "5.2.0"
 author = "pulser"
 license = "MIT"
-icon = "cpu-usage"
-description = "Compact gauge bar or plain percentage (toggle below); hover shows percent, clock speed, and package wattage."
-min_noctalia = "5.0.0"
+dependencies = []
 tags = ["system"]
+icon = "cpu-usage"
+description = "Compact gauge bar or plain percentage (toggle below); optional GPU usage; hover shows clock speed and package wattage."
 
 [[plugin]]
 id = "pulser/sysmon-ram"
@@ -99,7 +100,7 @@ tags = ["system"]
 [[plugin]]
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.7.0"
+version = "1.8.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -111,7 +112,7 @@ description = "Classic now-playing artwork and progress pill, configurable width
 [[plugin]]
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.8.0"
+version = "1.9.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"

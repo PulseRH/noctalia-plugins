@@ -54,3 +54,7 @@ Version 1.6.0 fixes volume folding and handle visibility, adds media controls on
 Version 1.7.0 adds animated hover controls, stable hover transitions, clickable background seeking and conditional settings visibility.
 
 Version 1.8.0 fixes transient media disappearance, speeds artwork with persistent cache/native rounding, fixes background text width and enlarges play/pause icons.
+
+Version 1.9.0: smaller play/pause, full-width background seek strip, optional wheel seeking, darker unplayed backgrounds and reordered settings.
+
+CPU now shows optional GPU usage alongside CPU using Noctalia system statistics. Unplayed background darkening is subtle, and the lower-edge seek target adds no visible line.

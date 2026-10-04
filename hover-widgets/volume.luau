@@ -130,7 +130,7 @@ render = function()
     local filledWidth = knobStart + handleWidth / 2
     local layers = {
       ui.row({key = "track-layer", width = trackWidth, height = inputHeight, align = "center"}, {
-        ui.box({key = "track", width = trackWidth, height = h, radius = h / 2, fill = color .. "/0.23"}),
+        ui.box({key = "track", width = trackWidth, height = h, radius = h / 2, fill = "#00000033"}),
       }),
       ui.row({key = "fill-layer", gap = 0, width = trackWidth, height = inputHeight, align = "center"}, flat and {
         ui.progress({key = "flat-fill", width = trackWidth, height = h, radius = h / 2,

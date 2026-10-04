@@ -77,6 +77,10 @@
       "gauge": {
         "label": "Show gauge bar",
         "description": "Compact display: gauge bar (on) or plain percentage (off)"
+      },
+      "show_gpu": {
+        "label": "Show GPU usage",
+        "description": "Show GPU utilisation beside CPU usage using Noctalia system monitoring. A dash means the sensor is unavailable or still loading."
       }
     }
   },
@@ -233,6 +237,22 @@
           "tertiary": "Tertiary",
           "error": "Error"
         }
+      },
+      "scroll_action": {
+        "label": "Scroll action",
+        "description": "Skip tracks or seek through the current song with the mouse wheel.",
+        "options": {
+          "tracks": "Previous / next track",
+          "seek": "Seek playback"
+        }
+      },
+      "scroll_seek_step": {
+        "label": "Scroll seek seconds",
+        "description": "Seconds per wheel step. Scroll up goes forward; down goes back."
+      },
+      "background_seek_strip": {
+        "label": "Seek beneath controls",
+        "description": "Keep an invisible clickable seek area along the lower edge of the background, including underneath the playback controls."
       }
     }
   },

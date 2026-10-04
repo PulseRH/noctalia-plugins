@@ -39,6 +39,8 @@ local position = 0
 local length = 0
 local seekDraft, seekPlayer, seekTrack = nil, nil, nil
 local render
+local flushSeek
+local seekWritePending, wantedSeek, seekGeneration = false, nil, 0
 local classicBarWidth = 0
 local renderedSeekValue = nil
 local hoveredControl = nil
@@ -136,7 +138,7 @@ local function youtubeThumbFromPageUrl(pageUrl: string): string?
   return `https://i.ytimg.com/vi/{id}/hqdefault.jpg`
 end
 
-local function acceptMediaResult(result)
+local function acceptMediaResult(result, readGeneration)
   mediaPollPending = false
   local out = result.stdout or ""
   -- title is last/greedy since it's the only field likely to contain
@@ -170,7 +172,9 @@ local function acceptMediaResult(result)
   artist = a or ""
   title = t or ""
   artUrl = resolvedArtUrl
-  position = tonumber(pos) or 0
+  if (readGeneration == nil or readGeneration == seekGeneration) and not seekWritePending and wantedSeek == nil then
+    position = tonumber(pos) or 0
+  end
   length = tonumber(len) or 0
   if seekDraft ~= nil and seekTrack ~= trackKey() then seekDraft, seekPlayer, seekTrack = nil, nil, nil end
   if render then render() end
@@ -179,7 +183,8 @@ end
 local function pollMedia()
   if mediaPollPending then return end
   mediaPollPending = true
-  noctalia.runAsync(`sh {shQuote(PICK_PLAYER_SCRIPT)}`, acceptMediaResult, 1500)
+  local readGeneration = seekGeneration
+  noctalia.runAsync(`sh {shQuote(PICK_PLAYER_SCRIPT)}`, function(result) acceptMediaResult(result, readGeneration) end, 1500)
 end
 
 local function fullText(): string
@@ -219,7 +224,7 @@ end
 local function playbackButton(key, glyph, action, tooltip, size, reveal)
   reveal = reveal or 1
   local highlighted = hoveredControl == key
-  local glyphSize = (key == "pause" or key == "playback") and math.min(20, size) or math.min(16, size - 4)
+  local glyphSize = (key == "pause" or key == "playback") and math.min(18, size - 2) or math.min(16, size - 4)
   return ui.row({key = key, width = size * reveal, height = size, align = "center", justify = "center", radius = 5,
     fill = highlighted and "primary/0.2" or "#00000000", onClick = action, onHover = "onMediaControlHover", tooltip = tooltip}, {
     ui.glyph({name = glyph, size = glyphSize * reveal, color = highlighted and "primary" or "on_surface"}),
@@ -255,18 +260,31 @@ function onSeekChange(value)
   seekDraft = math.max(0, math.min(length / 1000000, tonumber(value) or 0))
   if render then render() end
 end
+flushSeek = function()
+  if seekWritePending then return end
+  local request = wantedSeek
+  wantedSeek = nil
+  if not request then pollMedia(); return end
+  if request.player ~= activePlayer or request.track ~= trackKey() then return end
+  seekWritePending = true
+  noctalia.runAsync({"playerctl", "-p", request.player, "position", tostring(request.value)}, function(result)
+    seekWritePending = false
+    if result.exitCode ~= 0 then barWidget.setTooltip("This player could not seek to that position") end
+    flushSeek()
+  end, 1500)
+end
 function onSeekRelease()
   if seekDraft == nil then return end
   local value, player, track = seekDraft, seekPlayer, seekTrack
   seekDraft, seekPlayer, seekTrack = nil, nil, nil
   if player ~= activePlayer or track ~= trackKey() then return end
   position = value * 1000000
-  noctalia.runAsync({"playerctl", "-p", player, "position", tostring(value)}, function(result)
-    if result.exitCode ~= 0 then barWidget.setTooltip("This player could not seek to that position") end
-    pollMedia()
-  end, 1500)
+  wantedSeek = {value = value, player = player, track = track}
+  seekGeneration += 1
+  flushSeek()
   render()
 end
+
 local classicSeekX = nil
 function onClassicSeekMove(x)
   classicSeekX = tonumber(x)
@@ -288,6 +306,12 @@ function onBackgroundSeekMove(x)
 end
 function onBackgroundBarMove(x)
   backgroundSeekX = tonumber(x)
+  onHover(true)
+end
+function onBackgroundStripMove(x)
+  local n = tonumber(x)
+  if n == nil then return end
+  backgroundSeekX = n <= 0 and 0 or n >= 1 and 1 or (4 + n * (backgroundWidth - 8)) / math.max(1, backgroundWidth)
   onHover(true)
 end
 function onBackgroundSeekLeave()
@@ -353,7 +377,7 @@ render = function()
       local filledWidth = barWidth * fraction
       local layers = {
         ui.row({key = "classic-track-layer", width = barWidth, height = inputHeight, align = "center"}, {
-          ui.box({key = "classic-track", width = barWidth, height = barHeight, radius = barHeight / 2, fill = barColor .. "/0.28"}),
+          ui.box({key = "classic-track", width = barWidth, height = barHeight, radius = barHeight / 2, fill = "#00000033"}),
         }),
         ui.row({key = "classic-fill-layer", width = barWidth, height = inputHeight, gap = 0, align = "center"}, flat and {
           ui.progress({key = "flat-fill", width = barWidth, height = barHeight, radius = barHeight / 2,
@@ -412,9 +436,9 @@ render = function()
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onBackgroundSeekMove", onPointerLeave = "onBackgroundSeekLeave"}),
     }))
-    barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth, align = "center", onHover = "onMediaInlineHover", onClick = "onBackgroundSeekClick"}, {
+    local backgroundLayers = {
       ui.row({key = "background-track-layer", width = bgWidth, height = inputHeight, align = "center"}, {
-        ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = "primary/0.12"}),
+        ui.box({width = bgWidth, height = bgHeight, radius = bgHeight / 2, fill = "#00000022"}),
       }),
       ui.row({key = "background-fill-layer", width = bgWidth, height = inputHeight, gap = 0, align = "center"}, flat and {
         ui.progress({width = bgWidth, height = bgHeight, radius = bgHeight / 2, progress = fraction, fill = "primary/0.3", track = "#00000000"}),
@@ -426,7 +450,23 @@ render = function()
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onBackgroundBarMove", onPointerLeave = "onBackgroundSeekLeave"}),
       ui.row({key = "media-foreground", width = bgWidth, height = inputHeight, gap = 6, paddingH = 8, align = "center"}, children),
-    }))
+    }
+    if noctalia.getConfig("background_seek_strip") ~= false then
+      local stripWidth = bgWidth - 8
+      local top = (inputHeight + bgHeight) / 2 - 4
+      table.insert(backgroundLayers, ui.column({key = "seek-strip-layer", width = bgWidth, height = inputHeight, gap = 0, align = "center"}, {
+        ui.box({width = 1, height = top, fill = "#00000000"}),
+        ui.row({key = "seek-strip-hit", width = stripWidth, height = 4, gap = -stripWidth, align = "center",
+          onClick = "onBackgroundSeekClick", tooltip = "Seek below the playback buttons"}, {
+          ui.box({key = "seek-strip-space", width = stripWidth, height = 4, fill = "#00000000"}),
+          ui.graph({key = "seek-strip-pointer", width = stripWidth, height = 4, values = {0, 0}, color = "#00000000", lineWidth = 0, fillOpacity = 0,
+            onPointerMove = "onBackgroundStripMove", onPointerLeave = "onBackgroundSeekLeave"}),
+        }),
+        ui.box({width = 1, height = inputHeight - top - 4, fill = "#00000000"}),
+      }))
+    end
+    barWidget.render(ui.row({key = "media-background", width = bgWidth, height = inputHeight, gap = -bgWidth,
+      align = "center", onHover = "onMediaInlineHover", onClick = "onBackgroundSeekClick"}, backgroundLayers))
   else
     table.insert(children, ui.label({key = "title", text = text, maxLines = 1}))
     barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center", onHover = "onMediaInlineHover"}, children))
@@ -505,6 +545,13 @@ end
 function onScroll(axis, steps)
   local n = tonumber(steps) or 0
   if axis ~= "vertical" or n == 0 then
+    return
+  end
+  if noctalia.getConfig("scroll_action") == "seek" then
+    if length <= 0 or activePlayer == "" then return end
+    local seconds = math.max(1, math.min(60, noctalia.getConfig("scroll_seek_step") or 5))
+    onSeekChange(tostring((seekDraft or position / 1000000) - n * seconds))
+    onSeekRelease()
     return
   end
   if n < 0 then

@@ -5,6 +5,7 @@
 local RAPL_PATH = "/sys/class/powercap/intel-rapl:0/energy_uj"
 local FREQ_PATH = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq"
 
+local gpuPct = nil
 local pct = 0.0
 local ghz = nil
 local watts = nil
@@ -72,6 +73,13 @@ local function updatePct()
   prevTotal = total
 end
 
+local function updateGpu()
+  if noctalia.getConfig("show_gpu") == false then gpuPct = nil; return end
+  local stats = noctalia.systemStats()
+  local value = stats and stats.gpu and stats.gpu.usagePercent
+  gpuPct = type(value) == "number" and math.max(0, math.min(100, value)) or nil
+end
+
 local function updateFreq()
   local raw = noctalia.readFile(FREQ_PATH)
   if raw then
@@ -130,6 +138,9 @@ local function render()
     parts[#parts + 1] = gaugeChar(pct)
   end
   parts[#parts + 1] = pctText
+  if noctalia.getConfig("show_gpu") ~= false then
+    parts[#parts + 1] = gpuPct ~= nil and `GPU {math.floor(gpuPct + 0.5)}%` or "GPU —"
+  end
   local base = table.concat(parts, " ")
 
   local extraParts = {}
@@ -154,6 +165,7 @@ local function step()
     progress = target
     noctalia.setUpdateInterval(IDLE_INTERVAL)
     updatePct()
+    updateGpu()
     updateFreq()
     updatePower()
   else

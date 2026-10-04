@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.8.0"
+version = "1.9.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -23,6 +23,83 @@ entry = "volume.luau"
 [widget.actions]
 left = "panel-toggle control-center audio"
 right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "icon_click"
+type = "select"
+label_key = "volume_hover.settings.icon_click.label"
+description_key = "volume_hover.settings.icon_click.description"
+default = "mute"
+options = [
+  { value = "mute", label_key = "volume_hover.settings.icon_click.options.mute" },
+  { value = "panel", label_key = "volume_hover.settings.icon_click.options.panel" },
+]
+
+[[widget.setting]]
+key = "show_percent"
+type = "bool"
+label_key = "volume_hover.settings.show_percent.label"
+description_key = "volume_hover.settings.show_percent.description"
+default = true
+
+[[widget.setting]]
+key = "scroll_step"
+type = "int"
+label_key = "volume_hover.settings.scroll_step.label"
+description_key = "volume_hover.settings.scroll_step.description"
+default = 5
+min = 1
+max = 25
+step = 1
+
+[[widget.setting]]
+key = "invert_scroll"
+type = "bool"
+label_key = "volume_hover.settings.invert_scroll.label"
+description_key = "volume_hover.settings.invert_scroll.description"
+default = false
+
+[[widget.setting]]
+key = "drag_enabled"
+type = "bool"
+label_key = "volume_hover.settings.drag_enabled.label"
+description_key = "volume_hover.settings.drag_enabled.description"
+default = false
+
+[[widget.setting]]
+key = "slider_width"
+type = "int"
+label_key = "volume_hover.settings.slider_width.label"
+description_key = "volume_hover.settings.slider_width.description"
+default = 90
+min = 40
+max = 300
+step = 2
+
+[[widget.setting]]
+key = "slider_thickness"
+type = "int"
+label_key = "volume_hover.settings.slider_thickness.label"
+description_key = "volume_hover.settings.slider_thickness.description"
+default = 12
+min = 4
+max = 24
+step = 1
+
+[[widget.setting]]
+key = "bar_color"
+type = "select"
+label_key = "volume_hover.settings.bar_color.label"
+description_key = "volume_hover.settings.bar_color.description"
+default = "primary"
+options = [
+  { value = "primary", label_key = "volume_hover.settings.bar_color.options.primary" },
+  { value = "onsurface", label_key = "volume_hover.settings.bar_color.options.onsurface" },
+  { value = "secondary", label_key = "volume_hover.settings.bar_color.options.secondary" },
+  { value = "tertiary", label_key = "volume_hover.settings.bar_color.options.tertiary" },
+  { value = "hover", label_key = "volume_hover.settings.bar_color.options.hover" },
+  { value = "error", label_key = "volume_hover.settings.bar_color.options.error" },
+]
 
 [[widget.setting]]
 key = "point_style"
@@ -58,83 +135,6 @@ options = [
   { value = "error", label_key = "volume_hover.settings.knob_color.options.error" },
 ]
 
-[[widget.setting]]
-key = "drag_enabled"
-type = "bool"
-label_key = "volume_hover.settings.drag_enabled.label"
-description_key = "volume_hover.settings.drag_enabled.description"
-default = false
-
-[[widget.setting]]
-key = "slider_thickness"
-type = "int"
-label_key = "volume_hover.settings.slider_thickness.label"
-description_key = "volume_hover.settings.slider_thickness.description"
-default = 12
-min = 4
-max = 24
-step = 1
-
-[[widget.setting]]
-key = "icon_click"
-type = "select"
-label_key = "volume_hover.settings.icon_click.label"
-description_key = "volume_hover.settings.icon_click.description"
-default = "mute"
-options = [
-  { value = "mute", label_key = "volume_hover.settings.icon_click.options.mute" },
-  { value = "panel", label_key = "volume_hover.settings.icon_click.options.panel" },
-]
-
-[[widget.setting]]
-key = "bar_color"
-type = "select"
-label_key = "volume_hover.settings.bar_color.label"
-description_key = "volume_hover.settings.bar_color.description"
-default = "primary"
-options = [
-  { value = "primary", label_key = "volume_hover.settings.bar_color.options.primary" },
-  { value = "onsurface", label_key = "volume_hover.settings.bar_color.options.onsurface" },
-  { value = "secondary", label_key = "volume_hover.settings.bar_color.options.secondary" },
-  { value = "tertiary", label_key = "volume_hover.settings.bar_color.options.tertiary" },
-  { value = "hover", label_key = "volume_hover.settings.bar_color.options.hover" },
-  { value = "error", label_key = "volume_hover.settings.bar_color.options.error" },
-]
-
-[[widget.setting]]
-key = "slider_width"
-type = "int"
-label_key = "volume_hover.settings.slider_width.label"
-description_key = "volume_hover.settings.slider_width.description"
-default = 90
-min = 40
-max = 300
-step = 2
-
-[[widget.setting]]
-key = "scroll_step"
-type = "int"
-label_key = "volume_hover.settings.scroll_step.label"
-description_key = "volume_hover.settings.scroll_step.description"
-default = 5
-min = 1
-max = 25
-step = 1
-
-[[widget.setting]]
-key = "invert_scroll"
-type = "bool"
-label_key = "volume_hover.settings.invert_scroll.label"
-description_key = "volume_hover.settings.invert_scroll.description"
-default = false
-
-[[widget.setting]]
-key = "show_percent"
-type = "bool"
-label_key = "volume_hover.settings.show_percent.label"
-description_key = "volume_hover.settings.show_percent.description"
-default = true
-
 [[widget]]
 id = "cpu"
 entry = "cpu.luau"
@@ -143,6 +143,13 @@ entry = "cpu.luau"
 left = "panel-toggle control-center system"
 
   [[widget.setting]]
+key = "show_gpu"
+type = "bool"
+label_key = "sysmon_cpu.settings.show_gpu.label"
+description_key = "sysmon_cpu.settings.show_gpu.description"
+default = true
+
+[[widget.setting]]
   key = "gauge"
   type = "bool"
   label_key = "sysmon_cpu.settings.gauge.label"
@@ -271,6 +278,41 @@ entry = "media.luau"
 right = "panel-toggle control-center media"
 
 [[widget.setting]]
+key = "show_cover_art"
+type = "bool"
+label_key = "media_mini.settings.show_cover_art.label"
+description_key = "media_mini.settings.show_cover_art.description"
+default = true
+
+[[widget.setting]]
+key = "corner_rounding"
+visible_when = { key = "show_cover_art", values = ["true"] }
+type = "int"
+label_key = "media_mini.settings.corner_rounding.label"
+description_key = "media_mini.settings.corner_rounding.description"
+default = 100
+min = 0
+max = 100
+step = 5
+
+[[widget.setting]]
+key = "cover_size"
+type = "int"
+label_key = "media_mini.settings.cover_size.label"
+description_key = "media_mini.settings.cover_size.description"
+default = 20
+min = 12
+max = 40
+step = 1
+
+[[widget.setting]]
+key = "show_controls"
+type = "bool"
+label_key = "media_mini.settings.show_controls.label"
+description_key = "media_mini.settings.show_controls.description"
+default = false
+
+[[widget.setting]]
 key = "controls_on_hover"
 visible_when = { key = "show_controls", values = ["true"] }
 type = "bool"
@@ -279,30 +321,33 @@ description_key = "media_mini.settings.controls_on_hover.description"
 default = false
 
 [[widget.setting]]
-key = "background_expand_width"
-visible_when = { key = "progress_layout", values = ["background"] }
-type = "int"
-label_key = "media_mini.settings.background_expand_width.label"
-description_key = "media_mini.settings.background_expand_width.description"
-default = 420
-min = 120
-max = 1000
-step = 2
+key = "scroll_action"
+type = "select"
+label_key = "media_mini.settings.scroll_action.label"
+description_key = "media_mini.settings.scroll_action.description"
+default = "tracks"
+options = [
+  { value = "tracks", label_key = "media_mini.settings.scroll_action.options.tracks" },
+  { value = "seek", label_key = "media_mini.settings.scroll_action.options.seek" },
+]
 
 [[widget.setting]]
-key = "bar_color"
-visible_when = { key = "progress_layout", values = ["inline"] }
-type = "select"
-label_key = "media_mini.settings.bar_color.label"
-description_key = "media_mini.settings.bar_color.description"
-default = "on_surface"
-options = [
-  { value = "on_surface", label_key = "media_mini.settings.bar_color.options.on_surface" },
-  { value = "primary", label_key = "media_mini.settings.bar_color.options.primary" },
-  { value = "secondary", label_key = "media_mini.settings.bar_color.options.secondary" },
-  { value = "tertiary", label_key = "media_mini.settings.bar_color.options.tertiary" },
-  { value = "error", label_key = "media_mini.settings.bar_color.options.error" },
-]
+key = "scroll_seek_step"
+visible_when = { key = "scroll_action", values = ["seek"] }
+type = "int"
+label_key = "media_mini.settings.scroll_seek_step.label"
+description_key = "media_mini.settings.scroll_seek_step.description"
+default = 5
+min = 1
+max = 60
+step = 1
+
+[[widget.setting]]
+key = "show_progress_bar"
+type = "bool"
+label_key = "media_mini.settings.show_progress_bar.label"
+description_key = "media_mini.settings.show_progress_bar.description"
+default = true
 
 [[widget.setting]]
 key = "point_style"
@@ -315,13 +360,6 @@ options = [
   { value = "rounded", label_key = "media_mini.settings.point_style.options.rounded" },
   { value = "flat", label_key = "media_mini.settings.point_style.options.flat" },
 ]
-
-[[widget.setting]]
-key = "show_controls"
-type = "bool"
-label_key = "media_mini.settings.show_controls.label"
-description_key = "media_mini.settings.show_controls.description"
-default = false
 
 [[widget.setting]]
 key = "progress_layout"
@@ -347,6 +385,17 @@ max = 700
 step = 2
 
 [[widget.setting]]
+key = "background_expand_width"
+visible_when = { key = "progress_layout", values = ["background"] }
+type = "int"
+label_key = "media_mini.settings.background_expand_width.label"
+description_key = "media_mini.settings.background_expand_width.description"
+default = 420
+min = 120
+max = 1000
+step = 2
+
+[[widget.setting]]
 key = "background_height"
 visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
@@ -358,15 +407,12 @@ max = 40
 step = 1
 
 [[widget.setting]]
-key = "progress_thickness"
-visible_when = { key = "progress_layout", values = ["inline"] }
-type = "int"
-label_key = "media_mini.settings.progress_thickness.label"
-description_key = "media_mini.settings.progress_thickness.description"
-default = 8
-min = 4
-max = 24
-step = 1
+key = "background_seek_strip"
+visible_when = { key = "progress_layout", values = ["background"] }
+type = "bool"
+label_key = "media_mini.settings.background_seek_strip.label"
+description_key = "media_mini.settings.background_seek_strip.description"
+default = true
 
 [[widget.setting]]
 key = "progress_style"
@@ -380,63 +426,6 @@ options = [
   { value = "classic_drag", label_key = "media_mini.settings.progress_style.options.classic_drag" },
   { value = "interactive", label_key = "media_mini.settings.progress_style.options.interactive" },
 ]
-
-[[widget.setting]]
-key = "show_cover_art"
-type = "bool"
-label_key = "media_mini.settings.show_cover_art.label"
-description_key = "media_mini.settings.show_cover_art.description"
-default = true
-
-[[widget.setting]]
-key = "show_progress_bar"
-type = "bool"
-label_key = "media_mini.settings.show_progress_bar.label"
-description_key = "media_mini.settings.show_progress_bar.description"
-default = true
-
-[[widget.setting]]
-key = "compact_width"
-visible_when = { key = "progress_layout", values = ["inline"] }
-type = "int"
-label_key = "media_mini.settings.compact_width.label"
-description_key = "media_mini.settings.compact_width.description"
-default = 20
-min = 8
-max = 60
-step = 1
-
-[[widget.setting]]
-key = "expand_width"
-visible_when = { key = "progress_layout", values = ["inline"] }
-type = "int"
-label_key = "media_mini.settings.expand_width.label"
-description_key = "media_mini.settings.expand_width.description"
-default = 40
-min = 8
-max = 100
-step = 1
-
-[[widget.setting]]
-key = "cover_size"
-type = "int"
-label_key = "media_mini.settings.cover_size.label"
-description_key = "media_mini.settings.cover_size.description"
-default = 20
-min = 12
-max = 40
-step = 1
-
-[[widget.setting]]
-key = "corner_rounding"
-visible_when = { key = "show_cover_art", values = ["true"] }
-type = "int"
-label_key = "media_mini.settings.corner_rounding.label"
-description_key = "media_mini.settings.corner_rounding.description"
-default = 100
-min = 0
-max = 100
-step = 5
 
 [[widget.setting]]
 key = "progress_width"
@@ -459,6 +448,54 @@ default = 35
 min = 24
 max = 500
 step = 2
+
+[[widget.setting]]
+key = "progress_thickness"
+visible_when = { key = "progress_layout", values = ["inline"] }
+type = "int"
+label_key = "media_mini.settings.progress_thickness.label"
+description_key = "media_mini.settings.progress_thickness.description"
+default = 8
+min = 4
+max = 24
+step = 1
+
+[[widget.setting]]
+key = "bar_color"
+visible_when = { key = "progress_layout", values = ["inline"] }
+type = "select"
+label_key = "media_mini.settings.bar_color.label"
+description_key = "media_mini.settings.bar_color.description"
+default = "on_surface"
+options = [
+  { value = "on_surface", label_key = "media_mini.settings.bar_color.options.on_surface" },
+  { value = "primary", label_key = "media_mini.settings.bar_color.options.primary" },
+  { value = "secondary", label_key = "media_mini.settings.bar_color.options.secondary" },
+  { value = "tertiary", label_key = "media_mini.settings.bar_color.options.tertiary" },
+  { value = "error", label_key = "media_mini.settings.bar_color.options.error" },
+]
+
+[[widget.setting]]
+key = "compact_width"
+visible_when = { key = "progress_layout", values = ["inline"] }
+type = "int"
+label_key = "media_mini.settings.compact_width.label"
+description_key = "media_mini.settings.compact_width.description"
+default = 20
+min = 8
+max = 60
+step = 1
+
+[[widget.setting]]
+key = "expand_width"
+visible_when = { key = "progress_layout", values = ["inline"] }
+type = "int"
+label_key = "media_mini.settings.expand_width.label"
+description_key = "media_mini.settings.expand_width.description"
+default = 40
+min = 8
+max = 100
+step = 1
 
 [[widget]]
 id = "active-window"

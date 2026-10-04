@@ -47,7 +47,7 @@ Enable dragging to drag the same classic track; it folds after leaving or releas
 
 ### Hover CPU Monitor (`cpu`)
 
-Hover to reveal CPU frequency and package power when available. Left-click opens the System Control Center.
+Shows CPU and optional GPU usage together. GPU usage comes from Noctalia system monitoring; a dash means unavailable or still loading. Hover to reveal CPU frequency and package power when available. Left-click opens the System Control Center.
 
 
 ### Hover Memory Monitor (`ram`)
@@ -92,23 +92,24 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
+| `icon_click` | `select` | `mute` | Click the speaker to toggle mute, or open Audio. Click the expanded track to set volume. Percentage/padding and right-click open Audio. |
+| `show_percent` | `bool` | `true` | Show volume percentage or muted. Click this label to open Audio. |
+| `scroll_step` | `int` | `5` | How much one scroll notch changes the volume. |
+| `invert_scroll` | `bool` | `false` | By default scroll up raises the volume. Turn this on if it feels backwards. |
+| `drag_enabled` | `bool` | `false` | Drag the classic volume track. It folds when idle and stays open during an active drag. |
+| `slider_width` | `int` | `90` | Expanded track width in pixels, independent of thickness and speaker size. |
+| `slider_thickness` | `int` | `12` | Track thickness, independent of its width. The circular knob is 1.5 times this size. |
+| `bar_color` | `select` | `primary` | Theme colour role used for the classic filled track and circular knob. |
 | `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Flat also uses a slim rectangular volume handle. |
 | `show_knob` | `bool` | `true` | Show the circle or flat handle at the current volume. Turn off for a plain bar. |
 | `knob_color` | `select` | `on_primary` | Independent knob colour. On-primary matches the knob used by native Settings sliders. |
-| `drag_enabled` | `bool` | `false` | Drag the classic volume track. It folds when idle and stays open during an active drag. |
-| `slider_thickness` | `int` | `12` | Track thickness, independent of its width. The circular knob is 1.5 times this size. |
-| `icon_click` | `select` | `mute` | Click the speaker to toggle mute, or open Audio. Click the expanded track to set volume. Percentage/padding and right-click open Audio. |
-| `bar_color` | `select` | `primary` | Theme colour role used for the classic filled track and circular knob. |
-| `slider_width` | `int` | `90` | Expanded track width in pixels, independent of thickness and speaker size. |
-| `scroll_step` | `int` | `5` | How much one scroll notch changes the volume. |
-| `invert_scroll` | `bool` | `false` | By default scroll up raises the volume. Turn this on if it feels backwards. |
-| `show_percent` | `bool` | `true` | Show volume percentage or muted. Click this label to open Audio. |
 
 
 ### Hover CPU Monitor (`cpu`)
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
+| `show_gpu` | `bool` | `true` | Show GPU utilisation beside CPU usage using Noctalia system monitoring. A dash means the sensor is unavailable or still loading. |
 | `gauge` | `bool` | `true` | Compact display: gauge bar (on) or plain percentage (off) |
 
 
@@ -152,24 +153,27 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `controls_on_hover` | `bool` | `false` | When Playback controls is enabled, animate those buttons in and out on hover. |
-| `background_expand_width` | `int` | `420` | Background pill width on hover, in pixels. Never smaller than Background width. |
-| `bar_color` | `select` | `on_surface` | Theme colour for the classic media track and progress fill. |
-| `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
+| `show_cover_art` | `bool` | `true` | Replace the play/pause icon with the track's (rounded) cover art when available. |
+| `corner_rounding` | `int` | `100` | 0 = square corners, 100 = fully circular. |
+| `cover_size` | `int` | `20` | Size of the cover art icon in place of the play/pause glyph. |
 | `show_controls` | `bool` | `false` | Show previous, play/pause and next buttons. |
+| `controls_on_hover` | `bool` | `false` | When Playback controls is enabled, animate those buttons in and out on hover. |
+| `scroll_action` | `select` | `tracks` | Skip tracks or seek through the current song with the mouse wheel. |
+| `scroll_seek_step` | `int` | `5` | Seconds per wheel step. Scroll up goes forward; down goes back. |
+| `show_progress_bar` | `bool` | `true` | Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph. |
+| `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
 | `progress_layout` | `select` | `inline` | Inline seekable bar or progress behind the media content. Click the background title/progress area to seek; artwork and buttons retain playback actions. |
 | `background_width` | `int` | `260` | Compact background pill width, in pixels; it grows to Expanded background width on hover. |
+| `background_expand_width` | `int` | `420` | Background pill width on hover, in pixels. Never smaller than Background width. |
 | `background_height` | `int` | `22` | Thickness of the background progress pill, in pixels. |
-| `progress_thickness` | `int` | `8` | Progress bar thickness, independent of cover size and width. Rounded ends stay circular. |
+| `background_seek_strip` | `bool` | `true` | Keep an invisible clickable seek area along the lower edge of the background, including underneath the playback controls. |
 | `progress_style` | `select` | `classic` | Classic supports clicks. Classic with dragging keeps the same pill, uses expanded width, previews while dragging and seeks on release. Interactive uses the native slider appearance. |
-| `show_cover_art` | `bool` | `true` | Replace the play/pause icon with the track's (rounded) cover art when available. |
-| `show_progress_bar` | `bool` | `true` | Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph. |
-| `compact_width` | `int` | `20` | Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put. |
-| `expand_width` | `int` | `40` | Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further. |
-| `cover_size` | `int` | `20` | Size of the cover art icon in place of the play/pause glyph. |
-| `corner_rounding` | `int` | `100` | 0 = square corners, 100 = fully circular. |
 | `progress_width` | `int` | `35` | Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length. |
 | `progress_expand_width` | `int` | `35` | Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length. |
+| `progress_thickness` | `int` | `8` | Progress bar thickness, independent of cover size and width. Rounded ends stay circular. |
+| `bar_color` | `select` | `on_surface` | Theme colour for the classic media track and progress fill. |
+| `compact_width` | `int` | `20` | Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put. |
+| `expand_width` | `int` | `40` | Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further. |
 
 
 ### Hover Active Window (`active-window`)
@@ -276,3 +280,7 @@ Hover-only controls fade and expand into place. A 120ms leave grace period preve
 ## Version 1.8.0
 
 Serializes metadata polling and preserves the last valid media through five transient failures; six consecutive misses hide the widget until a valid read returns. Metadata checks run every 500ms while idle. Artwork uses persistent URL-keyed downloads, renders immediately on completion, and uses native ui.image rounding instead of ImageMagick. Background titles use their remaining pixel width rather than inline character limits; inline text-width settings hide in background mode. Play/pause glyphs are larger while retaining the same button targets.
+
+## Version 1.9.0
+
+Reduces play/pause glyphs slightly (18px in the 20px controls). Adds a full-width 4px click target at the lower edge of background progress without an extra visible line, so seeking remains possible underneath artwork and playback controls. Its Seek beneath controls setting defaults on. Button centres retain playback actions. Scroll action optionally seeks playback by a configurable number of seconds (up forward/down back); track skipping remains the default. Seek writes are serialized/coalesced, and stale metadata cannot undo a new target. Unplayed volume/media tracks use a subtle dark translucent background. Settings place controllers before their conditional dependants. The CPU widget now shows GPU usage alongside CPU, with a Show GPU usage toggle.

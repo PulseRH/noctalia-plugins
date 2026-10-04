@@ -1,6 +1,6 @@
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "1.1.0"
+version = "1.2.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -16,6 +16,83 @@ entry = "volume.luau"
 [widget.actions]
 left = "panel-toggle control-center audio"
 right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "icon_click"
+type = "select"
+label_key = "volume_hover.settings.icon_click.label"
+description_key = "volume_hover.settings.icon_click.description"
+default = "mute"
+options = [
+  { value = "mute", label_key = "volume_hover.settings.icon_click.options.mute" },
+  { value = "panel", label_key = "volume_hover.settings.icon_click.options.panel" },
+]
+
+[[widget.setting]]
+key = "show_percent"
+type = "bool"
+label_key = "volume_hover.settings.show_percent.label"
+description_key = "volume_hover.settings.show_percent.description"
+default = true
+
+[[widget.setting]]
+key = "scroll_step"
+type = "int"
+label_key = "volume_hover.settings.scroll_step.label"
+description_key = "volume_hover.settings.scroll_step.description"
+default = 5
+min = 1
+max = 25
+step = 1
+
+[[widget.setting]]
+key = "invert_scroll"
+type = "bool"
+label_key = "volume_hover.settings.invert_scroll.label"
+description_key = "volume_hover.settings.invert_scroll.description"
+default = false
+
+[[widget.setting]]
+key = "drag_enabled"
+type = "bool"
+label_key = "volume_hover.settings.drag_enabled.label"
+description_key = "volume_hover.settings.drag_enabled.description"
+default = false
+
+[[widget.setting]]
+key = "slider_width"
+type = "int"
+label_key = "volume_hover.settings.slider_width.label"
+description_key = "volume_hover.settings.slider_width.description"
+default = 90
+min = 40
+max = 300
+step = 2
+
+[[widget.setting]]
+key = "slider_thickness"
+type = "int"
+label_key = "volume_hover.settings.slider_thickness.label"
+description_key = "volume_hover.settings.slider_thickness.description"
+default = 12
+min = 4
+max = 24
+step = 1
+
+[[widget.setting]]
+key = "bar_color"
+type = "select"
+label_key = "volume_hover.settings.bar_color.label"
+description_key = "volume_hover.settings.bar_color.description"
+default = "primary"
+options = [
+  { value = "primary", label_key = "volume_hover.settings.bar_color.options.primary" },
+  { value = "onsurface", label_key = "volume_hover.settings.bar_color.options.onsurface" },
+  { value = "secondary", label_key = "volume_hover.settings.bar_color.options.secondary" },
+  { value = "tertiary", label_key = "volume_hover.settings.bar_color.options.tertiary" },
+  { value = "hover", label_key = "volume_hover.settings.bar_color.options.hover" },
+  { value = "error", label_key = "volume_hover.settings.bar_color.options.error" },
+]
 
 [[widget.setting]]
 key = "point_style"
@@ -50,80 +127,3 @@ options = [
   { value = "tertiary", label_key = "volume_hover.settings.knob_color.options.tertiary" },
   { value = "error", label_key = "volume_hover.settings.knob_color.options.error" },
 ]
-
-[[widget.setting]]
-key = "drag_enabled"
-type = "bool"
-label_key = "volume_hover.settings.drag_enabled.label"
-description_key = "volume_hover.settings.drag_enabled.description"
-default = false
-
-[[widget.setting]]
-key = "slider_thickness"
-type = "int"
-label_key = "volume_hover.settings.slider_thickness.label"
-description_key = "volume_hover.settings.slider_thickness.description"
-default = 12
-min = 4
-max = 24
-step = 1
-
-[[widget.setting]]
-key = "icon_click"
-type = "select"
-label_key = "volume_hover.settings.icon_click.label"
-description_key = "volume_hover.settings.icon_click.description"
-default = "mute"
-options = [
-  { value = "mute", label_key = "volume_hover.settings.icon_click.options.mute" },
-  { value = "panel", label_key = "volume_hover.settings.icon_click.options.panel" },
-]
-
-[[widget.setting]]
-key = "bar_color"
-type = "select"
-label_key = "volume_hover.settings.bar_color.label"
-description_key = "volume_hover.settings.bar_color.description"
-default = "primary"
-options = [
-  { value = "primary", label_key = "volume_hover.settings.bar_color.options.primary" },
-  { value = "onsurface", label_key = "volume_hover.settings.bar_color.options.onsurface" },
-  { value = "secondary", label_key = "volume_hover.settings.bar_color.options.secondary" },
-  { value = "tertiary", label_key = "volume_hover.settings.bar_color.options.tertiary" },
-  { value = "hover", label_key = "volume_hover.settings.bar_color.options.hover" },
-  { value = "error", label_key = "volume_hover.settings.bar_color.options.error" },
-]
-
-[[widget.setting]]
-key = "slider_width"
-type = "int"
-label_key = "volume_hover.settings.slider_width.label"
-description_key = "volume_hover.settings.slider_width.description"
-default = 90
-min = 40
-max = 300
-step = 2
-
-[[widget.setting]]
-key = "scroll_step"
-type = "int"
-label_key = "volume_hover.settings.scroll_step.label"
-description_key = "volume_hover.settings.scroll_step.description"
-default = 5
-min = 1
-max = 25
-step = 1
-
-[[widget.setting]]
-key = "invert_scroll"
-type = "bool"
-label_key = "volume_hover.settings.invert_scroll.label"
-description_key = "volume_hover.settings.invert_scroll.description"
-default = false
-
-[[widget.setting]]
-key = "show_percent"
-type = "bool"
-label_key = "volume_hover.settings.show_percent.label"
-description_key = "volume_hover.settings.show_percent.description"
-default = true

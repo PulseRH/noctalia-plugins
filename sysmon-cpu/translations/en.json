@@ -3,6 +3,10 @@
     "gauge": {
       "label": "Show gauge bar",
       "description": "Compact display: gauge bar (on) or plain percentage (off)"
+    },
+    "show_gpu": {
+      "label": "Show GPU usage",
+      "description": "Show GPU utilisation beside CPU usage using Noctalia system monitoring. A dash means the sensor is unavailable or still loading."
     }
   }
 }
