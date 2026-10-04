@@ -229,7 +229,7 @@
       },
       "bar_color": {
         "label": "Progress colour",
-        "description": "Theme colour for the classic media track and progress fill.",
+        "description": "Pick a theme colour or a custom colour for classic progress.",
         "options": {
           "on_surface": "Text colour",
           "primary": "Primary",
@@ -255,8 +255,8 @@
         "description": "Right-click a playback button to seek at its position on the background progress. Left-click operates the button; right-click elsewhere opens Media controls."
       },
       "background_progress_color": {
-        "label": "Background progress colour",
-        "description": "Theme colour for the played part of background progress.",
+        "label": "Progress colour",
+        "description": "Pick a theme colour or a custom colour for the background progress fill.",
         "options": {
           "on_surface": "Text colour",
           "primary": "Primary",
@@ -268,6 +268,10 @@
       "background_darkening": {
         "label": "Background darkening (%)",
         "description": "Darken the unplayed background around the progress. Zero matches the widget background; the progress colour stays at full strength."
+      },
+      "progress_darkening": {
+        "label": "Progress darkening (%)",
+        "description": "Darken the played progress fill itself, from 0% (original colour) to 80%. Applies to background and classic progress."
       }
     }
   },

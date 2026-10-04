@@ -163,7 +163,8 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 | `show_progress_bar` | `bool` | `true` | Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph. |
 | `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
 | `progress_layout` | `select` | `inline` | Inline seekable bar or progress behind the media content. Click the background title/progress area to seek; artwork and buttons retain playback actions. |
-| `background_progress_color` | `select` | `primary` | Background progress theme colour: Primary, Secondary, Tertiary, Text colour or Error. |
+| `background_progress_color` | `color` | `primary` | Native theme/custom colour picker for background progress. |
+| `progress_darkening` | `int` | `0` | Darken the played fill itself, 0–80%, for background and classic progress. |
 | `background_darkening` | `int` | `0` | Darkening of the unplayed background, 0–60%. Progress stays at full colour. |
 | `background_width` | `int` | `260` | Compact background pill width, in pixels; it grows to Expanded background width on hover. |
 | `background_expand_width` | `int` | `420` | Background pill width on hover, in pixels. Never smaller than Background width. |
@@ -298,3 +299,7 @@ Replaces the seek footer with right-click seeking over playback controls, usable
 ## Version 1.9.3
 
 Adds theme colour selection and adjustable darkening for background progress. Zero darkening retains the normal capsule background. Artwork now aligns to the left, and title/control seek coordinates follow the new position.
+
+## Version 1.9.4
+
+Adds native theme/custom progress colour pickers and a separate Progress darkening setting that shades only the played fill.

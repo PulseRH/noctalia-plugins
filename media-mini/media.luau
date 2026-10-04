@@ -350,6 +350,16 @@ function onBackgroundSeekClick()
   onSeekChange(tostring(fraction * length / 1000000))
   onSeekRelease()
 end
+local function progressShade(key, width, height, inputHeight, fraction, flat, amount)
+  local shade = string.format("#000000%02x", math.floor(amount * 255 + 0.5))
+  return ui.row({key = key, width = width, height = inputHeight, gap = 0, align = "center"}, flat and {
+    ui.progress({width = width, height = height, radius = height / 2, progress = fraction,
+      fill = shade, track = "#00000000"}),
+  } or {
+    ui.box({width = width * fraction, height = height, radius = math.min(height, width * fraction) / 2, fill = shade}),
+    ui.box({width = width * (1 - fraction), height = 1, fill = "#00000000"}),
+  })
+end
 render = function()
   barWidget.setVisible(hasMedia)
   if not hasMedia then return end
@@ -367,6 +377,7 @@ render = function()
   local interactive = noctalia.getConfig("progress_style") == "interactive"
   local barWidth = classicDrag and expanded or compact + (expanded - compact) * progress
   local barHeight = math.max(4, math.min(24, noctalia.getConfig("progress_thickness") or 8))
+  local progressDarkening = math.max(0, math.min(80, noctalia.getConfig("progress_darkening") or 0)) / 100
   local inputHeight = 38
   local fraction = math.max(0, math.min(1, length > 0 and (seekDraft or position / 1000000) * 1000000 / length or 0))
   local bgCompact = math.max(120, math.min(700, noctalia.getConfig("background_width") or 260))
@@ -416,6 +427,9 @@ render = function()
           ui.box({width = barWidth - filledWidth, height = 1, fill = "#00000000"}),
         }),
       }
+      if progressDarkening > 0 then
+        table.insert(layers, progressShade("classic-progress-shade", barWidth, barHeight, inputHeight, fraction, flat, progressDarkening))
+      end
       if classicDrag then
         renderedSeekValue = math.max(0, math.min(1, (filledWidth - 2) / (barWidth - 4)))
         table.insert(layers, ui.row({key = "classic-drag-wrapper", width = barWidth, height = inputHeight, align = "center"}, {
@@ -479,6 +493,9 @@ render = function()
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onBackgroundBarMove", onPointerLeave = "onBackgroundSeekLeave"}),
     }
+    if progressDarkening > 0 then
+      table.insert(backgroundLayers, 3, progressShade("background-progress-shade", bgWidth, bgHeight, inputHeight, fraction, flat, progressDarkening))
+    end
     local foregroundHeight = math.max(cover and coverSize or coverSize + 4, 20)
     table.insert(backgroundLayers, ui.row({key = "media-foreground", width = bgWidth, height = foregroundHeight,
       gap = 6, paddingH = 0, align = "center"}, children))

@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.8.3"
+version = "1.8.4"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -113,19 +113,23 @@ options = [
 ]
 
 [[widget.setting]]
+key = "progress_darkening"
+visible_when = { key = "show_progress_bar", values = ["true"] }
+type = "int"
+label_key = "media_mini.settings.progress_darkening.label"
+description_key = "media_mini.settings.progress_darkening.description"
+default = 0
+min = 0
+max = 80
+step = 1
+
+[[widget.setting]]
 key = "background_progress_color"
 visible_when = { key = "progress_layout", values = ["background"] }
-type = "select"
+type = "color"
 label_key = "media_mini.settings.background_progress_color.label"
 description_key = "media_mini.settings.background_progress_color.description"
 default = "primary"
-options = [
-  { value = "primary", label_key = "media_mini.settings.background_progress_color.options.primary" },
-  { value = "secondary", label_key = "media_mini.settings.background_progress_color.options.secondary" },
-  { value = "tertiary", label_key = "media_mini.settings.background_progress_color.options.tertiary" },
-  { value = "on_surface", label_key = "media_mini.settings.background_progress_color.options.on_surface" },
-  { value = "error", label_key = "media_mini.settings.background_progress_color.options.error" },
-]
 
 [[widget.setting]]
 key = "background_darkening"
@@ -228,17 +232,10 @@ step = 1
 [[widget.setting]]
 key = "bar_color"
 visible_when = { key = "progress_layout", values = ["inline"] }
-type = "select"
+type = "color"
 label_key = "media_mini.settings.bar_color.label"
 description_key = "media_mini.settings.bar_color.description"
 default = "on_surface"
-options = [
-  { value = "on_surface", label_key = "media_mini.settings.bar_color.options.on_surface" },
-  { value = "primary", label_key = "media_mini.settings.bar_color.options.primary" },
-  { value = "secondary", label_key = "media_mini.settings.bar_color.options.secondary" },
-  { value = "tertiary", label_key = "media_mini.settings.bar_color.options.tertiary" },
-  { value = "error", label_key = "media_mini.settings.bar_color.options.error" },
-]
 
 [[widget.setting]]
 key = "compact_width"
