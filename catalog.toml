@@ -52,7 +52,7 @@ description = "Compact gauge bar or plain percentage (toggle below); optional GP
 [[plugin]]
 id = "pulser/sysmon-ram"
 name = "RAM (mini)"
-version = "0.3.1"
+version = "0.3.2"
 plugin_api = 31
 author = "pulser"
 license = "MIT"
@@ -112,7 +112,7 @@ description = "Classic now-playing artwork and progress pill, configurable width
 [[plugin]]
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.12.2"
+version = "1.12.3"
 plugin_api = 32
 author = "pulser"
 license = "MIT"

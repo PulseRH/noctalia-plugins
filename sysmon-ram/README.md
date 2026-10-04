@@ -1,1 +1,1 @@
-RAM mini widget. The default icon is [Bootstrap memory](https://github.com/twbs/icons/blob/main/icons/memory.svg), MIT licensed (see assets/BOOTSTRAP-ICONS-LICENSE.txt). The SVG viewport is tightened and its colour follows the theme.
+RAM mini widget. The default icon is a bold vector three-chip RAM outline based on the user reference, with six protruding contacts and active theme colour.

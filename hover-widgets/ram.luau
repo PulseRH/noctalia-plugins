@@ -62,7 +62,7 @@ local function gaugeChar(v: number): string
   return BLOCKS[idx]
 end
 
--- Bootstrap memory (MIT), tinted to the active theme and cached per colour.
+-- Vector RAM outline based on the user reference, tinted to the active theme and cached per colour.
 local ramIconSource = noctalia.readFile((noctalia.pluginDir() or "") .. "/assets/memory.svg")
 local ramIconDir = (noctalia.pluginDataDir() or noctalia.expandPath("~/.cache/noctalia-plugins")) .. "/cache/ram-icons"
 noctalia.mkdirAll(ramIconDir)
@@ -70,7 +70,7 @@ local ramIconColor, ramIconPath = nil, nil
 local function updateRamIcon()
   local color = noctalia.getColor("on_surface") or "#ffffff"
   if color ~= ramIconColor and ramIconSource then
-    local path = ramIconDir .. "/bootstrap-memory-" .. string.gsub(color, "#", "") .. ".svg"
+    local path = ramIconDir .. "/ram-vector-bold-" .. string.gsub(color, "#", "") .. ".svg"
     if noctalia.writeFile(path, string.gsub(ramIconSource, "currentColor", color)) then
       ramIconColor, ramIconPath = color, path
     end
