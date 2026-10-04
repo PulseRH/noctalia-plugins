@@ -7,6 +7,7 @@ local hovering, progress, target = false, 0, 0
 local pointerX, trackWidth = nil, 0
 local handleWidth = 0
 local renderedSliderValue = nil
+local dragging, dragWidth, leaveDelay = false, nil, 0
 local generation = 0
 local wantedVolume, wantedMute = nil, nil
 local writePending, pollPending = false, false
@@ -19,7 +20,8 @@ local function number(key, default)
 end
 local function boolean(key, default)
   local value = noctalia.getConfig(key)
-  return type(value) == "boolean" and value or default
+  if type(value) == "boolean" then return value end
+  return default
 end
 local function thickness() return clamp(number("slider_thickness", 12), 4, 24) end
 local function colour()
@@ -73,11 +75,16 @@ function onVolumeDrag(value)
   local requested = tonumber(value)
   if requested and renderedSliderValue ~= nil and math.abs(requested - renderedSliderValue) < 0.000001 then return end
   if requested and trackWidth > 4 then
+    dragging, dragWidth, leaveDelay = true, trackWidth, 0
     local x = 2 + requested * (trackWidth - 4)
     requestVolume(requested <= 0 and 0 or requested >= 1 and 1 or (x - handleWidth / 2) / math.max(1, trackWidth - handleWidth))
   end
 end
-function onVolumeDragEnd() flush() end
+function onVolumeDragEnd()
+  dragging, dragWidth = false, nil
+  if not hovering then leaveDelay = 500 end
+  flush()
+end
 function onSpeakerClick()
   muted = not muted
   wantedMute = muted
@@ -112,8 +119,8 @@ render = function()
     onHover = "onInlineHover", onClick = speakerClick}, {icon})}
   trackWidth = 0
   local draggingEnabled = boolean("drag_enabled", false)
-  if progress > 0.01 or draggingEnabled then
-    trackWidth = math.max(thickness() * 2, clamp(number("slider_width", 90), 40, 300) * (draggingEnabled and 1 or progress))
+  if progress > 0.01 or dragging then
+    trackWidth = dragWidth or math.max(thickness() * 2, clamp(number("slider_width", 90), 40, 300) * progress)
     local h = thickness()
     local showKnob = boolean("show_knob", true)
     local flat = noctalia.getConfig("point_style") == "flat"
@@ -137,7 +144,8 @@ render = function()
       table.insert(layers, ui.row({key = "knob-layer", gap = 0, width = trackWidth, height = inputHeight, align = "center"}, {
         ui.box({width = knobStart, height = 1, fill = "#00000000"}),
         ui.box({key = "knob", width = handleWidth, height = diameter, radius = flat and 0 or diameter / 2,
-          fill = tostring(noctalia.getConfig("knob_color") or "on_primary")}),
+          fill = tostring(noctalia.getConfig("knob_color") or "on_primary"),
+          border = "on_surface/0.65", borderWidth = 1}),
         ui.box({width = math.max(0, trackWidth - handleWidth - knobStart), height = 1, fill = "#00000000"}),
       }))
     end
@@ -168,10 +176,16 @@ render = function()
 end
 local function step()
   local interval = 300
+  if dragging then target = 1
+  elseif leaveDelay > 0 then
+    leaveDelay = math.max(0, leaveDelay - 16)
+    if leaveDelay == 0 then target = 0 end
+  end
   if math.abs(progress - target) > 0.01 then
     progress += (target - progress) * 0.16
     interval = 16
   else progress = target end
+  if leaveDelay > 0 or dragging then interval = 16 end
   render()
   noctalia.setUpdateInterval(interval)
   pollElapsed += interval
@@ -180,7 +194,9 @@ end
 function update() step() end
 function onHover(value)
   hovering = value
-  target = value and 1 or 0
+  if value then target, leaveDelay = 1, 0
+  elseif boolean("drag_enabled", false) then leaveDelay = 1200
+  else target = 0 end
   step()
 end
 function onConfigChanged() render() end

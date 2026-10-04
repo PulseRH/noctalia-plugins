@@ -42,7 +42,7 @@ Hover to reveal the full weekday, ordinal date, month and seconds. Uses local ti
 
 Hover expands the original rounded track and circular knob. Click the speaker to mute/unmute; click the track to set volume. Percentage/padding and right-click open the anchored Audio panel. Speaker click can select Audio instead. Rapid writes are serialized and coalesced; stale reads cannot overwrite a newer request. Width and thickness are independent. Handle colour is separate from the track, defaulting to the native Settings slider colour. Turn Show handle off for a plain rounded bar.
 
-Enable dragging to drag the same classic track; it stays expanded in that mode. Volume changes continuously during dragging. This is optional and off by default.
+Enable dragging to drag the same classic track; it folds after leaving or releasing, with a short grace period to move from the speaker to the drag target. Its width remains stable throughout an active drag. Volume changes continuously during dragging. This is optional and off by default.
 
 
 ### Hover CPU Monitor (`cpu`)
@@ -72,7 +72,9 @@ Shows transmit throughput. Hover expands the reading. Set Hide completely to fal
 
 ### Mini Media (`media`)
 
-Click the rounded classic progress pill to seek. Width and thickness are independent of cover size; the ends remain circular. Choose Classic with dragging to keep the same pill and drag its playhead: the fill previews your target and seeks on release, using expanded width. Interactive uses the native slider appearance. Seeking requires player support.
+Click the rounded classic progress pill to seek. Width and thickness are independent of cover size; the point style can be Rounded or Flat. Choose Classic with dragging to keep the same pill and drag its playhead: the fill previews your target and seeks on release, using expanded width. Interactive uses the native slider appearance. Seeking requires player support.
+
+Optional playback controls can appear always or only on hover. Hover highlights follow the theme. Classic progress uses a selectable theme colour. Background progress grows between compact and expanded widths and keeps its title on one line.
 
 Cover/title clicks toggle playback; right-click opens Media; scrolling skips tracks. Hover expands the title. Hidden when no player is available.
 
@@ -93,7 +95,7 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 | `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Flat also uses a slim rectangular volume handle. |
 | `show_knob` | `bool` | `true` | Show the circle or flat handle at the current volume. Turn off for a plain bar. |
 | `knob_color` | `select` | `on_primary` | Independent knob colour. On-primary matches the knob used by native Settings sliders. |
-| `drag_enabled` | `bool` | `false` | Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab. |
+| `drag_enabled` | `bool` | `false` | Drag the classic volume track. It folds when idle and stays open during an active drag. |
 | `slider_thickness` | `int` | `12` | Track thickness, independent of its width. The circular knob is 1.5 times this size. |
 | `icon_click` | `select` | `mute` | Click the speaker to toggle mute, or open Audio. Click the expanded track to set volume. Percentage/padding and right-click open Audio. |
 | `bar_color` | `select` | `primary` | Theme colour role used for the classic filled track and circular knob. |
@@ -150,10 +152,13 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
+| `controls_on_hover` | `bool` | `false` | When Playback controls is enabled, reveal those buttons only while hovering. |
+| `background_expand_width` | `int` | `420` | Background pill width on hover, in pixels. Never smaller than Background width. |
+| `bar_color` | `select` | `on_surface` | Theme colour for the classic media track and progress fill. |
 | `point_style` | `select` | `rounded` | Rounded or flat moving progress edge. Applies to classic and background progress; the native slider keeps its own style. |
 | `show_controls` | `bool` | `false` | Show previous, play/pause and next buttons. |
 | `progress_layout` | `select` | `inline` | Inline seekable bar or native-like progress behind the media content. Background progress is visual; artwork/title retain play/pause. |
-| `background_width` | `int` | `260` | Width of the media widget in background mode, in pixels. |
+| `background_width` | `int` | `260` | Compact background pill width, in pixels; it grows to Expanded background width on hover. |
 | `background_height` | `int` | `22` | Thickness of the background progress pill, in pixels. |
 | `progress_thickness` | `int` | `8` | Progress bar thickness, independent of cover size and width. Rounded ends stay circular. |
 | `progress_style` | `select` | `classic` | Classic supports clicks. Classic with dragging keeps the same pill, uses expanded width, previews while dragging and seeks on release. Interactive uses the native slider appearance. |
@@ -259,3 +264,7 @@ Adds a separate Circle colour selector (default: on-primary, matching native Set
 ## Version 1.5.0
 
 Adds Rounded/Flat point styles to volume and media. Flat gives the volume handle a slim rectangular shape; Show handle and Handle colour apply to both shapes. Fixes drag input width and maps pointer positions to the visible handle/playhead. Optional playback controls add previous, play/pause and next. Progress placement can put a tinted progress pill behind media content, with independent background width and thickness. Background progress is visual; use Inline for seeking. Vertical bars use the inline layout.
+
+## Version 1.6.0
+
+Restores folding in volume drag mode and keeps input width fixed during an active drag. Correctly preserves explicit false settings, fixing Show handle and Show percentage. Handles have a contrasting theme outline. Adds media Controls only on hover, themed hover highlights, classic Progress colour, and Expanded background width. Media labels are limited to one line.

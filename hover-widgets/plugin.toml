@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.5.0"
+version = "1.6.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -268,6 +268,37 @@ entry = "media.luau"
 
 [widget.actions]
 right = "panel-toggle control-center media"
+
+[[widget.setting]]
+key = "controls_on_hover"
+type = "bool"
+label_key = "media_mini.settings.controls_on_hover.label"
+description_key = "media_mini.settings.controls_on_hover.description"
+default = false
+
+[[widget.setting]]
+key = "background_expand_width"
+type = "int"
+label_key = "media_mini.settings.background_expand_width.label"
+description_key = "media_mini.settings.background_expand_width.description"
+default = 420
+min = 120
+max = 1000
+step = 2
+
+[[widget.setting]]
+key = "bar_color"
+type = "select"
+label_key = "media_mini.settings.bar_color.label"
+description_key = "media_mini.settings.bar_color.description"
+default = "on_surface"
+options = [
+  { value = "on_surface", label_key = "media_mini.settings.bar_color.options.on_surface" },
+  { value = "primary", label_key = "media_mini.settings.bar_color.options.primary" },
+  { value = "secondary", label_key = "media_mini.settings.bar_color.options.secondary" },
+  { value = "tertiary", label_key = "media_mini.settings.bar_color.options.tertiary" },
+  { value = "error", label_key = "media_mini.settings.bar_color.options.error" },
+]
 
 [[widget.setting]]
 key = "point_style"

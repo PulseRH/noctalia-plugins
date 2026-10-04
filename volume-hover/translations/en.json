@@ -44,7 +44,7 @@
       },
       "drag_enabled": {
         "label": "Enable dragging",
-        "description": "Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab."
+        "description": "Drag the classic volume track. It folds when idle and stays open during an active drag."
       },
       "show_knob": {
         "label": "Show handle",
@@ -209,11 +209,30 @@
       },
       "background_width": {
         "label": "Background width",
-        "description": "Width of the media widget in background mode, in pixels."
+        "description": "Compact background pill width, in pixels; it grows to Expanded background width on hover."
       },
       "background_height": {
         "label": "Background thickness",
         "description": "Thickness of the background progress pill, in pixels."
+      },
+      "controls_on_hover": {
+        "label": "Controls only on hover",
+        "description": "When Playback controls is enabled, reveal those buttons only while hovering."
+      },
+      "background_expand_width": {
+        "label": "Expanded background width",
+        "description": "Background pill width on hover, in pixels. Never smaller than Background width."
+      },
+      "bar_color": {
+        "label": "Progress colour",
+        "description": "Theme colour for the classic media track and progress fill.",
+        "options": {
+          "on_surface": "Text colour",
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "tertiary": "Tertiary",
+          "error": "Error"
+        }
       }
     }
   },
