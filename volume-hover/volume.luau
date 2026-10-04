@@ -2,13 +2,21 @@
 -- Volume: a persistent speaker glyph (Tabler, struck-through when muted) with a
 -- solid rounded slider that reveals to its right on hover, animating open/close
 -- with the same eased timing as the other hover widgets. Scroll changes volume,
--- left-click opens the audio panel, right-click mutes. Speaker + bar are baked
+-- click the speaker/bar to toggle mute; label/padding and right-click open Audio. Speaker + bar are baked
 -- together into one image (a bar widget has a single glyph-or-image slot), so
 -- reveal frames are pre-baked and swapped per animation step. Needs ImageMagick;
 -- without it, falls back to a plain glyph + percentage.
 
 local SINK = "@DEFAULT_AUDIO_SINK@"
-local TABLER = "/usr/share/noctalia/assets/fonts/tabler.ttf"
+local TABLER = nil
+local dataDirs = (noctalia.getenv("XDG_DATA_DIRS") or "/usr/local/share:/usr/share")
+for dir in string.gmatch(dataDirs, "[^:]+") do
+  local candidate = `{dir}/noctalia/assets/fonts/noctalia-tabler.ttf`
+  if noctalia.fileExists(candidate) then TABLER = candidate; break end
+end
+local function shQuote(value: string): string
+  return "'" .. string.gsub(value, "'", "'\\''") .. "'"
+end
 -- Tabler codepoints as UTF-8: volume(EB51) volume-2(EB4F) volume-off(F1C3)
 local GLYPH = { hi = "\xEE\xAD\x91", lo = "\xEE\xAD\x8F", off = "\xEF\x87\x83" }
 
@@ -33,13 +41,8 @@ local ANIM_INTERVAL = 16
 local IDLE_INTERVAL = 900
 local POLL_MS = 700
 
-local CACHE_DIR = noctalia.expandPath("~/.cache/noctalia-plugins/volume")
-local COLORS_JSON = "~/.config/noctalia/colors.json"
-local ROLE_KEYS = {
-  primary = "mPrimary", secondary = "mSecondary", tertiary = "mTertiary",
-  error = "mError", onsurface = "mOnSurface", surface = "mSurface", hover = "mHover",
-}
-
+local DATA_DIR = noctalia.pluginDataDir() or noctalia.expandPath("~/.cache/noctalia-plugins/volume-hover")
+local CACHE_DIR = `{DATA_DIR}/cache/volume-hover`
 -- ── state ────────────────────────────────────────────────────────────────────
 local vol, muted = 0.5, false
 local hovering = false
@@ -76,12 +79,9 @@ local function bucketFor(v) return clamp(round(v * FILL_STEPS), 0, FILL_STEPS) e
 
 local function refreshColor()
   local role = tostring(noctalia.getConfig("bar_color") or "primary"):lower()
-  local key = ROLE_KEYS[role] or "mPrimary"
-  local txt = noctalia.readFile(COLORS_JSON)
-  if txt then
-    local t = noctalia.json.decode(txt)
-    if t and type(t[key]) == "string" then curColor = (t[key]:gsub("#", "")) end
-  end
+  if role == "onsurface" then role = "on_surface" end
+  local color = noctalia.getColor(role) or noctalia.getColor("primary") or "#ffb4a5"
+  curColor = string.gsub(color, "#", "")
 end
 
 -- ── frame identity ────────────────────────────────────────────────────────────
@@ -93,8 +93,8 @@ local function revPath(bucket, os) return `{CACHE_DIR}/rev-{curColor}-{if muted 
 
 local function speakerCmd(out, w, ic)
   local spkA = if ic == "off" then "B0" else "FF"
-  return `{MAGICK} -size {w}x{CANVAS_H} xc:none -font '{TABLER}' -pointsize 40`
-    .. ` -fill '#{curColor}{spkA}' -gravity West -annotate +8+0 '{GLYPH[ic]}' '{out}'`
+  return `{MAGICK} -size {w}x{CANVAS_H} xc:none -font {shQuote(TABLER)} -pointsize 40`
+    .. ` -fill '#{curColor}{spkA}' -gravity West -annotate +8+0 '{GLYPH[ic]}' {shQuote(out)}`
 end
 
 local function revealCmd(out, os, bucket)
@@ -112,12 +112,12 @@ local function revealCmd(out, os, bucket)
     fillPart = ` -fill '{C}{fillA}' -draw 'roundRectangle {BX1},{FIL_Y1} {knobX},{FIL_Y2} 12,12'`
   end
   return `{MAGICK} -size {w}x{CANVAS_H} xc:none`
-    .. ` -font '{TABLER}' -pointsize 40 -fill '{C}{spkA}' -gravity West -annotate +8+0 '{GLYPH[ic]}'`
+    .. ` -font {shQuote(TABLER)} -pointsize 40 -fill '{C}{spkA}' -gravity West -annotate +8+0 '{GLYPH[ic]}'`
     .. ` -gravity NorthWest`
     .. ` -fill '{C}{trackA}' -draw 'roundRectangle {BX1},{TRK_Y1} {BX2},{TRK_Y2} 5,5'`
     .. fillPart
     .. ` -fill '{C}{knobA}' -draw 'circle {knobX},{TRACK_Y} {knobX},{KNOB_BOT}'`
-    .. ` '{out}'`
+    .. ` {shQuote(out)}`
 end
 
 local function bake(path, cmd)
@@ -125,7 +125,7 @@ local function bake(path, cmd)
   if noctalia.fileExists(path) then ready[path] = true; return end
   pending[path] = true
   noctalia.runAsync(cmd, function(_r)
-    pending[path] = nil; ready[path] = true
+    pending[path] = nil; ready[path] = _r.exitCode == 0 and noctalia.fileExists(path)
   end, 4000)
 end
 
@@ -140,19 +140,31 @@ local function prebake(bucket)
 end
 
 -- ── render ────────────────────────────────────────────────────────────────────
-local function setLabel()
-  if cfgBool("show_percent", true) then
-    barWidget.setText(if muted then "muted" else `{round(vol * 100)}%`)
+local function toggleMute()
+  noctalia.runAsync({"wpctl", "set-mute", SINK, "toggle"}, nil, 1500)
+end
+local function drawClassic(path, width, height)
+  local children = {}
+  local click = if noctalia.getConfig("icon_click") == "panel" then nil else toggleMute
+  if path then
+    table.insert(children, ui.image({key = "speaker-bar", path = path, width = width, height = height,
+      onClick = click}))
+  elseif click then
+    table.insert(children, ui.button({key = "speaker", glyph = if muted then "volume-off" elseif vol < 0.4 then "volume-2" else "volume",
+      glyphSize = 20, width = 24, height = 24, variant = "ghost", onClick = click}))
   else
-    barWidget.setText("")
+    table.insert(children, ui.glyph({key = "speaker", name = if muted then "volume-off" elseif vol < 0.4 then "volume-2" else "volume", size = 20}))
+  end
+  if cfgBool("show_percent", true) then
+    table.insert(children, ui.label({key = "percentage", text = if muted then "muted" else `{round(vol * 100)}%`}))
   end
   barWidget.setTooltip(if muted then "Muted" else `Volume {round(vol * 100)}%`)
+  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center"}, children))
 end
 
 local function render()
-  setLabel()
   if not MAGICK then
-    barWidget.setGlyph(if muted then "volume-mute" elseif vol < 0.4 then "volume-low" else "volume-high")
+    drawClassic(nil, 0, 0)
     return
   end
 
@@ -176,12 +188,12 @@ local function render()
   if ready[path] or noctalia.fileExists(path) then
     ready[path] = true
     local dispW = round(w * sc)
-    barWidget.setImage(path, false, dispW, dispH)
+    drawClassic(path, dispW, dispH)
     lastPath, lastDispW, lastDispH = path, dispW, dispH
   elseif lastPath then
-    barWidget.setImage(lastPath, false, lastDispW, lastDispH) -- hold last frame until bake lands
+    drawClassic(lastPath, lastDispW, lastDispH) -- hold last frame until bake lands
   else
-    barWidget.setGlyph(if muted then "volume-mute" elseif vol < 0.4 then "volume-low" else "volume-high")
+    drawClassic(nil, 0, 0)
   end
 end
 
@@ -220,8 +232,8 @@ end
 
 function update()
   if MAGICK == nil then
-    if noctalia.commandExists("magick") then MAGICK = "magick"
-    elseif noctalia.commandExists("convert") then MAGICK = "convert"
+    if TABLER and noctalia.commandExists("magick") then MAGICK = "magick"
+    elseif TABLER and noctalia.commandExists("convert") then MAGICK = "convert"
     else MAGICK = false end
     noctalia.mkdirAll(CACHE_DIR)
     refreshColor()
@@ -248,12 +260,4 @@ function onScroll(axis, steps)
   local up = n < 0
   if cfgBool("invert_scroll", false) then up = not up end
   adjust(up)
-end
-
-function onClick()
-  noctalia.runAsync("noctalia msg panel-toggle control-center audio", nil, 1500)
-end
-
-function onRightClick()
-  noctalia.runAsync("noctalia msg volume-mute", function(_r) poll() end, 1500)
 end

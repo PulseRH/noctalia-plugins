@@ -1,28 +1,175 @@
 {
-  "settings": {
-    "show_cover_art": {
-      "label": "Show cover art",
-      "description": "Replace the play/pause icon with the track's (rounded) cover art when available."
-    },
-    "show_progress_bar": {
-      "label": "Show progress bar",
-      "description": "Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph."
-    },
-    "compact_width": {
-      "label": "Compact width (characters)",
-      "description": "Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put."
-    },
-    "expand_width": {
-      "label": "Expanded width (characters)",
-      "description": "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
-    },
-    "cover_size": {
-      "label": "Cover art size (px)",
-      "description": "Size of the cover art icon in place of the play/pause glyph."
-    },
-    "corner_rounding": {
-      "label": "Cover art rounding (%)",
-      "description": "0 = square corners, 100 = fully circular."
+  "clock_hover": {},
+  "volume_hover": {
+    "settings": {
+      "bar_color": {
+        "label": "Bar colour",
+        "description": "Theme colour role used for the classic filled bar and knob.",
+        "options": {
+          "primary": "Primary (accent)",
+          "onsurface": "On-surface (text)",
+          "secondary": "Secondary",
+          "tertiary": "Tertiary",
+          "hover": "Hover",
+          "error": "Error"
+        }
+      },
+      "slider_width": {
+        "label": "Slider width (px)",
+        "description": "Width of the classic hover slider image. Height scales with it."
+      },
+      "scroll_step": {
+        "label": "Scroll step (%)",
+        "description": "How much one scroll notch changes the volume."
+      },
+      "invert_scroll": {
+        "label": "Invert scroll direction",
+        "description": "By default scroll up raises the volume. Turn this on if it feels backwards."
+      },
+      "show_percent": {
+        "label": "Show percentage",
+        "description": "Show volume percentage or muted. Click this label to open Audio."
+      },
+      "icon_click": {
+        "label": "Speaker click",
+        "description": "Click the speaker to toggle mute, or open Audio. Percentage/padding and right-click open Audio.",
+        "options": {
+          "mute": "Toggle mute",
+          "panel": "Open Audio panel"
+        }
+      }
+    }
+  },
+  "sysmon_cpu": {
+    "settings": {
+      "gauge": {
+        "label": "Show gauge bar",
+        "description": "Compact display: gauge bar (on) or plain percentage (off)"
+      }
+    }
+  },
+  "sysmon_ram": {
+    "settings": {
+      "gauge": {
+        "label": "Show gauge bar",
+        "description": "Compact display: gauge bar (on) or plain percentage (off)"
+      },
+      "amount_first": {
+        "label": "Show used amount by default",
+        "description": "On: shows used GB by default, revealing the percentage and total on hover. Off: shows the percentage by default, revealing used/total GB on hover."
+      }
+    }
+  },
+  "sysmon_temp": {
+    "settings": {
+      "show_gpu": {
+        "label": "Show GPU temp on hover"
+      },
+      "show_nvme": {
+        "label": "Show hottest NVMe temp on hover"
+      },
+      "show_ram": {
+        "label": "Show RAM (DIMM) temp on hover"
+      },
+      "show_hottest_core": {
+        "label": "Show hottest CPU core on hover"
+      }
+    }
+  },
+  "sysmon_net_down": {
+    "settings": {
+      "threshold_kbps": {
+        "label": "Idle threshold (KB/s)",
+        "description": "Hide entirely below this; hovering always shows it. 1024 = 1 MB/s"
+      },
+      "compact_units": {
+        "label": "Compact units when not hovering",
+        "description": "34K/1.2M instead of 34KB/s/1.2MB/s while not hovering"
+      },
+      "hide_completely": {
+        "label": "Hide widget entirely when idle",
+        "description": "On: vanishes below the idle threshold. Off: icon stays, only the number hides"
+      }
+    }
+  },
+  "sysmon_net_up": {
+    "settings": {
+      "threshold_kbps": {
+        "label": "Idle threshold (KB/s)",
+        "description": "Hide entirely below this; hovering always shows it. 1024 = 1 MB/s"
+      },
+      "compact_units": {
+        "label": "Compact units when not hovering",
+        "description": "34K/1.2M instead of 34KB/s/1.2MB/s while not hovering"
+      },
+      "hide_completely": {
+        "label": "Hide widget entirely when idle",
+        "description": "On: vanishes below the idle threshold. Off: icon stays, only the number hides"
+      }
+    }
+  },
+  "media_mini": {
+    "settings": {
+      "show_cover_art": {
+        "label": "Show cover art",
+        "description": "Replace the play/pause icon with the track's (rounded) cover art when available."
+      },
+      "show_progress_bar": {
+        "label": "Show progress bar",
+        "description": "Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph."
+      },
+      "compact_width": {
+        "label": "Compact width (characters)",
+        "description": "Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put."
+      },
+      "expand_width": {
+        "label": "Expanded width (characters)",
+        "description": "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
+      },
+      "cover_size": {
+        "label": "Cover art size (px)",
+        "description": "Size of the cover art icon in place of the play/pause glyph."
+      },
+      "corner_rounding": {
+        "label": "Cover art rounding (%)",
+        "description": "0 = square corners, 100 = fully circular."
+      },
+      "progress_width": {
+        "label": "Compact progress width (px)",
+        "description": "Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length."
+      },
+      "progress_expand_width": {
+        "label": "Expanded progress width (px)",
+        "description": "Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length."
+      },
+      "progress_style": {
+        "label": "Progress style",
+        "description": "Classic keeps the original solid pill and artwork. Interactive uses a native seek slider; click or drag it to seek.",
+        "options": {
+          "classic": "Classic (original look)",
+          "interactive": "Interactive seek slider"
+        }
+      }
+    }
+  },
+  "active_window_hover": {
+    "settings": {
+      "compact_width": {
+        "label": "Compact width (characters)",
+        "description": "Text width when not hovering. The title only actually shrinks to this if it's longer -- a short title just stays put."
+      },
+      "expand_width": {
+        "label": "Expanded width (characters)",
+        "description": "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
+      },
+      "icon_size": {
+        "label": "Icon size (px)",
+        "description": "Per-app icon size when compact (not hovering). Only affects the real app icon -- the generic fallback glyph (shown when no icon can be resolved) is a fixed size, since the plugin API doesn't expose glyph sizing."
+      },
+      "icon_size_hover": {
+        "label": "Icon size on hover (px)",
+        "description": "Per-app icon size while hovering; animates between this and the compact size along with the text width."
+      }
     }
   }
 }

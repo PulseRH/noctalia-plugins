@@ -19,7 +19,8 @@ for p in $(playerctl -l 2>/dev/null); do
 done
 
 if [ -n "$best" ]; then
+    printf '%s|' "$best"
     playerctl -p "$best" metadata --format "$fmt" 2>/dev/null
 else
-    playerctl metadata --format "$fmt" 2>/dev/null
+    exit 1
 fi

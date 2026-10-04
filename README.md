@@ -18,12 +18,12 @@ noctalia msg plugins enable pulser/clock-hover
 ## Plugins
 
 - **clock-hover** — Compact clock that expands to a full weekday/date/time on hover, with an animated open/close reveal.
-- **volume-hover** — Persistent speaker glyph (Tabler icon, struck-through when muted) with a solid rounded slider + percentage that reveals to its right on hover with an animated open/close. Scroll over the widget to change volume, left-click opens the audio panel, right-click toggles mute. Bar is baked in the theme colour (needs ImageMagick).
+- **volume-hover** — Original baked speaker and expanding slider. Click the speaker/slider image to toggle mute; click the percentage or right-click to open Audio. The Speaker click option can select Audio instead of mute. Scroll changes volume.
 - **sysmon-cpu** — Compact gauge bar or plain percentage; hover shows percent, clock speed, and package wattage (Intel RAPL).
 - **sysmon-ram** — Compact gauge bar or plain percentage; hover shows percent and used/total GB (auto-detected).
 - **sysmon-temp** — CPU package temperature always shown; hover can also show GPU, hottest NVMe, RAM (DIMM), and hottest CPU core, each toggleable.
 - **sysmon-net-down** / **sysmon-net-up** — Auto-detects the busiest network interface. Hides entirely below a configurable idle threshold; hovering always shows it.
-- **media-mini** — Now-playing via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one (e.g. a YouTube tab that navigated away, leaving dead MPRIS metadata behind), with rounded cover art (downloaded/cached for remote art, used directly for local files, falls back to a YouTube thumbnail when a browser's MPRIS doesn't expose real art; rounding needs ImageMagick) and an image-rendered playback-progress bar — beside the art when cover art is on, or in place of the play/pause glyph when it's off. Both are on by default and can be turned off in the widget's settings, which also expose compact/expand text width, cover size, and rounding amount. Scrolls as a marquee if still too long even expanded, and keeps polling while scrolling so a track change is never missed. Left-click toggles play/pause, right-click opens the media panel, and scrolling over the widget skips tracks (scroll up = previous, scroll down = next).
+- **media-mini** — Now-playing artwork and the original solid progress pill. Independent compact/expanded progress-width settings, optional Interactive seek slider, hover title expansion and scrolling. Click cover/title to toggle playback; right-click opens Media; scrolling skips tracks.
 - **active-window-hover** — Focused window's title via `wlrctl` (wlr-foreign-toplevel-management, compositor-agnostic), with the real per-app icon (resolved from its `.desktop` entry + icon theme, rasterized/cached via ImageMagick) in place of a generic glyph when one can be found. Compact/expand text width and icon size are all configurable settings, animating between them on hover; scrolls as a marquee if still too long even expanded. Hidden entirely when nothing is focused.
 
 All widgets share the same open/close animation timing (60fps ease) and use UTF-8-safe character reveal so multi-byte glyphs never get cut mid-character during the animation.
@@ -40,3 +40,5 @@ All widgets share the same open/close animation timing (60fps ease) and use UTF-
 ## License
 
 MIT
+
+**hover-widgets** bundles all nine entries into one install. Volume and media changes require plugin API 32 (Noctalia 5.2+). Classic media progress remains a visual indicator; choose Interactive for seeking.

@@ -2,7 +2,7 @@
 -- Volume: a persistent speaker glyph (Tabler, struck-through when muted) with a
 -- solid rounded slider that reveals to its right on hover, animating open/close
 -- with the same eased timing as the other hover widgets. Scroll changes volume,
--- left-click opens the audio panel, right-click mutes. Speaker + bar are baked
+-- click the speaker/bar to toggle mute; label/padding and right-click open Audio. Speaker + bar are baked
 -- together into one image (a bar widget has a single glyph-or-image slot), so
 -- reveal frames are pre-baked and swapped per animation step. Needs ImageMagick;
 -- without it, falls back to a plain glyph + percentage.
@@ -140,19 +140,31 @@ local function prebake(bucket)
 end
 
 -- ── render ────────────────────────────────────────────────────────────────────
-local function setLabel()
-  if cfgBool("show_percent", true) then
-    barWidget.setText(if muted then "muted" else `{round(vol * 100)}%`)
+local function toggleMute()
+  noctalia.runAsync({"wpctl", "set-mute", SINK, "toggle"}, nil, 1500)
+end
+local function drawClassic(path, width, height)
+  local children = {}
+  local click = if noctalia.getConfig("icon_click") == "panel" then nil else toggleMute
+  if path then
+    table.insert(children, ui.image({key = "speaker-bar", path = path, width = width, height = height,
+      onClick = click}))
+  elseif click then
+    table.insert(children, ui.button({key = "speaker", glyph = if muted then "volume-off" elseif vol < 0.4 then "volume-2" else "volume",
+      glyphSize = 20, width = 24, height = 24, variant = "ghost", onClick = click}))
   else
-    barWidget.setText("")
+    table.insert(children, ui.glyph({key = "speaker", name = if muted then "volume-off" elseif vol < 0.4 then "volume-2" else "volume", size = 20}))
+  end
+  if cfgBool("show_percent", true) then
+    table.insert(children, ui.label({key = "percentage", text = if muted then "muted" else `{round(vol * 100)}%`}))
   end
   barWidget.setTooltip(if muted then "Muted" else `Volume {round(vol * 100)}%`)
+  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center"}, children))
 end
 
 local function render()
-  setLabel()
   if not MAGICK then
-    barWidget.setGlyph(if muted then "volume-mute" elseif vol < 0.4 then "volume-low" else "volume-high")
+    drawClassic(nil, 0, 0)
     return
   end
 
@@ -176,12 +188,12 @@ local function render()
   if ready[path] or noctalia.fileExists(path) then
     ready[path] = true
     local dispW = round(w * sc)
-    barWidget.setImage(path, false, dispW, dispH)
+    drawClassic(path, dispW, dispH)
     lastPath, lastDispW, lastDispH = path, dispW, dispH
   elseif lastPath then
-    barWidget.setImage(lastPath, false, lastDispW, lastDispH) -- hold last frame until bake lands
+    drawClassic(lastPath, lastDispW, lastDispH) -- hold last frame until bake lands
   else
-    barWidget.setGlyph(if muted then "volume-mute" elseif vol < 0.4 then "volume-low" else "volume-high")
+    drawClassic(nil, 0, 0)
   end
 end
 
@@ -248,12 +260,4 @@ function onScroll(axis, steps)
   local up = n < 0
   if cfgBool("invert_scroll", false) then up = not up end
   adjust(up)
-end
-
-function onClick()
-  noctalia.runAsync("noctalia msg panel-toggle control-center audio", nil, 1500)
-end
-
-function onRightClick()
-  noctalia.runAsync("noctalia msg volume-mute", function(_r) poll() end, 1500)
 end

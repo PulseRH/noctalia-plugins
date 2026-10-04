@@ -27,14 +27,14 @@ tags = ["clock"]
 [[plugin]]
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "0.5.0"
-plugin_api = 5
+version = "0.6.0"
+plugin_api = 32
 author = "pulser"
 license = "MIT"
-icon = "volume-high"
-description = "Volume as a persistent speaker glyph (Tabler icon, struck-through when muted) with a solid rounded slider that reveals to its right on hover, animating open/close with the same eased timing as the other hover widgets. Scroll over the widget to change volume, left-click opens the audio panel (real draggable slider), right-click toggles mute. Speaker and bar are baked together into one image (in the theme colour) so reveal frames are pre-baked and swapped per animation step. Needs ImageMagick; without it, falls back to a plain glyph + percentage."
-min_noctalia = "5.0.0"
+dependencies = ["wpctl"]
 tags = ["audio"]
+icon = "volume-high"
+description = "Classic hover volume: speaker toggles mute, percentage opens Audio, scroll adjusts volume."
 
 [[plugin]]
 id = "pulser/sysmon-cpu"
@@ -99,19 +99,19 @@ tags = ["system"]
 [[plugin]]
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.9.0"
-plugin_api = 5
+version = "1.0.0"
+plugin_api = 32
 author = "pulser"
 license = "MIT"
-icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an image-rendered playback-progress bar beside it (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click toggles play/pause, right-click opens the media panel, and scrolling over the widget skips tracks (scroll up = previous, scroll down = next)."
-min_noctalia = "5.0.0"
+dependencies = ["playerctl", "sh"]
 tags = ["media"]
+icon = "player-play-filled"
+description = "Classic now-playing artwork and progress pill, configurable widths, and an optional interactive seek slider."
 
 [[plugin]]
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.0.1"
+version = "1.1.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -119,3 +119,4 @@ dependencies = ["noctalia", "wpctl", "playerctl", "sh", "wlrctl"]
 tags = ["bar", "clock", "audio", "media", "system", "network", "utility"]
 icon = "layout-navbar"
 description = "Nine compact bar widgets with hover expansion: clock, volume, media, active window and system monitors."
+

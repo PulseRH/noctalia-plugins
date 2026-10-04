@@ -1,38 +1,51 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "0.9.0"
-plugin_api = 5
-min_noctalia = "5.0.0"
+version = "1.0.0"
+plugin_api = 32
 author = "pulser"
 license = "MIT"
-dependencies = []
+dependencies = ["playerctl", "sh"]
 tags = ["media"]
 icon = "player-play-filled"
-description = "Compact now-playing (artist - title) via playerctl/MPRIS, preferring whichever player is actually Playing over a paused/stale one, with rounded cover art (including a YouTube-thumbnail fallback for browser MPRIS, which doesn't expose real art) and an image-rendered playback-progress bar beside it (both toggleable below). Compact/expand text width, cover size, and rounding are all configurable settings. Scrolls as a marquee on hover if still too long even expanded; keeps polling while scrolling so a track change is never missed. Left-click toggles play/pause, right-click opens the media panel, and scrolling over the widget skips tracks (scroll up = previous, scroll down = next)."
+description = "Classic now-playing artwork and progress pill, configurable widths, and an optional interactive seek slider."
 
 [[widget]]
 id = "media"
 entry = "media.luau"
 
+[widget.actions]
+right = "panel-toggle control-center media"
+
+[[widget.setting]]
+key = "progress_style"
+type = "select"
+label_key = "media_mini.settings.progress_style.label"
+description_key = "media_mini.settings.progress_style.description"
+default = "classic"
+options = [
+  { value = "classic", label_key = "media_mini.settings.progress_style.options.classic" },
+  { value = "interactive", label_key = "media_mini.settings.progress_style.options.interactive" },
+]
+
 [[widget.setting]]
 key = "show_cover_art"
 type = "bool"
-label_key = "settings.show_cover_art.label"
-description_key = "settings.show_cover_art.description"
+label_key = "media_mini.settings.show_cover_art.label"
+description_key = "media_mini.settings.show_cover_art.description"
 default = true
 
 [[widget.setting]]
 key = "show_progress_bar"
 type = "bool"
-label_key = "settings.show_progress_bar.label"
-description_key = "settings.show_progress_bar.description"
+label_key = "media_mini.settings.show_progress_bar.label"
+description_key = "media_mini.settings.show_progress_bar.description"
 default = true
 
 [[widget.setting]]
 key = "compact_width"
-type = "number"
-label_key = "settings.compact_width.label"
-description_key = "settings.compact_width.description"
+type = "int"
+label_key = "media_mini.settings.compact_width.label"
+description_key = "media_mini.settings.compact_width.description"
 default = 20
 min = 8
 max = 60
@@ -40,9 +53,9 @@ step = 1
 
 [[widget.setting]]
 key = "expand_width"
-type = "number"
-label_key = "settings.expand_width.label"
-description_key = "settings.expand_width.description"
+type = "int"
+label_key = "media_mini.settings.expand_width.label"
+description_key = "media_mini.settings.expand_width.description"
 default = 40
 min = 8
 max = 100
@@ -50,9 +63,9 @@ step = 1
 
 [[widget.setting]]
 key = "cover_size"
-type = "number"
-label_key = "settings.cover_size.label"
-description_key = "settings.cover_size.description"
+type = "int"
+label_key = "media_mini.settings.cover_size.label"
+description_key = "media_mini.settings.cover_size.description"
 default = 20
 min = 12
 max = 40
@@ -60,10 +73,31 @@ step = 1
 
 [[widget.setting]]
 key = "corner_rounding"
-type = "number"
-label_key = "settings.corner_rounding.label"
-description_key = "settings.corner_rounding.description"
+type = "int"
+label_key = "media_mini.settings.corner_rounding.label"
+description_key = "media_mini.settings.corner_rounding.description"
 default = 100
 min = 0
 max = 100
 step = 5
+
+[[widget.setting]]
+key = "progress_width"
+type = "int"
+label_key = "media_mini.settings.progress_width.label"
+description_key = "media_mini.settings.progress_width.description"
+default = 35
+min = 24
+max = 300
+step = 2
+
+[[widget.setting]]
+key = "progress_expand_width"
+type = "int"
+label_key = "media_mini.settings.progress_expand_width.label"
+description_key = "media_mini.settings.progress_expand_width.description"
+default = 35
+min = 24
+max = 500
+step = 2
+

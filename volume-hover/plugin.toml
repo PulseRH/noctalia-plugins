@@ -1,39 +1,53 @@
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "0.5.0"
-plugin_api = 5
-min_noctalia = "5.0.0"
+version = "0.6.0"
+plugin_api = 32
 author = "pulser"
 license = "MIT"
-dependencies = []
+dependencies = ["wpctl"]
 tags = ["audio"]
 icon = "volume-high"
-description = "Volume as a persistent speaker glyph (Tabler icon, struck-through when muted) with a solid rounded slider that reveals to its right on hover, animating open/close with the same eased timing as the other hover widgets. Scroll over the widget to change volume, left-click opens the audio panel (real draggable slider), right-click toggles mute. Speaker and bar are baked together into one image (in the theme colour) so reveal frames are pre-baked and swapped per animation step. Needs ImageMagick; without it, falls back to a plain glyph + percentage."
+description = "Classic hover volume: speaker toggles mute, percentage opens Audio, scroll adjusts volume."
 
 [[widget]]
 id = "volume"
 entry = "volume.luau"
 
+[widget.actions]
+left = "panel-toggle control-center audio"
+right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "icon_click"
+type = "select"
+label_key = "volume_hover.settings.icon_click.label"
+description_key = "volume_hover.settings.icon_click.description"
+default = "mute"
+options = [
+  { value = "mute", label_key = "volume_hover.settings.icon_click.options.mute" },
+  { value = "panel", label_key = "volume_hover.settings.icon_click.options.panel" },
+]
+
 [[widget.setting]]
 key = "bar_color"
 type = "select"
-label_key = "settings.bar_color.label"
-description_key = "settings.bar_color.description"
+label_key = "volume_hover.settings.bar_color.label"
+description_key = "volume_hover.settings.bar_color.description"
 default = "primary"
 options = [
-  { value = "primary", label_key = "settings.bar_color.options.primary" },
-  { value = "onsurface", label_key = "settings.bar_color.options.onsurface" },
-  { value = "secondary", label_key = "settings.bar_color.options.secondary" },
-  { value = "tertiary", label_key = "settings.bar_color.options.tertiary" },
-  { value = "hover", label_key = "settings.bar_color.options.hover" },
-  { value = "error", label_key = "settings.bar_color.options.error" },
+  { value = "primary", label_key = "volume_hover.settings.bar_color.options.primary" },
+  { value = "onsurface", label_key = "volume_hover.settings.bar_color.options.onsurface" },
+  { value = "secondary", label_key = "volume_hover.settings.bar_color.options.secondary" },
+  { value = "tertiary", label_key = "volume_hover.settings.bar_color.options.tertiary" },
+  { value = "hover", label_key = "volume_hover.settings.bar_color.options.hover" },
+  { value = "error", label_key = "volume_hover.settings.bar_color.options.error" },
 ]
 
 [[widget.setting]]
 key = "slider_width"
-type = "number"
-label_key = "settings.slider_width.label"
-description_key = "settings.slider_width.description"
+type = "int"
+label_key = "volume_hover.settings.slider_width.label"
+description_key = "volume_hover.settings.slider_width.description"
 default = 90
 min = 40
 max = 240
@@ -41,9 +55,9 @@ step = 2
 
 [[widget.setting]]
 key = "scroll_step"
-type = "number"
-label_key = "settings.scroll_step.label"
-description_key = "settings.scroll_step.description"
+type = "int"
+label_key = "volume_hover.settings.scroll_step.label"
+description_key = "volume_hover.settings.scroll_step.description"
 default = 5
 min = 1
 max = 25
@@ -52,13 +66,14 @@ step = 1
 [[widget.setting]]
 key = "invert_scroll"
 type = "bool"
-label_key = "settings.invert_scroll.label"
-description_key = "settings.invert_scroll.description"
+label_key = "volume_hover.settings.invert_scroll.label"
+description_key = "volume_hover.settings.invert_scroll.description"
 default = false
 
 [[widget.setting]]
 key = "show_percent"
 type = "bool"
-label_key = "settings.show_percent.label"
-description_key = "settings.show_percent.description"
+label_key = "volume_hover.settings.show_percent.label"
+description_key = "volume_hover.settings.show_percent.description"
 default = true
+

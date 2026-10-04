@@ -3,9 +3,8 @@
 -- settings below; hovering animates from one to the other, but only actually
 -- grows if the text is longer than the compact width -- a short title just
 -- stays put. If it's still too long even at the expanded width while
--- hovering, it scrolls as a marquee instead of truncating. Left-click opens
--- the media panel, right-click toggles play/pause (matches the native Media
--- widget's own click/right-click split).
+-- hovering, it scrolls as a marquee instead of truncating. Left-click toggles
+-- play/pause; right-click opens the media panel.
 
 local COVER_SIZE_DEFAULT = 20 -- px, square cover-art icon in place of the play/pause glyph
 local ROUND_SIZE = 128 -- px, fixed processing canvas the mask is rendered at before downscale
@@ -49,19 +48,24 @@ local ticksSincePoll = 0
 
 local hasMedia = false
 local playing = false
+local activePlayer = ""
 local artist = ""
 local title = ""
 local artUrl = ""
 local position = 0
 local length = 0
+local seekDraft, seekPlayer, seekTrack = nil, nil, nil
+local render
+local function trackKey() return `{activePlayer}|{artist}|{title}|{length}` end
 
 -- Cover art is only ever a local file (barWidget.setImage has no network
 -- fetcher), so http(s) art (Spotify etc.) gets downloaded once per track into
 -- a cache file and reused; file:// art (most local players) is used directly.
-local CACHE_DIR = `{noctalia.pluginDir()}/cache`
+local DATA_DIR = noctalia.pluginDataDir() or noctalia.expandPath("~/.cache/noctalia-plugins/media-mini")
+local CACHE_DIR = `{DATA_DIR}/cache/media-mini`
 local DOWNLOAD_PATH = `{CACHE_DIR}/cover-src.jpg`
+local standaloneReady, standalonePending = {}, {}
 local ROUND_PATH = `{CACHE_DIR}/cover-round.png`
-local COVER_BAR_PATH = `{CACHE_DIR}/cover-bar.png`
 noctalia.mkdirAll(CACHE_DIR)
 
 -- playerctl with no -p picks a player by its own internal ordering, not by
@@ -78,6 +82,7 @@ local PICK_PLAYER_SCRIPT = `{noctalia.pluginDir()}/pick-player.sh`
 local MAGICK_AVAILABLE = noctalia.commandExists("magick") or noctalia.commandExists("convert")
 local MAGICK_CMD = noctalia.commandExists("magick") and "magick" or "convert"
 
+local downloadPending = false
 local lastRequestedArtUrl = nil
 local downloadedArtUrl = nil
 -- Cache keys are keyed on artUrl (the art's identity), NOT the file path:
@@ -86,12 +91,6 @@ local downloadedArtUrl = nil
 -- refreshed on a track change. artUrl changes per track, so it does.
 local roundingKey = nil -- "artUrl|pct" currently being/last processed
 local roundedFor = nil -- "artUrl|pct" the current ROUND_PATH content matches
-
-local coverBarPending = nil -- "artUrl|pct|bucket" currently baking
-local coverBarLastKey = nil -- "artUrl|pct|bucket" the current COVER_BAR_PATH content matches
-local coverBarArtReady = nil -- "artUrl|pct" for which at least one composite has been baked
-local standaloneReady = {} -- [bucket] = true once cache/bar-standalone-{bucket}.png exists
-local standalonePending = {} -- [bucket] = true while generating
 
 local function shQuote(s: string): string
   return "'" .. string.gsub(s, "'", "'\\''") .. "'"
@@ -145,6 +144,8 @@ end
 -- but does expose the page URL -- for YouTube specifically that's enough to
 -- build a thumbnail URL via its stable, unauthenticated thumbnail CDN.
 local function youtubeThumbFromPageUrl(pageUrl: string): string?
+  if not string.match(pageUrl, "^https?://[%w%.%-]*youtube%.com/")
+    and not string.match(pageUrl, "^https?://youtu%.be/") then return nil end
   local id = string.match(pageUrl, "[?&]v=([%w_%-]+)")
   if not id then
     id = string.match(pageUrl, "youtu%.be/([%w_%-]+)")
@@ -162,10 +163,11 @@ local function pollMedia()
       local out = result.stdout or ""
       -- title is last/greedy since it's the only field likely to contain
       -- stray characters; the others are safe to split on "|".
-      local status, a, url, pos, len, pageUrl, t =
-        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
+      local selected, status, a, url, pos, len, pageUrl, t =
+        string.match(out, "^([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|([^|]*)|(.-)%s*$")
       if not status or status == "" then
         hasMedia = false
+        seekDraft, seekPlayer, seekTrack = nil, nil, nil
         return
       end
       local resolvedArtUrl = url or ""
@@ -178,12 +180,14 @@ local function pollMedia()
         scrollOffset = 0
       end
       hasMedia = true
+      activePlayer = selected or ""
       playing = status == "Playing"
       artist = a or ""
       title = t or ""
       artUrl = resolvedArtUrl
       position = tonumber(pos) or 0
       length = tonumber(len) or 0
+      if seekDraft ~= nil and seekTrack ~= trackKey() then seekDraft, seekPlayer, seekTrack = nil, nil, nil end
     end,
     1500
   )
@@ -210,12 +214,14 @@ local function resolveRawCoverPath(): string?
   end
 
   if string.match(artUrl, "^https?://") then
-    if artUrl ~= lastRequestedArtUrl then
-      lastRequestedArtUrl = artUrl
-      noctalia.download(artUrl, DOWNLOAD_PATH, function(ok)
-        if ok then
-          downloadedArtUrl = artUrl
-        end
+    if artUrl ~= lastRequestedArtUrl and not downloadPending then
+      local requestedUrl = artUrl
+      lastRequestedArtUrl = requestedUrl
+      downloadPending = true
+      noctalia.download(requestedUrl, DOWNLOAD_PATH, function(ok)
+        downloadPending = false
+        if ok then downloadedArtUrl = requestedUrl
+        else lastRequestedArtUrl = nil end
       end)
     end
     if downloadedArtUrl == artUrl then
@@ -297,48 +303,6 @@ end
 -- composite exists for the current art (subsequent bucket changes overwrite
 -- that same file in place -- setImage watch=true reloads it, so the widget's
 -- width never jitters), or the plain art path until the first bake lands.
-local function resolveCoverWithBar(pct: number, bucket: number): string?
-  local base = resolveCoverPath(pct)
-  if not base then
-    return nil
-  end
-  if not MAGICK_AVAILABLE then
-    return base
-  end
-
-  local artKey = `{artUrl}|{pct}`
-  local fullKey = `{artKey}|{bucket}`
-
-  -- (Re)bake whenever the displayed bucket/art isn't the one on disk.
-  if coverBarLastKey ~= fullKey and coverBarPending ~= fullKey then
-    coverBarPending = fullKey
-    local barX = ROUND_SIZE + COMBO_GAP
-    local filledW = math.floor((bucket / FILL_STEPS) * COMBO_BAR_W + 0.5)
-    local top = math.floor((ROUND_SIZE - COMBO_BAR_H) / 2)
-    local bottom = top + COMBO_BAR_H - 1
-    local r = math.floor(COMBO_BAR_H / 2)
-
-    local cmd = string.format("%s %s -background none -gravity West -extent %dx%d", MAGICK_CMD, shQuote(base), COMBO_CANVAS_W, ROUND_SIZE)
-      .. barDrawCmd("\"rgba(255,255,255,0.30)\"", barX, top, barX + COMBO_BAR_W - 1, bottom, r)
-      .. (filledW > 0 and barDrawCmd("white", barX, top, barX + filledW - 1, bottom, r) or "")
-      .. " "
-      .. shQuote(COVER_BAR_PATH)
-
-    noctalia.runAsync(cmd, function(result)
-      coverBarPending = nil
-      if result.exitCode == 0 then
-        coverBarLastKey = fullKey
-        coverBarArtReady = artKey
-      end
-    end)
-  end
-
-  if coverBarArtReady == artKey then
-    return COVER_BAR_PATH
-  end
-  return base
-end
-
 -- Standalone flat pill bar for when cover art is off, shown in place of the
 -- play/pause glyph. Purely a function of the fill bucket (not the track), so
 -- each of the FILL_STEPS possible images only ever needs generating once.
@@ -373,65 +337,93 @@ local function resolveStandaloneBar(bucket: number): string?
   return nil
 end
 
-local function render()
-  if not hasMedia then
-    barWidget.setVisible(false)
-    return
-  end
-  barWidget.setVisible(true)
-  -- Never touch font here -- Noctalia already gives every widget (native or
-  -- plugin) a per-widget Font setting in its own settings panel
-  -- (Widget::labelFontFamily), applied at build time. The progress bar is an
-  -- image now, not text, so it never needs (or fights over) a font.
-
-  local barEnabled = noctalia.getConfig("show_progress_bar") ~= false
-  local coverEnabled = noctalia.getConfig("show_cover_art") ~= false
+local function togglePlayback()
+  if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "play-pause"}) end
+end
+local function previewSeek(value)
+  if length <= 0 or activePlayer == "" then return end
+  if seekDraft == nil then seekPlayer, seekTrack = activePlayer, trackKey() end
+  seekDraft = math.max(0, math.min(length / 1000000, tonumber(value) or 0))
+end
+local function finishSeek()
+  if seekDraft == nil then return end
+  local value, player, track = seekDraft, seekPlayer, seekTrack
+  seekDraft, seekPlayer, seekTrack = nil, nil, nil
+  if player ~= activePlayer or track ~= trackKey() then return end
+  position = value * 1000000
+  noctalia.runAsync({"playerctl", "-p", player, "position", tostring(value)}, function(result)
+    if result.exitCode ~= 0 then barWidget.setTooltip("This player could not seek to that position") end
+    pollMedia()
+  end, 1500)
+  render()
+end
+render = function()
+  barWidget.setVisible(hasMedia)
+  if not hasMedia then return end
   local coverSize = noctalia.getConfig("cover_size") or COVER_SIZE_DEFAULT
-  local roundPct = noctalia.getConfig("corner_rounding") or 100
-  local barActive = barEnabled and hasMedia and length > 0
-  local bucket = fillBucket()
-
+  local children = {}
+  if noctalia.getConfig("progress_style") == "interactive" then
   local imagePath = nil
-  if coverEnabled then
-    imagePath = barActive and resolveCoverWithBar(roundPct, bucket) or resolveCoverPath(roundPct)
+  if noctalia.getConfig("show_cover_art") ~= false then
+    imagePath = resolveCoverPath(noctalia.getConfig("corner_rounding") or 100)
   end
-
-  if imagePath == COVER_BAR_PATH then
-    -- art + bar side by side: the composite is COMBO_CANVAS_W wide at
-    -- ROUND_SIZE tall, displayed at cover_size tall and proportionally wide.
-    local dispW = math.floor(coverSize * (COMBO_CANVAS_W / ROUND_SIZE) + 0.5)
-    barWidget.setImage(imagePath, true, dispW, coverSize)
-  elseif imagePath then
-    barWidget.setImage(imagePath, true, coverSize) -- plain square art
-  elseif barActive then
-    local barPath = resolveStandaloneBar(bucket)
-    if barPath then
-      local dispW = math.floor(coverSize * STANDALONE_DISP_SCALE + 0.5)
-      local dispH = math.floor(dispW * (STANDALONE_BAR_H / STANDALONE_BAR_W) + 0.5)
-      barWidget.setImage(barPath, true, dispW, dispH)
-    else
-      barWidget.setGlyph(playing and "player-play-filled" or "player-pause-filled")
-    end
+  if imagePath then
+    table.insert(children, ui.image({key = "cover", path = imagePath, width = coverSize, height = coverSize,
+      fit = "cover", onClick = togglePlayback, tooltip = "Play / pause"}))
   else
-    barWidget.setGlyph(playing and "player-play-filled" or "player-pause-filled")
+    table.insert(children, ui.button({key = "playback", glyph = playing and "player-pause-filled" or "player-play-filled",
+      glyphSize = coverSize, width = coverSize + 4, height = coverSize + 4,
+      variant = "ghost", onClick = togglePlayback, tooltip = "Play / pause"}))
   end
-
+  if noctalia.getConfig("show_progress_bar") ~= false and length > 0 then
+    local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
+    local expanded = math.max(compact, math.min(500, noctalia.getConfig("progress_expand_width") or 35))
+    table.insert(children, ui.slider({key = "song-progress", min = 0, max = length / 1000000, step = 1,
+      value = seekDraft or math.max(0, math.min(length, position)) / 1000000,
+      width = compact + (expanded - compact) * progress, height = 16, controlSize = "sm",
+      onChange = previewSeek, onDragEnd = finishSeek}))
+  end
+  else
+    local showBar = noctalia.getConfig("show_progress_bar") ~= false and length > 0
+    local compact = math.max(24, math.min(300, noctalia.getConfig("progress_width") or 35))
+    local expanded = math.max(compact, math.min(500, noctalia.getConfig("progress_expand_width") or 35))
+    local barWidth = compact + (expanded - compact) * progress
+    local roundPct = noctalia.getConfig("corner_rounding") or 100
+    local cover = nil
+    if noctalia.getConfig("show_cover_art") ~= false then cover = resolveCoverPath(roundPct) end
+    local parts = {}
+    if cover then
+      table.insert(parts, ui.image({key = "cover", path = cover, width = coverSize, height = coverSize,
+        onClick = togglePlayback}))
+    end
+    if showBar then
+      local bar = resolveStandaloneBar(fillBucket())
+      if bar then
+        local barHeight = cover and coverSize * COMBO_BAR_H / ROUND_SIZE
+          or coverSize * STANDALONE_DISP_SCALE * STANDALONE_BAR_H / STANDALONE_BAR_W
+        table.insert(parts, ui.image({key = "classic-progress", path = bar, width = barWidth,
+          height = barHeight, fit = "stretch", onClick = togglePlayback}))
+      end
+    end
+    if #parts == 0 then
+      table.insert(parts, ui.glyph({name = playing and "player-play-filled" or "player-pause-filled", size = coverSize}))
+    end
+    table.insert(children, (barWidget.isVertical() and ui.column or ui.row)({key = "classic-art-progress",
+      gap = coverSize * COMBO_GAP / ROUND_SIZE, align = "center"}, parts))
+  end
   local full = fullText()
   local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(full) or #full
   local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
-
-  if fullLen <= width then
-    barWidget.setText(full)
-  elseif hovering then
-    local loop = full .. "   "
-    local loopLen = utf8.len(loop) or #loop
-    local start = scrollOffset % loopLen
-    local window = utf8Window(loop .. full, start, width)
-    barWidget.setText(window)
-  else
-    barWidget.setText(`{utf8Sub(full, math.max(width - 3, 1))}...`)
+  local text = full
+  if fullLen > width then
+    if hovering then
+      local loop = full .. "   "
+      text = utf8Window(loop .. full, scrollOffset % (utf8.len(loop) or #loop), width)
+    else text = `{utf8Sub(full, math.max(width - 3, 1))}...` end
   end
+  table.insert(children, ui.label({key = "title", text = text}))
+  barWidget.render((barWidget.isVertical() and ui.column or ui.row)({gap = 6, align = "center"}, children))
 end
 
 local function step()
@@ -480,7 +472,7 @@ function onHover(isHovering: boolean)
 end
 
 function onClick()
-  noctalia.runAsync("playerctl play-pause")
+  if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "play-pause"}) end
 end
 
 function onRightClick()
@@ -495,8 +487,8 @@ function onScroll(axis, steps)
     return
   end
   if n < 0 then
-    noctalia.runAsync("playerctl previous")
+    if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "previous"}) end
   else
-    noctalia.runAsync("playerctl next")
+    if activePlayer ~= "" then noctalia.runAsync({"playerctl", "-p", activePlayer, "next"}) end
   end
 end

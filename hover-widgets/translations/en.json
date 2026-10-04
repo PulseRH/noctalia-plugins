@@ -4,7 +4,7 @@
     "settings": {
       "bar_color": {
         "label": "Bar colour",
-        "description": "Theme colour role used for the filled bar and knob.",
+        "description": "Theme colour role used for the classic filled bar and knob.",
         "options": {
           "primary": "Primary (accent)",
           "onsurface": "On-surface (text)",
@@ -16,7 +16,7 @@
       },
       "slider_width": {
         "label": "Slider width (px)",
-        "description": "On-screen width of the slider image. Height scales with it."
+        "description": "Width of the classic hover slider image. Height scales with it."
       },
       "scroll_step": {
         "label": "Scroll step (%)",
@@ -28,7 +28,15 @@
       },
       "show_percent": {
         "label": "Show percentage",
-        "description": "Show the numeric volume (or \"muted\") as text beside the slider."
+        "description": "Show volume percentage or muted. Click this label to open Audio."
+      },
+      "icon_click": {
+        "label": "Speaker click",
+        "description": "Click the speaker to toggle mute, or open Audio. Percentage/padding and right-click open Audio.",
+        "options": {
+          "mute": "Toggle mute",
+          "panel": "Open Audio panel"
+        }
       }
     }
   },
@@ -125,6 +133,22 @@
       "corner_rounding": {
         "label": "Cover art rounding (%)",
         "description": "0 = square corners, 100 = fully circular."
+      },
+      "progress_width": {
+        "label": "Compact progress width (px)",
+        "description": "Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length."
+      },
+      "progress_expand_width": {
+        "label": "Expanded progress width (px)",
+        "description": "Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length."
+      },
+      "progress_style": {
+        "label": "Progress style",
+        "description": "Classic keeps the original solid pill and artwork. Interactive uses a native seek slider; click or drag it to seek.",
+        "options": {
+          "classic": "Classic (original look)",
+          "interactive": "Interactive seek slider"
+        }
       }
     }
   },

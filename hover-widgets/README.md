@@ -40,7 +40,7 @@ Hover to reveal the full weekday, ordinal date, month and seconds. Uses local ti
 
 ### Hover Volume (`volume`)
 
-Hover to reveal the volume slider. Scroll up/down to adjust output volume, left-click to open the Audio Control Center, and right-click to toggle mute. The revealed slider is a visual indicator; use the Audio panel for dragging.
+Keeps the original baked speaker and hover slider. Click the speaker/slider image to toggle mute; click the percentage (or muted label) or right-click to open the anchored Audio Control Center. The Speaker click setting can make the image open Audio instead. Scroll adjusts volume. The classic slider is a visual indicator; use Audio for dragging.
 
 
 ### Hover CPU Monitor (`cpu`)
@@ -70,7 +70,7 @@ Shows transmit throughput. Hover expands the reading. Set Hide completely to fal
 
 ### Mini Media (`media`)
 
-Hover to expand artist/title and scroll long text. Left-click toggles play/pause, right-click opens the Media Control Center. Scroll up for the previous track and down for the next track. Hidden when no player is available.
+Classic keeps the original cover art and solid progress pill. Compact and expanded progress widths are configurable independently; equal values keep a fixed length. Interactive style replaces the pill with a native slider: click or drag to seek when the player supports it. Cover/title clicks toggle playback; right-click opens Media. Scroll skips tracks. Hidden when no player is available.
 
 
 ### Hover Active Window (`active-window`)
@@ -86,11 +86,12 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
-| `bar_color` | `select` | `primary` | Theme colour role used for the filled bar and knob. Choices: `primary`, `onsurface`, `secondary`, `tertiary`, `hover`, `error`. |
-| `slider_width` | `int` | `90` | On-screen width of the slider image. Height scales with it. Measured in pixels. |
-| `scroll_step` | `int` | `5` | How much one scroll notch changes the volume. Percentage points per scroll action. |
+| `icon_click` | `select` | `mute` | Click the speaker to toggle mute, or open Audio. Percentage/padding and right-click open Audio. |
+| `bar_color` | `select` | `primary` | Theme colour role used for the classic filled bar and knob. |
+| `slider_width` | `int` | `90` | Width of the classic hover slider image. Height scales with it. |
+| `scroll_step` | `int` | `5` | How much one scroll notch changes the volume. |
 | `invert_scroll` | `bool` | `false` | By default scroll up raises the volume. Turn this on if it feels backwards. |
-| `show_percent` | `bool` | `true` | Show the numeric volume (or "muted") as text beside the slider. |
+| `show_percent` | `bool` | `true` | Show volume percentage or muted. Click this label to open Audio. |
 
 
 ### Hover CPU Monitor (`cpu`)
@@ -140,12 +141,15 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
+| `progress_style` | `select` | `classic` | Classic keeps the original solid pill and artwork. Interactive uses a native seek slider; click or drag it to seek. |
 | `show_cover_art` | `bool` | `true` | Replace the play/pause icon with the track's (rounded) cover art when available. |
 | `show_progress_bar` | `bool` | `true` | Show a playback-position bar next to the icon. It's a rendered image (not text), so it never affects the widget's Font setting -- when cover art is on, the bar sits beside the art; when off, it replaces the play/pause glyph. |
-| `compact_width` | `int` | `20` | Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put. Measured in characters. |
-| `expand_width` | `int` | `40` | Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further. Measured in characters. |
-| `cover_size` | `int` | `20` | Size of the cover art icon in place of the play/pause glyph. Measured in pixels. |
-| `corner_rounding` | `int` | `100` | 0 = square corners, 100 = fully circular. Percentage, 0–100. |
+| `compact_width` | `int` | `20` | Text width when not hovering. The text only actually shrinks to this if it's longer -- a short title just stays put. |
+| `expand_width` | `int` | `40` | Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further. |
+| `cover_size` | `int` | `20` | Size of the cover art icon in place of the play/pause glyph. |
+| `corner_rounding` | `int` | `100` | 0 = square corners, 100 = fully circular. |
+| `progress_width` | `int` | `35` | Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length. |
+| `progress_expand_width` | `int` | `35` | Width of the seek slider in this state. Expanded width is at least the compact width. Set both equal for a fixed length. |
 
 
 ### Hover Active Window (`active-window`)
@@ -218,3 +222,7 @@ MIT.
 ## Native panel actions
 
 Clock left-click opens the Control Center Calendar page, matching the native clock. Volume opens Audio, system monitors open System, and media right-click opens Media. These are native widget actions, so panel placement follows Noctalia’s positioning settings and retains the originating widget anchor. Per-instance action settings can override these defaults.
+
+## Version 1.1.0
+
+Original visual styles remain the defaults. Volume now has separate icon and label click targets. Media adds configurable compact/expanded progress widths and an opt-in Interactive seek-slider style. Seeking commits on release and targets the displayed player; pending seeks are discarded when its track changes.

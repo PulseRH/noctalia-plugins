@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.0.1"
+version = "1.1.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -22,6 +22,18 @@ entry = "volume.luau"
 
 [widget.actions]
 left = "panel-toggle control-center audio"
+right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "icon_click"
+type = "select"
+label_key = "volume_hover.settings.icon_click.label"
+description_key = "volume_hover.settings.icon_click.description"
+default = "mute"
+options = [
+  { value = "mute", label_key = "volume_hover.settings.icon_click.options.mute" },
+  { value = "panel", label_key = "volume_hover.settings.icon_click.options.panel" },
+]
 
 [[widget.setting]]
 key = "bar_color"
@@ -208,6 +220,17 @@ entry = "media.luau"
 right = "panel-toggle control-center media"
 
 [[widget.setting]]
+key = "progress_style"
+type = "select"
+label_key = "media_mini.settings.progress_style.label"
+description_key = "media_mini.settings.progress_style.description"
+default = "classic"
+options = [
+  { value = "classic", label_key = "media_mini.settings.progress_style.options.classic" },
+  { value = "interactive", label_key = "media_mini.settings.progress_style.options.interactive" },
+]
+
+[[widget.setting]]
 key = "show_cover_art"
 type = "bool"
 label_key = "media_mini.settings.show_cover_art.label"
@@ -260,6 +283,26 @@ default = 100
 min = 0
 max = 100
 step = 5
+
+[[widget.setting]]
+key = "progress_width"
+type = "int"
+label_key = "media_mini.settings.progress_width.label"
+description_key = "media_mini.settings.progress_width.description"
+default = 35
+min = 24
+max = 300
+step = 2
+
+[[widget.setting]]
+key = "progress_expand_width"
+type = "int"
+label_key = "media_mini.settings.progress_expand_width.label"
+description_key = "media_mini.settings.progress_expand_width.description"
+default = 35
+min = 24
+max = 500
+step = 2
 
 [[widget]]
 id = "active-window"
