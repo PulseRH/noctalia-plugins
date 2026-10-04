@@ -307,3 +307,7 @@ Adds native theme/custom progress colour pickers and a separate Progress darkeni
 ## Version 1.9.5
 
 The upper/lower 2px of media control targets no longer highlight the playback button. Widget expansion and right-click seek tracking continue there.
+
+## Version 1.9.6
+
+Left-click the top/bottom 5px seek areas of playback controls to seek without a button highlight. Left-click their centres for playback; right-click anywhere over them to seek.

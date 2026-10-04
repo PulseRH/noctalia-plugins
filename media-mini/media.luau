@@ -232,9 +232,9 @@ local function controlPointerMove(key, x, y)
   end
   onMediaControlHover("true", key)
   -- Keep pointer/seek tracking over the whole target, but highlight only the
-  -- central visible band. The upper/lower slivers are background hover.
+  -- central button band. The upper/lower quarters are seek areas.
   local pointerY = tonumber(y) or 0.5
-  local edge = 0.1
+  local edge = 0.25
   local nextHighlight = pointerY > edge and pointerY < 1 - edge and key or nil
   highlightedControl = nextHighlight
   if previousHighlight ~= nextHighlight and render then render() end
@@ -248,6 +248,16 @@ function onNextPointer(x, y) controlPointerMove("next", x, y) end
 function onPreviousLeave() controlPointerLeave("previous") end
 function onPauseLeave() controlPointerLeave("pause") end
 function onNextLeave() controlPointerLeave("next") end
+local function controlRegionClick(key, action)
+  if noctalia.getConfig("progress_layout") == "background"
+    and noctalia.getConfig("background_seek_strip") ~= false
+    and hoveredControl == key and highlightedControl ~= key then
+    onBackgroundSeekClick()
+  else action() end
+end
+function onPreviousRegionClick() controlRegionClick("previous", onPreviousClick) end
+function onPauseRegionClick() controlRegionClick("pause", onPlaybackClick) end
+function onNextRegionClick() controlRegionClick("next", onNextClick) end
 local function playbackButton(key, glyph, action, tooltip, size, reveal)
   reveal = reveal or 1
   local highlighted = highlightedControl == key
@@ -257,6 +267,7 @@ local function playbackButton(key, glyph, action, tooltip, size, reveal)
     color = highlighted and not background and "primary" or "on_surface"})}
   if background and key ~= "playback" then
     local name = key == "previous" and "Previous" or key == "pause" and "Pause" or "Next"
+    action = "on" .. name .. "RegionClick"
     content = {
       ui.row({width = size * reveal, height = size, align = "center", justify = "center"}, content),
       ui.graph({key = key .. "-pointer", width = size * reveal, height = size, values = {0, 0},

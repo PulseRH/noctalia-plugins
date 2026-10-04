@@ -1,6 +1,6 @@
 id = "pulser/media-mini"
 name = "Media (mini)"
-version = "1.8.5"
+version = "1.8.6"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
