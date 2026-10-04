@@ -40,7 +40,7 @@ Hover to reveal the full weekday, ordinal date, month and seconds. Uses local ti
 
 ### Hover Volume (`volume`)
 
-Hover expands the original rounded track and circular knob. Click the speaker to mute/unmute; click the track to set volume. Percentage/padding and right-click open the anchored Audio panel. Speaker click can select Audio instead. Rapid writes are serialized and coalesced; stale reads cannot overwrite a newer request. Width and thickness are independent.
+Hover expands the original rounded track and circular knob. Click the speaker to mute/unmute; click the track to set volume. Percentage/padding and right-click open the anchored Audio panel. Speaker click can select Audio instead. Rapid writes are serialized and coalesced; stale reads cannot overwrite a newer request. Width and thickness are independent. Circle colour is separate from the track, defaulting to the native Settings slider colour. Turn Show circle knob off for a plain rounded bar.
 
 Enable dragging to drag the same classic track; it stays expanded in that mode. Volume changes continuously during dragging. This is optional and off by default.
 
@@ -90,6 +90,8 @@ Settings below belong to the named widget entry, not to the whole bundle. The cl
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
+| `show_knob` | `bool` | `true` | Show the circular volume handle. Turn off for a plain rounded bar; clicking and dragging still work. |
+| `knob_color` | `select` | `on_primary` | Independent knob colour. On-primary matches the knob used by native Settings sliders. |
 | `drag_enabled` | `bool` | `false` | Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab. |
 | `slider_thickness` | `int` | `12` | Track thickness, independent of its width. The circular knob is 1.5 times this size. |
 | `icon_click` | `select` | `mute` | Click the speaker to toggle mute, or open Audio. Click the expanded track to set volume. Percentage/padding and right-click open Audio. |
@@ -243,3 +245,7 @@ Version 1.2.1 gives volume immediate click feedback and refreshes the classic kn
 ## Version 1.3.0
 
 Volume uses a serialized latest-request queue and discards stale polling results. Rounded bars and knobs are drawn at their actual dimensions, with independent width/thickness. Optional dragging keeps classic shapes, using Noctalia pointer capture; volume updates continuously and media seeks on release.
+
+## Version 1.4.0
+
+Adds a separate Circle colour selector (default: on-primary, matching native Settings sliders) and Show circle knob toggle. Drawing and pointer layers share a fixed centre line, so changing thickness keeps the bars vertically aligned in click and drag modes. Track and moving fill ends use rounded shapes.

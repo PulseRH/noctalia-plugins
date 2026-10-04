@@ -45,6 +45,22 @@
       "drag_enabled": {
         "label": "Enable dragging",
         "description": "Drag to change volume using the classic bar appearance. Keeps the track expanded so it stays available to grab."
+      },
+      "show_knob": {
+        "label": "Show circle knob",
+        "description": "Show the circular volume handle. Turn off for a plain rounded bar; clicking and dragging still work."
+      },
+      "knob_color": {
+        "label": "Circle colour",
+        "description": "Independent knob colour. On-primary matches the knob used by native Settings sliders.",
+        "options": {
+          "on_primary": "On-primary (native slider)",
+          "on_surface": "On-surface",
+          "primary": "Primary (same as bar)",
+          "secondary": "Secondary",
+          "tertiary": "Tertiary",
+          "error": "Error"
+        }
       }
     }
   },

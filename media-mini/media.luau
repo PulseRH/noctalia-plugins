@@ -348,17 +348,20 @@ render = function()
     if showBar then
       local barHeight = math.max(4, math.min(24, noctalia.getConfig("progress_thickness") or 8))
       local filledWidth = barWidth * math.max(0, math.min(1, (seekDraft or position / 1000000) * 1000000 / length))
-      table.insert(parts, ui.row({key = "classic-progress-hit", gap = -barWidth, align = "center",
+      local inputHeight = 38
+      table.insert(parts, ui.row({key = "classic-progress-hit", height = inputHeight, gap = -barWidth, align = "center",
         onClick = "onClassicSeekClick"}, {
-        ui.box({key = "classic-track", width = barWidth, height = barHeight, radius = barHeight / 2, fill = "#ffffff47"}),
-        ui.row({key = "classic-fill-layer", width = barWidth, height = barHeight, gap = 0, align = "center"}, {
-          ui.box({key = "classic-fill", width = filledWidth, height = barHeight, radius = barHeight / 2, fill = "#ffffff"}),
+        ui.row({key = "classic-track-layer", width = barWidth, height = inputHeight, align = "center"}, {
+          ui.box({key = "classic-track", width = barWidth, height = barHeight, radius = barHeight / 2, fill = "#ffffff47"}),
+        }),
+        ui.row({key = "classic-fill-layer", width = barWidth, height = inputHeight, gap = 0, align = "center"}, {
+          ui.box({key = "classic-fill", width = filledWidth, height = barHeight, radius = math.min(barHeight, filledWidth) / 2, fill = "#ffffff"}),
           ui.box({width = barWidth - filledWidth, height = 1, fill = "#00000000"}),
         }),
-        classicDrag and ui.slider({key = "classic-drag", width = barWidth, height = barHeight,
+        classicDrag and ui.slider({key = "classic-drag", width = barWidth, height = inputHeight,
           min = 0, max = length / 1000000, step = 1, value = seekDraft or position / 1000000, opacity = 0,
           onChange = "onSeekChange", onDragEnd = "onSeekRelease"})
-        or ui.graph({key = "classic-seek-pointer", width = barWidth, height = barHeight, values = {0, 0},
+        or ui.graph({key = "classic-seek-pointer", width = barWidth, height = inputHeight, values = {0, 0},
           color = "#00000000", lineWidth = 0, fillOpacity = 0,
           onPointerMove = "onClassicSeekMove", onPointerLeave = "onClassicSeekLeave"}),
       }))

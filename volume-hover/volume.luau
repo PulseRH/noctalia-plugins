@@ -90,7 +90,7 @@ function onVolumeBarLeave()
 end
 function onVolumeBarClick()
   if pointerX == nil or trackWidth <= 0 then return end
-  local radius = thickness() * 0.75
+  local radius = boolean("show_knob", true) and thickness() * 0.75 or 0
   requestVolume((pointerX * trackWidth - radius) / math.max(1, trackWidth - radius * 2))
 end
 render = function()
@@ -99,39 +99,47 @@ render = function()
   local icon = ui.glyph({key = "speaker", name = glyph, size = 20, color = color})
   local speakerClick = nil
   if noctalia.getConfig("icon_click") ~= "panel" then speakerClick = "onSpeakerClick" end
-  local speaker = ui.row({key = "speaker-target", width = 24, height = 24, align = "center",
-    onHover = "onInlineHover",
-    onClick = speakerClick}, {icon})
-  local children = {speaker}
+  -- Native sliders have a fixed 38px input height. All overlapping layers use
+  -- that same height, centering only their visible shapes inside it.
+  local inputHeight = 38
+  local children = {ui.row({key = "speaker-target", width = 24, height = inputHeight, align = "center",
+    onHover = "onInlineHover", onClick = speakerClick}, {icon})}
   trackWidth = 0
   local draggingEnabled = boolean("drag_enabled", false)
   if progress > 0.01 or draggingEnabled then
     trackWidth = math.max(thickness() * 2, clamp(number("slider_width", 90), 40, 300) * (draggingEnabled and 1 or progress))
     local h = thickness()
+    local showKnob = boolean("show_knob", true)
     local diameter = h * 1.5
     local knobStart = clamp(vol, 0, 1) * (trackWidth - diameter)
-    -- Full-width layers overlap. The knob is sized independently of bar width,
-    -- so its radius remains circular at every configured aspect ratio.
-    local knob = ui.row({key = "knob-layer", gap = 0, width = trackWidth, height = diameter, align = "center"}, {
-      ui.box({width = knobStart, height = 1, fill = "#00000000"}),
-      ui.box({key = "knob", width = diameter, height = diameter, radius = diameter / 2, fill = color}),
-      ui.box({width = math.max(0, trackWidth - diameter - knobStart), height = 1, fill = "#00000000"}),
-    })
+    local filledWidth = showKnob and (knobStart + diameter / 2) or clamp(vol, 0, 1) * trackWidth
     local layers = {
-      ui.progress({key = "classic-track", width = trackWidth, height = h, radius = h / 2,
-        progress = clamp(vol, 0, 1), fill = color, track = color .. "/0.23"}),
-      knob,
+      ui.row({key = "track-layer", width = trackWidth, height = inputHeight, align = "center"}, {
+        ui.box({key = "track", width = trackWidth, height = h, radius = h / 2, fill = color .. "/0.23"}),
+      }),
+      ui.row({key = "fill-layer", gap = 0, width = trackWidth, height = inputHeight, align = "center"}, {
+        ui.box({key = "fill", width = filledWidth, height = h, radius = math.min(h, filledWidth) / 2, fill = color}),
+        ui.box({width = trackWidth - filledWidth, height = 1, fill = "#00000000"}),
+      }),
     }
+    if showKnob then
+      table.insert(layers, ui.row({key = "knob-layer", gap = 0, width = trackWidth, height = inputHeight, align = "center"}, {
+        ui.box({width = knobStart, height = 1, fill = "#00000000"}),
+        ui.box({key = "knob", width = diameter, height = diameter, radius = diameter / 2,
+          fill = tostring(noctalia.getConfig("knob_color") or "on_primary")}),
+        ui.box({width = math.max(0, trackWidth - diameter - knobStart), height = 1, fill = "#00000000"}),
+      }))
+    end
     if draggingEnabled then
-      table.insert(layers, ui.slider({key = "volume-drag", width = trackWidth, height = diameter,
+      table.insert(layers, ui.slider({key = "volume-drag", width = trackWidth, height = inputHeight,
         min = 0, max = 1, step = 0.01, value = clamp(vol, 0, 1), opacity = 0,
         onChange = "onVolumeDrag", onDragEnd = "onVolumeDragEnd"}))
     else
-      table.insert(layers, ui.graph({key = "volume-pointer", width = trackWidth, height = diameter, values = {0, 0},
+      table.insert(layers, ui.graph({key = "volume-pointer", width = trackWidth, height = inputHeight, values = {0, 0},
         color = "#00000000", lineWidth = 0, fillOpacity = 0,
         onPointerMove = "onVolumeBarMove", onPointerLeave = "onVolumeBarLeave"}))
     end
-    table.insert(children, ui.row({key = "volume-hit", width = trackWidth, height = diameter,
+    table.insert(children, ui.row({key = "volume-hit", width = trackWidth, height = inputHeight,
       gap = -trackWidth, align = "center", opacity = muted and 0.65 or 1,
       onClick = "onVolumeBarClick"}, layers))
   end

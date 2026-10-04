@@ -1,6 +1,6 @@
 id = "pulser/volume-hover"
 name = "Volume (scroll slider)"
-version = "0.8.0"
+version = "0.9.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -16,6 +16,28 @@ entry = "volume.luau"
 [widget.actions]
 left = "panel-toggle control-center audio"
 right = "panel-toggle control-center audio"
+
+[[widget.setting]]
+key = "show_knob"
+type = "bool"
+label_key = "volume_hover.settings.show_knob.label"
+description_key = "volume_hover.settings.show_knob.description"
+default = true
+
+[[widget.setting]]
+key = "knob_color"
+type = "select"
+label_key = "volume_hover.settings.knob_color.label"
+description_key = "volume_hover.settings.knob_color.description"
+default = "on_primary"
+options = [
+  { value = "on_primary", label_key = "volume_hover.settings.knob_color.options.on_primary" },
+  { value = "on_surface", label_key = "volume_hover.settings.knob_color.options.on_surface" },
+  { value = "primary", label_key = "volume_hover.settings.knob_color.options.primary" },
+  { value = "secondary", label_key = "volume_hover.settings.knob_color.options.secondary" },
+  { value = "tertiary", label_key = "volume_hover.settings.knob_color.options.tertiary" },
+  { value = "error", label_key = "volume_hover.settings.knob_color.options.error" },
+]
 
 [[widget.setting]]
 key = "drag_enabled"
