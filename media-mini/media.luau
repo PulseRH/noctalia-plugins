@@ -123,6 +123,29 @@ local function widthRange(): (number, number)
   return compactLen, math.max(compactLen, expandLen)
 end
 
+-- Approximate proportional glyph advances until native label measurement is
+-- exposed to plugins. Cache per title so spectrum frames do not remeasure it.
+local measuredTitle, measuredTitleWidth = nil, 0
+local function titlePixelWidth(text)
+  if text == measuredTitle then return measuredTitleWidth end
+  local width = 0
+  for _, code in utf8.codes(text) do
+    if code >= 0x300 and code <= 0x36f then
+      -- Combining marks have no independent advance.
+    elseif code >= 0x2e80 then width += 14
+    elseif code > 127 then width += 8
+    else
+      local ch = string.char(code)
+      if ch == " " then width += 4
+      elseif string.find("ilI.,!|:;'", ch, 1, true) then width += 3.8
+      elseif string.find("mwMW@%&", ch, 1, true) then width += 11.5
+      elseif code >= 65 and code <= 90 then width += 9
+      else width += 7.5 end
+    end
+  end
+  measuredTitle, measuredTitleWidth = text, math.ceil(width + 6)
+  return measuredTitleWidth
+end
 -- Browser MPRIS (Firefox et al) doesn't populate mpris:artUrl for web video,
 -- but does expose the page URL -- for YouTube specifically that's enough to
 -- build a thumbnail URL via its stable, unauthenticated thumbnail CDN.
@@ -379,7 +402,7 @@ local function visualiser(width, inputHeight, fraction, mode)
   local barWidth = (width - gap * (count - 1)) / count
   local boundary = math.max(0, math.min(1, fraction or 0)) * width
   mode = mode or "overlay"
-  local playedColor = mode == "inverted" and "#000000" or color
+  local playedColor = mode == "inverted" and "#00000066" or color
   if mode == "progress" then playedColor = tostring(noctalia.getConfig("background_progress_color") or "primary") end
   local shade = math.max(0, math.min(80, noctalia.getConfig("progress_darkening") or 0)) / 100
   local shadeColor = string.format("#000000%02x", math.floor(shade * 255 + 0.5))
@@ -461,7 +484,7 @@ render = function()
   local fraction = math.max(0, math.min(1, length > 0 and (seekDraft or position / 1000000) * 1000000 / length or 0))
   local bgCompact = math.max(120, math.min(700, noctalia.getConfig("background_width") or 260))
   local bgExpanded = math.max(bgCompact, math.min(1000, noctalia.getConfig("background_expand_width") or 420))
-  local bgWidth = bgCompact + (bgExpanded - bgCompact) * progress
+  local bgWidth = bgCompact
   local bgHeight = math.max(16, math.min(40, noctalia.getConfig("background_height") or 22))
   local visualiserMode = tostring(noctalia.getConfig("visualiser_mode") or "overlay")
   local spectrumProgress = noctalia.getConfig("audio_spectrum") == true and visualiserMode == "progress"
@@ -471,6 +494,12 @@ render = function()
   local children = {}
   local cover = nil
   if noctalia.getConfig("show_cover_art") ~= false then cover = resolveRawCoverPath() end
+  if background then
+    local leading = (cover and coverSize or coverSize + 4) + 6
+    if noctalia.getConfig("show_controls") == true then leading += 60 + 6 end
+    local fittedExpanded = math.max(bgCompact, math.min(bgExpanded, leading + titlePixelWidth(fullText()) + 8))
+    bgWidth = bgCompact + (fittedExpanded - bgCompact) * progress
+  end
   if cover then
     table.insert(children, ui.image({key = "cover", path = cover, width = coverSize, height = coverSize,
       radius = coverSize * math.max(0, math.min(100, noctalia.getConfig("corner_rounding") or 100)) / 200, fit = "cover",
@@ -533,6 +562,7 @@ render = function()
   local full = fullText()
   local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(full) or #full
+  expandLen = math.max(compactLen, math.min(expandLen, fullLen))
   local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
   local text = full
   if fullLen > width then
@@ -550,7 +580,7 @@ render = function()
     backgroundWidth = bgWidth
     backgroundSeekOffset = 0 + (cover and coverSize or coverSize + 4) + 6 + (controls and (60 * controlsReveal + 6) or 0)
     backgroundSeekWidth = math.max(1, bgWidth - backgroundSeekOffset - 8)
-    if hovering and fullLen * 7 > backgroundSeekWidth then
+    if hovering and titlePixelWidth(full) > backgroundSeekWidth then
       local loop = full .. "   "
       text = utf8Window(loop .. full, scrollOffset % (utf8.len(loop) or #loop), fullLen)
     end
@@ -613,9 +643,10 @@ local function step()
   local full = fullText()
   local compactLen, expandLen = widthRange()
   local fullLen = utf8.len(full) or #full
+  expandLen = math.max(compactLen, math.min(expandLen, fullLen))
   local width = math.floor(compactLen + (expandLen - compactLen) * progress + 0.5)
   local overflowing = noctalia.getConfig("progress_layout") == "background" and not barWidget.isVertical()
-    and fullLen * 7 > backgroundSeekWidth or noctalia.getConfig("progress_layout") ~= "background" and fullLen > width
+    and titlePixelWidth(full) > backgroundSeekWidth or noctalia.getConfig("progress_layout") ~= "background" and fullLen > width
   local needsScroll = hovering and hasMedia and overflowing
 
   if needsScroll then

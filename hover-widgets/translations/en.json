@@ -160,7 +160,7 @@
       },
       "expand_width": {
         "label": "Expanded width (characters)",
-        "description": "Text width while hovering. If the title is still longer than this, it scrolls as a marquee instead of growing further."
+        "description": "Maximum title characters on hover. Shorter titles use only the space they need; longer titles cycle within the limit."
       },
       "cover_size": {
         "label": "Cover art size (px)",
@@ -225,7 +225,7 @@
       },
       "background_expand_width": {
         "label": "Expanded background width",
-        "description": "Background pill width on hover, in pixels. Never smaller than Background width."
+        "description": "Maximum hovered background width. Expansion stops earlier when the whole title fits; longer titles cycle within this limit."
       },
       "bar_color": {
         "label": "Progress colour",
