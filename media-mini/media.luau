@@ -43,7 +43,7 @@ local flushSeek
 local seekWritePending, wantedSeek, seekGeneration = false, nil, 0
 local classicBarWidth = 0
 local renderedSeekValue = nil
-local hoveredControl = nil
+local hoveredControl, highlightedControl = nil, nil
 local hoverLeaveMs = 0
 local backgroundSeekX, backgroundSeekOffset, backgroundSeekWidth, backgroundWidth = nil, 0, 0, 0
 local function trackKey() return `{activePlayer}|{artist}|{title}|{length}` end
@@ -217,11 +217,12 @@ end
 
 
 function onMediaControlHover(state, key)
-  if state == "true" then hoveredControl = key
-  elseif hoveredControl == key then hoveredControl = nil end
+  if state == "true" then hoveredControl, highlightedControl = key, key
+  elseif hoveredControl == key then hoveredControl, highlightedControl = nil, nil end
   onHover(state == "true")
 end
 local function controlPointerMove(key, x, y)
+  local previousHighlight = highlightedControl
   if noctalia.getConfig("progress_layout") == "background" then
     local index = key == "previous" and 0 or key == "pause" and 1 or 2
     local reveal = noctalia.getConfig("controls_on_hover") == true and progress or 1
@@ -230,6 +231,13 @@ local function controlPointerMove(key, x, y)
     backgroundSeekX = (start + (tonumber(x) or 0) * 20 * reveal) / math.max(1, backgroundWidth)
   end
   onMediaControlHover("true", key)
+  -- Keep pointer/seek tracking over the whole target, but highlight only the
+  -- central visible band. The upper/lower slivers are background hover.
+  local pointerY = tonumber(y) or 0.5
+  local edge = 0.1
+  local nextHighlight = pointerY > edge and pointerY < 1 - edge and key or nil
+  highlightedControl = nextHighlight
+  if previousHighlight ~= nextHighlight and render then render() end
 end
 local function controlPointerLeave(key)
   onMediaControlHover("false", key)
@@ -242,7 +250,7 @@ function onPauseLeave() controlPointerLeave("pause") end
 function onNextLeave() controlPointerLeave("next") end
 local function playbackButton(key, glyph, action, tooltip, size, reveal)
   reveal = reveal or 1
-  local highlighted = hoveredControl == key
+  local highlighted = highlightedControl == key
   local background = noctalia.getConfig("progress_layout") == "background"
   local glyphSize = (key == "pause" or key == "playback") and math.min(18, size - 2) or math.min(16, size - 4)
   local content = {ui.glyph({name = glyph, size = glyphSize * reveal,

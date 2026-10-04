@@ -303,3 +303,7 @@ Adds theme colour selection and adjustable darkening for background progress. Ze
 ## Version 1.9.4
 
 Adds native theme/custom progress colour pickers and a separate Progress darkening setting that shades only the played fill.
+
+## Version 1.9.5
+
+The upper/lower 2px of media control targets no longer highlight the playback button. Widget expansion and right-click seek tracking continue there.

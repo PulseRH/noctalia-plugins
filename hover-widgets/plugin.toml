@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.9.4"
+version = "1.9.5"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
