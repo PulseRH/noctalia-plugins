@@ -326,3 +326,7 @@ Adds optional audio bars using Noctalia’s shared PipeWire spectrum callback. V
 ## Version 1.11.0
 
 Adds adjustable band count and four visualiser masks in background layout. Played-only hides bars over unplayed background. Inverted uses black bars over progress and Visualiser colour outside it. Progress replaces the solid fill with played audio bars, using Progress colour and darkening; a quiet/paused baseline retains position. Bands crossing the position boundary split precisely. Band widths and gaps scale to fit, including 128 bands in compact widgets.
+
+## Version 1.11.1
+
+Inline visualiser width is visible only for Inline progress placement.

@@ -1,6 +1,6 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.11.0"
+version = "1.11.1"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
@@ -406,7 +406,7 @@ step = 1
 
 [[widget.setting]]
 key = "visualiser_width"
-visible_when = { key = "audio_spectrum", values = ["true"] }
+visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.visualiser_width.label"
 description_key = "media_mini.settings.visualiser_width.description"
