@@ -1,6 +1,6 @@
 id = "pulser/sysmon-ram"
 name = "RAM (mini)"
-version = "0.3.0"
+version = "0.3.1"
 plugin_api = 31
 min_noctalia = "5.2.0"
 author = "pulser"

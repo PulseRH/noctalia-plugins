@@ -62,20 +62,20 @@ local function gaugeChar(v: number): string
   return BLOCKS[idx]
 end
 
--- Lucide memory-stick (ISC), tinted to the active theme and cached per colour.
-local ramIconSource = noctalia.readFile((noctalia.pluginDir() or "") .. "/assets/memory-stick.svg")
+-- Bootstrap memory (MIT), tinted to the active theme and cached per colour.
+local ramIconSource = noctalia.readFile((noctalia.pluginDir() or "") .. "/assets/memory.svg")
 local ramIconDir = (noctalia.pluginDataDir() or noctalia.expandPath("~/.cache/noctalia-plugins")) .. "/cache/ram-icons"
 noctalia.mkdirAll(ramIconDir)
 local ramIconColor, ramIconPath = nil, nil
 local function updateRamIcon()
   local color = noctalia.getColor("on_surface") or "#ffffff"
   if color ~= ramIconColor and ramIconSource then
-    local path = ramIconDir .. "/memory-stick-" .. string.gsub(color, "#", "") .. ".svg"
+    local path = ramIconDir .. "/bootstrap-memory-" .. string.gsub(color, "#", "") .. ".svg"
     if noctalia.writeFile(path, string.gsub(ramIconSource, "currentColor", color)) then
       ramIconColor, ramIconPath = color, path
     end
   end
-  if ramIconPath then barWidget.setImage(ramIconPath, false, 18, 18)
+  if ramIconPath then barWidget.setImage(ramIconPath, false, 20, 18)
   else barWidget.setGlyph("memory") end
 end
 

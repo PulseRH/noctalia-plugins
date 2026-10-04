@@ -1,2 +1,1 @@
-
-The default RAM icon is [Lucide memory-stick](https://github.com/lucide-icons/lucide/blob/main/icons/memory-stick.svg), ISC licensed (see assets/LUCIDE-LICENSE.txt). The plugin tints it to the active theme colour.
+RAM mini widget. The default icon is [Bootstrap memory](https://github.com/twbs/icons/blob/main/icons/memory.svg), MIT licensed (see assets/BOOTSTRAP-ICONS-LICENSE.txt). The SVG viewport is tightened and its colour follows the theme.

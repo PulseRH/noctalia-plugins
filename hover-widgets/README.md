@@ -341,4 +341,8 @@ RAM uses the Lucide memory-stick icon, tinted to the active on_surface theme col
 
 ### Icon attribution
 
-`assets/memory-stick.svg` is from [Lucide](https://github.com/lucide-icons/lucide/blob/main/icons/memory-stick.svg), copyright Lucide Icons and Contributors, under the ISC license included in `assets/LUCIDE-LICENSE.txt`. The runtime substitutes the theme colour for currentColor.
+`assets/memory.svg` is Bootstrap Icons’ [memory icon](https://github.com/twbs/icons/blob/main/icons/memory.svg), copyright The Bootstrap Authors, under the MIT license included in `assets/BOOTSTRAP-ICONS-LICENSE.txt`. Its viewport is tightened to reduce unused padding; the runtime substitutes the theme colour for currentColor.
+
+## Version 1.12.2
+
+RAM uses the bolder Bootstrap memory icon with three large chip cut-outs, displayed 20px wide for better small-size legibility.
