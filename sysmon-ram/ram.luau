@@ -70,7 +70,7 @@ local ramIconColor, ramIconPath = nil, nil
 local function updateRamIcon()
   local color = noctalia.getColor("on_surface") or "#ffffff"
   if color ~= ramIconColor and ramIconSource then
-    local path = ramIconDir .. "/ram-dimm-inset-" .. string.gsub(color, "#", "") .. ".svg"
+    local path = ramIconDir .. "/ram-dimm-spaced-" .. string.gsub(color, "#", "") .. ".svg"
     if noctalia.writeFile(path, string.gsub(ramIconSource, "currentColor", color)) then
       ramIconColor, ramIconPath = color, path
     end

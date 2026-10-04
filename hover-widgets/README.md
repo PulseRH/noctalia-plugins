@@ -354,3 +354,7 @@ Uses a clean vector three-chip RAM outline based on the user reference, with a t
 ## Version 1.12.4
 
 RAM contacts are narrower than the stick body, with an off-centre key notch and unequal banks. The theme tint and 20px icon size are retained.
+
+## Version 1.12.5
+
+Repositions the right contact bank and widens the gaps following the user markup for small-size legibility.
