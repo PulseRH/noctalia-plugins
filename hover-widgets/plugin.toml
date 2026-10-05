@@ -1,10 +1,10 @@
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.12.7"
+version = "1.13.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
-dependencies = ["noctalia", "wpctl", "playerctl", "sh", "wlrctl"]
+dependencies = ["noctalia", "wpctl", "playerctl", "sh", "wlrctl", "nvidia-smi"]
 tags = ["bar", "clock", "audio", "media", "system", "network", "utility"]
 icon = "layout-navbar"
 description = "Nine compact bar widgets with hover expansion: clock, volume, media, active window and system monitors."
@@ -47,7 +47,7 @@ key = "scroll_step"
 type = "int"
 label_key = "volume_hover.settings.scroll_step.label"
 description_key = "volume_hover.settings.scroll_step.description"
-default = 5
+default = 2
 min = 1
 max = 25
 step = 1
@@ -64,14 +64,14 @@ key = "drag_enabled"
 type = "bool"
 label_key = "volume_hover.settings.drag_enabled.label"
 description_key = "volume_hover.settings.drag_enabled.description"
-default = false
+default = true
 
 [[widget.setting]]
 key = "slider_width"
 type = "int"
 label_key = "volume_hover.settings.slider_width.label"
 description_key = "volume_hover.settings.slider_width.description"
-default = 90
+default = 100
 min = 40
 max = 300
 step = 2
@@ -81,7 +81,7 @@ key = "slider_thickness"
 type = "int"
 label_key = "volume_hover.settings.slider_thickness.label"
 description_key = "volume_hover.settings.slider_thickness.description"
-default = 12
+default = 7
 min = 4
 max = 24
 step = 1
@@ -106,7 +106,7 @@ key = "point_style"
 type = "select"
 label_key = "volume_hover.settings.point_style.label"
 description_key = "volume_hover.settings.point_style.description"
-default = "rounded"
+default = "flat"
 options = [
   { value = "rounded", label_key = "volume_hover.settings.point_style.options.rounded" },
   { value = "flat", label_key = "volume_hover.settings.point_style.options.flat" },
@@ -117,7 +117,7 @@ key = "show_knob"
 type = "bool"
 label_key = "volume_hover.settings.show_knob.label"
 description_key = "volume_hover.settings.show_knob.description"
-default = true
+default = false
 
 [[widget.setting]]
 key = "knob_color"
@@ -125,7 +125,7 @@ visible_when = { key = "show_knob", values = ["true"] }
 type = "select"
 label_key = "volume_hover.settings.knob_color.label"
 description_key = "volume_hover.settings.knob_color.description"
-default = "on_primary"
+default = "primary"
 options = [
   { value = "on_primary", label_key = "volume_hover.settings.knob_color.options.on_primary" },
   { value = "on_surface", label_key = "volume_hover.settings.knob_color.options.on_surface" },
@@ -154,7 +154,7 @@ default = true
   type = "bool"
   label_key = "sysmon_cpu.settings.gauge.label"
   description_key = "sysmon_cpu.settings.gauge.description"
-  default = true
+  default = false
 
 [[widget]]
 id = "ram"
@@ -168,14 +168,14 @@ left = "panel-toggle control-center system"
   type = "bool"
   label_key = "sysmon_ram.settings.gauge.label"
   description_key = "sysmon_ram.settings.gauge.description"
-  default = true
+  default = false
 
   [[widget.setting]]
   key = "amount_first"
   type = "bool"
   label_key = "sysmon_ram.settings.amount_first.label"
   description_key = "sysmon_ram.settings.amount_first.description"
-  default = false
+  default = true
 
 [[widget]]
 id = "temp"
@@ -200,13 +200,13 @@ left = "panel-toggle control-center system"
   key = "show_ram"
   type = "bool"
   label_key = "sysmon_temp.settings.show_ram.label"
-  default = false
+  default = true
 
   [[widget.setting]]
   key = "show_hottest_core"
   type = "bool"
   label_key = "sysmon_temp.settings.show_hottest_core.label"
-  default = false
+  default = true
 
 [[widget]]
 id = "net-down"
@@ -251,7 +251,7 @@ left = "panel-toggle control-center system"
   type = "int"
   label_key = "sysmon_net_up.settings.threshold_kbps.label"
   description_key = "sysmon_net_up.settings.threshold_kbps.description"
-  default = 1024
+  default = 1152
   min = 0
   max = 20480
   step = 32
@@ -290,7 +290,7 @@ visible_when = { key = "show_cover_art", values = ["true"] }
 type = "int"
 label_key = "media_mini.settings.corner_rounding.label"
 description_key = "media_mini.settings.corner_rounding.description"
-default = 100
+default = 75
 min = 0
 max = 100
 step = 5
@@ -300,7 +300,7 @@ key = "cover_size"
 type = "int"
 label_key = "media_mini.settings.cover_size.label"
 description_key = "media_mini.settings.cover_size.description"
-default = 20
+default = 18
 min = 12
 max = 40
 step = 1
@@ -310,7 +310,7 @@ key = "show_controls"
 type = "bool"
 label_key = "media_mini.settings.show_controls.label"
 description_key = "media_mini.settings.show_controls.description"
-default = false
+default = true
 
 [[widget.setting]]
 key = "controls_on_hover"
@@ -318,14 +318,14 @@ visible_when = { key = "show_controls", values = ["true"] }
 type = "bool"
 label_key = "media_mini.settings.controls_on_hover.label"
 description_key = "media_mini.settings.controls_on_hover.description"
-default = false
+default = true
 
 [[widget.setting]]
 key = "scroll_action"
 type = "select"
 label_key = "media_mini.settings.scroll_action.label"
 description_key = "media_mini.settings.scroll_action.description"
-default = "tracks"
+default = "seek"
 options = [
   { value = "tracks", label_key = "media_mini.settings.scroll_action.options.tracks" },
   { value = "seek", label_key = "media_mini.settings.scroll_action.options.seek" },
@@ -337,7 +337,7 @@ visible_when = { key = "scroll_action", values = ["seek"] }
 type = "int"
 label_key = "media_mini.settings.scroll_seek_step.label"
 description_key = "media_mini.settings.scroll_seek_step.description"
-default = 5
+default = 10
 min = 1
 max = 60
 step = 1
@@ -347,7 +347,7 @@ key = "audio_spectrum"
 type = "bool"
 label_key = "media_mini.settings.audio_spectrum.label"
 description_key = "media_mini.settings.audio_spectrum.description"
-default = false
+default = true
 
 [[widget.setting]]
 key = "audio_spectrum_bands"
@@ -355,7 +355,7 @@ visible_when = { key = "audio_spectrum", values = ["true"] }
 type = "int"
 label_key = "media_mini.settings.audio_spectrum_bands.label"
 description_key = "media_mini.settings.audio_spectrum_bands.description"
-default = 16
+default = 44
 min = 8
 max = 128
 step = 4
@@ -366,7 +366,7 @@ visible_when = { key = "audio_spectrum", values = ["true"] }
 type = "select"
 label_key = "media_mini.settings.visualiser_mode.label"
 description_key = "media_mini.settings.visualiser_mode.description"
-default = "overlay"
+default = "progress"
 options = [
   { value = "overlay", label_key = "media_mini.settings.visualiser_mode.options.overlay" },
   { value = "played_only", label_key = "media_mini.settings.visualiser_mode.options.played_only" },
@@ -380,7 +380,7 @@ visible_when = { key = "audio_spectrum", values = ["true"] }
 type = "color"
 label_key = "media_mini.settings.visualiser_color.label"
 description_key = "media_mini.settings.visualiser_color.description"
-default = "secondary"
+default = "on_tertiary"
 
 [[widget.setting]]
 key = "visualiser_opacity"
@@ -388,7 +388,7 @@ visible_when = { key = "audio_spectrum", values = ["true"] }
 type = "int"
 label_key = "media_mini.settings.visualiser_opacity.label"
 description_key = "media_mini.settings.visualiser_opacity.description"
-default = 35
+default = 83
 min = 0
 max = 100
 step = 1
@@ -399,7 +399,7 @@ visible_when = { key = "audio_spectrum", values = ["true"] }
 type = "int"
 label_key = "media_mini.settings.visualiser_height.label"
 description_key = "media_mini.settings.visualiser_height.description"
-default = 12
+default = 18
 min = 4
 max = 24
 step = 1
@@ -410,7 +410,7 @@ visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.visualiser_width.label"
 description_key = "media_mini.settings.visualiser_width.description"
-default = 48
+default = 50
 min = 24
 max = 160
 step = 2
@@ -428,7 +428,7 @@ visible_when = { key = "show_progress_bar", values = ["true"] }
 type = "select"
 label_key = "media_mini.settings.point_style.label"
 description_key = "media_mini.settings.point_style.description"
-default = "rounded"
+default = "flat"
 options = [
   { value = "rounded", label_key = "media_mini.settings.point_style.options.rounded" },
   { value = "flat", label_key = "media_mini.settings.point_style.options.flat" },
@@ -440,7 +440,7 @@ visible_when = { key = "show_progress_bar", values = ["true"] }
 type = "select"
 label_key = "media_mini.settings.progress_layout.label"
 description_key = "media_mini.settings.progress_layout.description"
-default = "inline"
+default = "background"
 options = [
   { value = "inline", label_key = "media_mini.settings.progress_layout.options.inline" },
   { value = "background", label_key = "media_mini.settings.progress_layout.options.background" },
@@ -452,7 +452,7 @@ visible_when = { key = "show_progress_bar", values = ["true"] }
 type = "int"
 label_key = "media_mini.settings.progress_darkening.label"
 description_key = "media_mini.settings.progress_darkening.description"
-default = 0
+default = 20
 min = 0
 max = 80
 step = 1
@@ -471,7 +471,7 @@ visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
 label_key = "media_mini.settings.background_darkening.label"
 description_key = "media_mini.settings.background_darkening.description"
-default = 0
+default = 10
 min = 0
 max = 60
 step = 1
@@ -482,7 +482,7 @@ visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
 label_key = "media_mini.settings.background_width.label"
 description_key = "media_mini.settings.background_width.description"
-default = 260
+default = 164
 min = 120
 max = 700
 step = 2
@@ -493,7 +493,7 @@ visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
 label_key = "media_mini.settings.background_expand_width.label"
 description_key = "media_mini.settings.background_expand_width.description"
-default = 420
+default = 280
 min = 120
 max = 1000
 step = 2
@@ -504,7 +504,7 @@ visible_when = { key = "progress_layout", values = ["background"] }
 type = "int"
 label_key = "media_mini.settings.background_height.label"
 description_key = "media_mini.settings.background_height.description"
-default = 22
+default = 16
 min = 16
 max = 40
 step = 1
@@ -523,7 +523,7 @@ visible_when = { key = "progress_layout", values = ["inline"] }
 type = "select"
 label_key = "media_mini.settings.progress_style.label"
 description_key = "media_mini.settings.progress_style.description"
-default = "classic"
+default = "classic_drag"
 options = [
   { value = "classic", label_key = "media_mini.settings.progress_style.options.classic" },
   { value = "classic_drag", label_key = "media_mini.settings.progress_style.options.classic_drag" },
@@ -536,7 +536,7 @@ visible_when = { key = "progress_layout", values = ["inline"] }
 type = "int"
 label_key = "media_mini.settings.progress_width.label"
 description_key = "media_mini.settings.progress_width.description"
-default = 35
+default = 86
 min = 24
 max = 300
 step = 2
@@ -602,7 +602,7 @@ key = "compact_width"
 type = "int"
 label_key = "active_window_hover.settings.compact_width.label"
 description_key = "active_window_hover.settings.compact_width.description"
-default = 20
+default = 26
 min = 8
 max = 60
 step = 1
@@ -612,7 +612,7 @@ key = "expand_width"
 type = "int"
 label_key = "active_window_hover.settings.expand_width.label"
 description_key = "active_window_hover.settings.expand_width.description"
-default = 40
+default = 45
 min = 8
 max = 100
 step = 1
@@ -632,7 +632,7 @@ key = "icon_size_hover"
 type = "int"
 label_key = "active_window_hover.settings.icon_size_hover.label"
 description_key = "active_window_hover.settings.icon_size_hover.description"
-default = 28
+default = 24
 min = 12
 max = 48
 step = 1

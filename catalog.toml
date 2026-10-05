@@ -112,11 +112,12 @@ description = "Classic now-playing artwork and progress pill, configurable width
 [[plugin]]
 id = "pulser/hover-widgets"
 name = "Hover Widgets"
-version = "1.12.7"
+version = "1.13.0"
 plugin_api = 32
 author = "pulser"
 license = "MIT"
-dependencies = ["noctalia", "wpctl", "playerctl", "sh", "wlrctl"]
+dependencies = ["noctalia", "wpctl", "playerctl", "sh", "wlrctl", "nvidia-smi"]
 tags = ["bar", "clock", "audio", "media", "system", "network", "utility"]
 icon = "layout-navbar"
 description = "Nine compact bar widgets with hover expansion: clock, volume, media, active window and system monitors."
+
