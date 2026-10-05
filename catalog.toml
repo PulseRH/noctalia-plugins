@@ -120,4 +120,3 @@ dependencies = ["noctalia", "wpctl", "playerctl", "sh", "wlrctl", "nvidia-smi"]
 tags = ["bar", "clock", "audio", "media", "system", "network", "utility"]
 icon = "layout-navbar"
 description = "Nine compact bar widgets with hover expansion: clock, volume, media, active window and system monitors."
-
